@@ -62,12 +62,13 @@ export default function App() {
   }, []);
 
   const animateCards = (itemsToAnimate: CocoonPrice[]) => {
-    if (animatedValues.length !== itemsToAnimate.length) {
-      animatedValues.length = 0;
-      itemsToAnimate.forEach(() => animatedValues.push(new Animated.Value(0)));
-    }
+    // Robust fix: Re-create the animated values array every time.
+    // This is less performant but guarantees synchronization and prevents crashes.
+    animatedValues.length = 0;
+    itemsToAnimate.forEach(() => {
+      animatedValues.push(new Animated.Value(0));
+    });
 
-    animatedValues.forEach((val) => val.setValue(0));
     const animations = itemsToAnimate.map((_, i) => {
       return Animated.timing(animatedValues[i], {
         toValue: 1,
