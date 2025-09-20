@@ -8,9 +8,12 @@ import {
   TouchableOpacity,
   RefreshControl,
   SafeAreaView,
-  Alert
+  Alert,
+  Animated,
+  Easing,
 } from 'react-native';
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { LinearGradient } from 'expo-linear-gradient';
 import { db, COLLECTIONS } from './firebase.config';
 import { CocoonPrice } from './types';
 
@@ -21,9 +24,10 @@ export default function App() {
   const [selectedMarket, setSelectedMarket] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const animatedValue = new Animated.Value(0);
 
   const breeds = ['all', 'CB', 'BV'];
-  const markets = ['all', 'Ramanagara', 'Kollegala', 'Kanakapura', 'Siddalagatta', 'Kollara'];
+  const markets = ['all', 'Ramanagara', 'Kollegala', 'Kanakapura', 'Siddalagatta', 'Kolar'];
 
   const fetchPrices = async () => {
     try {
@@ -35,7 +39,7 @@ export default function App() {
         pricesData.push({
           id: doc.id,
           ...doc.data(),
-          lastUpdated: doc.data().lastUpdated.toDate()
+          lastUpdated: doc.data().lastUpdated.toDate(),
         } as CocoonPrice);
       });
 
@@ -52,17 +56,23 @@ export default function App() {
 
   useEffect(() => {
     fetchPrices();
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   useEffect(() => {
     let filtered = prices;
 
     if (selectedBreed !== 'all') {
-      filtered = filtered.filter(price => price.breed === selectedBreed);
+      filtered = filtered.filter((price) => price.breed === selectedBreed);
     }
 
     if (selectedMarket !== 'all') {
-      filtered = filtered.filter(price => price.market === selectedMarket);
+      filtered = filtered.filter((price) => price.market === selectedMarket);
     }
 
     setFilteredPrices(filtered);
@@ -73,33 +83,51 @@ export default function App() {
     fetchPrices();
   };
 
-  const renderPriceCard = ({ item }: { item: CocoonPrice }) => (
-    <View style={styles.priceCard}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.breedText}>{item.breed}</Text>
-        <Text style={styles.qualityBadge}>Grade {item.quality}</Text>
-      </View>
-      <Text style={styles.marketText}>{item.market}</Text>
+  const renderPriceCard = ({ item, index }: { item: CocoonPrice; index: number }) => {
+    const cardStyle = {
+      transform: [
+        {
+          translateY: animatedValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: [100, 0],
+          }),
+        },
+      ],
+      opacity: animatedValue,
+    };
 
-      <View style={styles.priceRow}>
-        <View style={styles.priceItem}>
-          <Text style={styles.priceLabel}>Current</Text>
-          <Text style={styles.currentPrice}>₹{item.pricePerKg}/kg</Text>
+    return (
+      <Animated.View style={[styles.priceCard, cardStyle]}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.breedText}>{item.breed}</Text>
+          <Text style={styles.qualityBadge}>Grade {item.quality}</Text>
         </View>
-        <View style={styles.priceStats}>
-          <Text style={styles.statText}>Min: ₹{item.minPrice}</Text>
-          <Text style={styles.statText}>Max: ₹{item.maxPrice}</Text>
-          <Text style={styles.statText}>Avg: ₹{item.avgPrice}</Text>
+        <Text style={styles.marketText}>{item.market}</Text>
+
+        <View style={styles.priceRow}>
+          <View style={styles.priceItem}>
+            <Text style={styles.priceLabel}>Current</Text>
+            <Text style={styles.currentPrice}>₹{item.pricePerKg}/kg</Text>
+          </View>
+          <View style={styles.priceStats}>
+            <Text style={styles.statText}>Min: ₹{item.minPrice}</Text>
+            <Text style={styles.statText}>Max: ₹{item.maxPrice}</Text>
+            <Text style={styles.statText}>Avg: ₹{item.avgPrice}</Text>
+          </View>
         </View>
-      </View>
 
-      <Text style={styles.updatedText}>
-        Updated: {item.lastUpdated.toLocaleDateString()}
-      </Text>
-    </View>
-  );
+        <Text style={styles.updatedText}>
+          Updated: {item.lastUpdated.toLocaleDateString()}
+        </Text>
+      </Animated.View>
+    );
+  };
 
-  const FilterButton = ({ title, isSelected, onPress }: {
+  const FilterButton = ({
+    title,
+    isSelected,
+    onPress,
+  }: {
     title: string;
     isSelected: boolean;
     onPress: () => void;
@@ -125,13 +153,13 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient colors={['#4CAF50', '#2E7D32']} style={styles.header}>
         <Text style={styles.title}>Cocoon Prices</Text>
         <Text style={styles.subtitle}>Live market rates per kg</Text>
-      </View>
+      </LinearGradient>
 
       <View style={styles.filterSection}>
-        <Text style={styles.filterTitle}>Breed:</Text>
+        <Text style={styles.filterTitle}>Filter by Breed:</Text>
         <FlatList
           horizontal
           data={breeds}
@@ -147,7 +175,7 @@ export default function App() {
           style={styles.filterList}
         />
 
-        <Text style={styles.filterTitle}>Market:</Text>
+        <Text style={styles.filterTitle}>Filter by Market:</Text>
         <FlatList
           horizontal
           data={markets}
@@ -168,9 +196,7 @@ export default function App() {
         data={filteredPrices}
         keyExtractor={(item) => item.id}
         renderItem={renderPriceCard}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
       />
@@ -183,63 +209,60 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F0F4F8',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: 'center',
-    marginTop: 50,
-    color: '#666',
+    marginTop: 60,
+    color: '#555',
   },
   header: {
-    backgroundColor: '#2e7d32',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
     alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#e8f5e8',
+    fontSize: 16,
+    color: '#E0F2F1',
   },
   filterSection: {
     backgroundColor: '#fff',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    padding: 20,
+    margin: 16,
+    borderRadius: 12,
+    elevation: 2,
   },
   filterTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
-    marginTop: 8,
+    marginBottom: 12,
   },
   filterList: {
-    marginBottom: 8,
+    marginBottom: 16,
   },
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginRight: 10,
+    backgroundColor: '#E0E0E0',
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   selectedFilter: {
-    backgroundColor: '#2e7d32',
-    borderColor: '#2e7d32',
+    backgroundColor: '#4CAF50',
   },
   filterText: {
     fontSize: 14,
-    color: '#666',
+    color: '#333',
     textTransform: 'capitalize',
   },
   selectedFilterText: {
@@ -252,69 +275,62 @@ const styles = StyleSheet.create({
   priceCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   breedText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#2e7d32',
+    color: '#2E7D32',
     textTransform: 'capitalize',
   },
   qualityBadge: {
-    backgroundColor: '#4caf50',
-    color: '#fff',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: '#FFC107',
+    color: '#333',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   marketText: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 12,
+    color: '#555',
+    marginBottom: 16,
   },
   priceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   priceItem: {
     alignItems: 'center',
   },
   priceLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 14,
+    color: '#777',
     marginBottom: 4,
   },
   currentPrice: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#2e7d32',
+    color: '#2E7D32',
   },
   priceStats: {
     alignItems: 'flex-end',
   },
   statText: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 2,
+    color: '#555',
+    marginBottom: 4,
   },
   updatedText: {
     fontSize: 12,
