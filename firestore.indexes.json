@@ -5,6 +5,16 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "lastUpdated",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "cocoonPrices",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "breed",
           "order": "ASCENDING"
         },
@@ -28,7 +38,7 @@
         },
         {
           "fieldPath": "pricePerKg",
-          "order": "ASCENDING"
+          "order": "ASCENDIN"
         },
         {
           "fieldPath": "lastUpdated",
