@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -16,15 +16,19 @@ import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { db, COLLECTIONS } from './firebase.config';
 import { CocoonPrice } from './types';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import './i18n';
 
 export default function App() {
+  const { t, i18n } = useTranslation();
   const [prices, setPrices] = useState<CocoonPrice[]>([]);
   const [filteredPrices, setFilteredPrices] = useState<CocoonPrice[]>([]);
   const [selectedBreed, setSelectedBreed] = useState<string>('all');
   const [selectedMarket, setSelectedMarket] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const animatedValue = new Animated.Value(0);
+  const animatedValues = useRef(prices.map(() => new Animated.Value(0))).current;
 
   const breeds = ['all', 'CB', 'BV'];
   const markets = ['all', 'Ramanagara', 'Kollegala', 'Kanakapura', 'Siddalagatta', 'Kolar'];
@@ -56,12 +60,6 @@ export default function App() {
 
   useEffect(() => {
     fetchPrices();
-    Animated.timing(animatedValue, {
-      toValue: 1,
-      duration: 1000,
-      easing: Easing.inOut(Easing.ease),
-      useNativeDriver: true,
-    }).start();
   }, []);
 
   useEffect(() => {
@@ -76,7 +74,22 @@ export default function App() {
     }
 
     setFilteredPrices(filtered);
+    animateCards();
   }, [selectedBreed, selectedMarket, prices]);
+
+  const animateCards = () => {
+    animatedValues.forEach((val) => val.setValue(0));
+    const animations = prices.map((_, i) => {
+      return Animated.timing(animatedValues[i], {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+        delay: i * 100,
+      });
+    });
+    Animated.stagger(100, animations).start();
+  };
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -87,38 +100,47 @@ export default function App() {
     const cardStyle = {
       transform: [
         {
-          translateY: animatedValue.interpolate({
+          translateY: animatedValues[index] ? animatedValues[index].interpolate({
             inputRange: [0, 1],
             outputRange: [100, 0],
-          }),
+          }) : 0,
         },
       ],
-      opacity: animatedValue,
+      opacity: animatedValues[index] ? animatedValues[index] : 1,
     };
 
     return (
       <Animated.View style={[styles.priceCard, cardStyle]}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.breedText}>{item.breed}</Text>
-          <Text style={styles.qualityBadge}>Grade {item.quality}</Text>
-        </View>
-        <Text style={styles.marketText}>{item.market}</Text>
-
-        <View style={styles.priceRow}>
-          <View style={styles.priceItem}>
-            <Text style={styles.priceLabel}>Current</Text>
-            <Text style={styles.currentPrice}>₹{item.pricePerKg}/kg</Text>
+        <LinearGradient colors={['#FFFFFF', '#F0F4F8']} style={styles.cardGradient}>
+          <View style={styles.cardHeader}>
+            <Ionicons name="leaf-outline" size={24} color="#2E7D32" />
+            <Text style={styles.breedText}>{item.breed}</Text>
+            <Text style={styles.qualityBadge}>{t('grade')} {item.quality}</Text>
           </View>
-          <View style={styles.priceStats}>
-            <Text style={styles.statText}>Min: ₹{item.minPrice}</Text>
-            <Text style={styles.statText}>Max: ₹{item.maxPrice}</Text>
-            <Text style={styles.statText}>Avg: ₹{item.avgPrice}</Text>
+          <View style={styles.marketContainer}>
+            <Ionicons name="location-outline" size={20} color="#555" />
+            <Text style={styles.marketText}>{item.market}</Text>
           </View>
-        </View>
 
-        <Text style={styles.updatedText}>
-          Updated: {item.lastUpdated.toLocaleDateString()}
-        </Text>
+          <View style={styles.priceRow}>
+            <View style={styles.priceItem}>
+              <Text style={styles.priceLabel}>{t('current')}</Text>
+              <Text style={styles.currentPrice}>₹{item.pricePerKg}/kg</Text>
+            </View>
+            <View style={styles.priceStats}>
+              <Text style={styles.statText}>{t('min')}: ₹{item.minPrice}</Text>
+              <Text style={styles.statText}>{t('max')}: ₹{item.maxPrice}</Text>
+              <Text style={styles.statText}>{t('avg')}: ₹{item.avgPrice}</Text>
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Ionicons name="time-outline" size={14} color="#999" />
+            <Text style={styles.updatedText}>
+              {t('updated')}: {item.lastUpdated.toLocaleDateString()}
+            </Text>
+          </View>
+        </LinearGradient>
       </Animated.View>
     );
   };
@@ -145,7 +167,7 @@ export default function App() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.loadingText}>Loading cocoon prices...</Text>
+        <Text style={styles.loadingText}>{t('loading')}</Text>
         <StatusBar style="auto" />
       </SafeAreaView>
     );
@@ -154,12 +176,21 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient colors={['#4CAF50', '#2E7D32']} style={styles.header}>
-        <Text style={styles.title}>Cocoon Prices</Text>
-        <Text style={styles.subtitle}>Live market rates per kg</Text>
+        <View style={styles.languageSwitcher}>
+          <TouchableOpacity onPress={() => i18n.changeLanguage('en')}>
+            <Text style={styles.languageText}>EN</Text>
+          </TouchableOpacity>
+          <Text style={styles.languageSeparator}>|</Text>
+          <TouchableOpacity onPress={() => i18n.changeLanguage('kn')}>
+            <Text style={styles.languageText}>KN</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.title}>{t('cocoonPrices')}</Text>
+        <Text style={styles.subtitle}>{t('liveMarketRates')}</Text>
       </LinearGradient>
 
       <View style={styles.filterSection}>
-        <Text style={styles.filterTitle}>Filter by Breed:</Text>
+        <Text style={styles.filterTitle}>{t('filterByBreed')}</Text>
         <FlatList
           horizontal
           data={breeds}
@@ -175,7 +206,7 @@ export default function App() {
           style={styles.filterList}
         />
 
-        <Text style={styles.filterTitle}>Filter by Market:</Text>
+        <Text style={styles.filterTitle}>{t('filterByMarket')}</Text>
         <FlatList
           horizontal
           data={markets}
@@ -218,31 +249,53 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   header: {
-    paddingVertical: 30,
+    paddingTop: 60,
+    paddingBottom: 40,
     paddingHorizontal: 20,
     alignItems: 'center',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    elevation: 10,
+  },
+  languageSwitcher: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  languageText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  languageSeparator: {
+    color: '#fff',
+    marginHorizontal: 5,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#E0F2F1',
   },
   filterSection: {
     backgroundColor: '#fff',
     padding: 20,
-    margin: 16,
-    borderRadius: 12,
-    elevation: 2,
+    marginHorizontal: 16,
+    marginTop: -20,
+    borderRadius: 20,
+    elevation: 5,
   },
   filterTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: '#333',
     marginBottom: 12,
@@ -259,6 +312,7 @@ const styles = StyleSheet.create({
   },
   selectedFilter: {
     backgroundColor: '#4CAF50',
+    elevation: 2,
   },
   filterText: {
     fontSize: 14,
@@ -273,23 +327,30 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   priceCard: {
+    borderRadius: 20,
+    marginBottom: 20,
+    elevation: 5,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+  cardGradient: {
+    borderRadius: 20,
     padding: 20,
-    marginBottom: 16,
-    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
   breedText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#2E7D32',
-    textTransform: 'capitalize',
+    marginLeft: 10,
+    flex: 1,
   },
   qualityBadge: {
     backgroundColor: '#FFC107',
@@ -300,16 +361,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  marketText: {
-    fontSize: 16,
-    color: '#555',
+  marketContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
+  },
+  marketText: {
+    fontSize: 18,
+    color: '#555',
+    marginLeft: 10,
   },
   priceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
   },
   priceItem: {
     alignItems: 'center',
@@ -320,7 +389,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   currentPrice: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#2E7D32',
   },
@@ -328,13 +397,19 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   statText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#555',
     marginBottom: 4,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 10,
   },
   updatedText: {
     fontSize: 12,
     color: '#999',
-    textAlign: 'right',
+    marginLeft: 5,
   },
 });

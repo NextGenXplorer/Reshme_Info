@@ -1,0 +1,13 @@
+{
+  "cocoonPrices": "Cocoon Prices",
+  "liveMarketRates": "Live market rates per kg",
+  "filterByBreed": "Filter by Breed:",
+  "filterByMarket": "Filter by Market:",
+  "current": "Current",
+  "min": "Min",
+  "max": "Max",
+  "avg": "Avg",
+  "updated": "Updated",
+  "grade": "Grade",
+  "loading": "Loading cocoon prices..."
+}
