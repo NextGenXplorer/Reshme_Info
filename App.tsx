@@ -28,7 +28,7 @@ export default function App() {
   const [selectedMarket, setSelectedMarket] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const animatedValues = useRef(prices.map(() => new Animated.Value(0))).current;
+  const animatedValues = useRef<Animated.Value[]>([]).current;
 
   const breeds = ['all', 'CB', 'BV'];
   const markets = ['all', 'Ramanagara', 'Kollegala', 'Kanakapura', 'Siddalagatta', 'Kolar'];
@@ -48,7 +48,6 @@ export default function App() {
       });
 
       setPrices(pricesData);
-      setFilteredPrices(pricesData);
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch cocoon prices');
       console.error('Error fetching prices:', error);
@@ -62,6 +61,25 @@ export default function App() {
     fetchPrices();
   }, []);
 
+  const animateCards = (itemsToAnimate: CocoonPrice[]) => {
+    if (animatedValues.length !== itemsToAnimate.length) {
+      animatedValues.length = 0;
+      itemsToAnimate.forEach(() => animatedValues.push(new Animated.Value(0)));
+    }
+
+    animatedValues.forEach((val) => val.setValue(0));
+    const animations = itemsToAnimate.map((_, i) => {
+      return Animated.timing(animatedValues[i], {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+        delay: i * 100,
+      });
+    });
+    Animated.stagger(100, animations).start();
+  };
+
   useEffect(() => {
     let filtered = prices;
 
@@ -74,22 +92,8 @@ export default function App() {
     }
 
     setFilteredPrices(filtered);
-    animateCards();
+    animateCards(filtered);
   }, [selectedBreed, selectedMarket, prices]);
-
-  const animateCards = () => {
-    animatedValues.forEach((val) => val.setValue(0));
-    const animations = prices.map((_, i) => {
-      return Animated.timing(animatedValues[i], {
-        toValue: 1,
-        duration: 500,
-        easing: Easing.inOut(Easing.ease),
-        useNativeDriver: true,
-        delay: i * 100,
-      });
-    });
-    Animated.stagger(100, animations).start();
-  };
 
   const onRefresh = () => {
     setRefreshing(true);
