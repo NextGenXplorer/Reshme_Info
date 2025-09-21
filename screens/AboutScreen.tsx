@@ -125,56 +125,54 @@ export default function AboutScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="About ReshmeInfo" subtitle="Your trusted silk market companion" />
+      <Header title={t('aboutReshmeInfo')} subtitle={t('tagline')} />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Mission Section */}
         <View style={styles.missionSection}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../assets/IMG-20250920-WA0022.jpg')}
+              source={require('../assets/reshme-logo.png')}
               style={styles.largeLogo}
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.missionTitle}>Our Mission</Text>
+          <Text style={styles.missionTitle}>{t('ourMission')}</Text>
           <Text style={styles.missionText}>
-            ReshmeInfo is dedicated to bringing transparency and real-time information to the silk cocoon market.
-            We empower farmers, traders, and industry professionals with accurate pricing data from verified market sources
-            across Karnataka's major trading centers.
+            {t('missionMessage')}
           </Text>
         </View>
 
         {/* Features Section */}
         <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>Why Choose ReshmeInfo?</Text>
+          <Text style={styles.sectionTitle}>{t('whyChoose')}</Text>
           <View style={styles.featuresGrid}>
             {features.map((feature, index) => (
-              <FeatureCard key={index} feature={feature} />
+              <FeatureCard key={index} feature={{...feature, title: t(feature.title), description: t(feature.description)}} />
             ))}
           </View>
         </View>
 
         {/* Team Section */}
         <View style={styles.teamSection}>
-          <Text style={styles.sectionTitle}>Our Team</Text>
+          <Text style={styles.sectionTitle}>{t('ourTeam')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Dedicated professionals working to transform the silk market
+            {t('teamMessage')}
           </Text>
           {teamMembers.map((member, index) => (
-            <TeamCard key={index} member={member} />
+            <TeamCard key={index} member={{...member, role: t(member.role), description: t(member.description)}} />
           ))}
         </View>
 
         {/* Contact Section */}
         <View style={styles.contactSection}>
-          <Text style={styles.sectionTitle}>Get in Touch</Text>
+          <Text style={styles.sectionTitle}>{t('getInTouch')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Have questions or suggestions? We'd love to hear from you.
+            {t('getInTouchMessage')}
           </Text>
 
           <ContactCard
             icon="mail"
-            title="Email Us"
+            title={t('emailUs')}
             subtitle="mithungowda.b7411@gmail.com"
             onPress={() => handleContactPress('email')}
             color="#3B82F6"
@@ -182,7 +180,7 @@ export default function AboutScreen() {
 
           <ContactCard
             icon="logo-github"
-            title="GitHub"
+            title={t('github')}
             subtitle="github.com/mithun50"
             onPress={() => handleContactPress('github')}
             color="#10B981"
@@ -192,17 +190,17 @@ export default function AboutScreen() {
         {/* App Info */}
         <View style={styles.appInfoSection}>
           <View style={styles.appInfoCard}>
-            <Text style={styles.appInfoTitle}>App Information</Text>
+            <Text style={styles.appInfoTitle}>{t('appInformation')}</Text>
             <View style={styles.appInfoRow}>
-              <Text style={styles.appInfoLabel}>Version:</Text>
+              <Text style={styles.appInfoLabel}>{t('version')}</Text>
               <Text style={styles.appInfoValue}>1.0.0</Text>
             </View>
             <View style={styles.appInfoRow}>
-              <Text style={styles.appInfoLabel}>Last Updated:</Text>
+              <Text style={styles.appInfoLabel}>{t('lastUpdated')}</Text>
               <Text style={styles.appInfoValue}>January 2025</Text>
             </View>
             <View style={styles.appInfoRow}>
-              <Text style={styles.appInfoLabel}>Platform:</Text>
+              <Text style={styles.appInfoLabel}>{t('platform')}</Text>
               <Text style={styles.appInfoValue}>iOS, Android, Web</Text>
             </View>
           </View>
@@ -211,14 +209,14 @@ export default function AboutScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            © 2025 ReshmeInfo. All rights reserved.
+            {t('copyright')}
           </Text>
           <Text style={styles.footerSubtext}>
-            Made with ❤️ for the silk industry
+            {t('madeWithLove')}
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

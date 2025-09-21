@@ -115,7 +115,7 @@ export default function MarketScreen() {
           </View>
           <View style={styles.marketStatsContainer}>
             <Text style={styles.marketPrice}>₹{stats.avgPrice}</Text>
-            <Text style={styles.marketPriceLabel}>Avg/kg</Text>
+            <Text style={styles.marketPriceLabel}>{t('avgPriceKg')}</Text>
           </View>
         </View>
 
@@ -124,12 +124,12 @@ export default function MarketScreen() {
         <View style={styles.marketFooter}>
           <View style={styles.marketStat}>
             <Ionicons name="list" size={16} color="#6B7280" />
-            <Text style={styles.marketStatText}>{stats.totalListings} listings</Text>
+            <Text style={styles.marketStatText}>{stats.totalListings} {t('listings')}</Text>
           </View>
           <View style={styles.marketStat}>
             <Ionicons name="time-outline" size={16} color="#6B7280" />
             <Text style={styles.marketStatText}>
-              {stats.lastUpdate ? stats.lastUpdate.toLocaleDateString() : 'No data'}
+              {stats.lastUpdate ? stats.lastUpdate.toLocaleDateString() : t('noData')}
             </Text>
           </View>
         </View>
@@ -146,21 +146,21 @@ export default function MarketScreen() {
 
     return (
       <View style={styles.overviewCard}>
-        <Text style={styles.overviewTitle}>Market Overview</Text>
+        <Text style={styles.overviewTitle}>{t('marketOverview')}</Text>
         <View style={styles.overviewStats}>
           <View style={styles.overviewStat}>
             <Text style={styles.overviewNumber}>{totalMarkets}</Text>
-            <Text style={styles.overviewLabel}>Active Markets</Text>
+            <Text style={styles.overviewLabel}>{t('activeMarkets')}</Text>
           </View>
           <View style={styles.overviewDivider} />
           <View style={styles.overviewStat}>
             <Text style={styles.overviewNumber}>{totalListings}</Text>
-            <Text style={styles.overviewLabel}>Total Listings</Text>
+            <Text style={styles.overviewLabel}>{t('totalListings')}</Text>
           </View>
           <View style={styles.overviewDivider} />
           <View style={styles.overviewStat}>
             <Text style={styles.overviewNumber}>₹{avgPrice}</Text>
-            <Text style={styles.overviewLabel}>Avg Price/kg</Text>
+            <Text style={styles.overviewLabel}>{t('avgPriceKg')}</Text>
           </View>
         </View>
       </View>
@@ -169,14 +169,14 @@ export default function MarketScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="Market Centers" subtitle="Silk cocoon trading hubs" />
+      <Header title={t('tradingCenters')} subtitle={t('marketInfoDetail')} />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <OverviewCard />
 
         <View style={styles.marketsSection}>
-          <Text style={styles.sectionTitle}>Trading Centers</Text>
+          <Text style={styles.sectionTitle}>{t('tradingCenters')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Explore major silk cocoon markets across Karnataka
+            {t('marketInfoDetail')}
           </Text>
 
           {markets.map((market, index) => (
@@ -188,10 +188,9 @@ export default function MarketScreen() {
           <View style={styles.infoCard}>
             <Ionicons name="information-circle" size={24} color="#3B82F6" />
             <View style={styles.infoContent}>
-              <Text style={styles.infoTitle}>Market Information</Text>
+              <Text style={styles.infoTitle}>{t('marketInformation')}</Text>
               <Text style={styles.infoText}>
-                Prices are updated in real-time from verified market sources.
-                All trading centers operate during standard business hours.
+                {t('marketInfoDetail')}
               </Text>
             </View>
           </View>

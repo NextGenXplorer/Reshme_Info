@@ -80,11 +80,11 @@ export default function HomeScreen() {
       if (dateFilter) {
         const dateExists = pricesData.length > 0;
         if (!dateExists) {
-          Alert.alert('No Data', 'No price data available for the selected date.');
+          Alert.alert(t('noData'), t('noDataMessage'));
         }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch cocoon prices');
+      Alert.alert(t('error'), t('failedToFetch'));
       console.error('Error fetching prices:', error);
     } finally {
       setLoading(false);
@@ -177,9 +177,9 @@ export default function HomeScreen() {
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (date.toDateString() === today.toDateString()) {
-      return 'Today';
+      return t('today');
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
+      return t('yesterday');
     } else {
       return date.toLocaleDateString('en-IN', {
         day: '2-digit',
@@ -245,7 +245,7 @@ export default function HomeScreen() {
           onPress={() => setShowLanguageModal(false)}
         >
           <View style={styles.languageModal}>
-            <Text style={styles.modalTitle}>Select Language</Text>
+            <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
 
             <TouchableOpacity
               style={[
@@ -264,7 +264,7 @@ export default function HomeScreen() {
                   styles.languageOptionText,
                   currentLanguage === 'en' && styles.languageOptionTextSelected
                 ]}>
-                  English
+                  {t('english')}
                 </Text>
               </View>
               {currentLanguage === 'en' && (
@@ -289,7 +289,7 @@ export default function HomeScreen() {
                   styles.languageOptionText,
                   currentLanguage === 'kn' && styles.languageOptionTextSelected
                 ]}>
-                  ಕನ್ನಡ (Kannada)
+                  {t('kannada')}
                 </Text>
               </View>
               {currentLanguage === 'kn' && (
@@ -336,40 +336,40 @@ export default function HomeScreen() {
 
             {/* Price Table */}
             <View style={styles.priceTable}>
-              <Text style={styles.priceTableTitle}>Price Details (₹/kg)</Text>
+              <Text style={styles.priceTableTitle}>{t('priceDetails')}</Text>
 
               {/* Table Header */}
               <View style={styles.tableHeader}>
-                <Text style={styles.tableHeaderText}>Type</Text>
-                <Text style={styles.tableHeaderText}>Price</Text>
-                <Text style={styles.tableHeaderText}>Status</Text>
+                <Text style={styles.tableHeaderText}>{t('type')}</Text>
+                <Text style={styles.tableHeaderText}>{t('price')}</Text>
+                <Text style={styles.tableHeaderText}>{t('status')}</Text>
               </View>
 
               {/* Table Rows */}
               <View style={styles.tableRow}>
-                <Text style={styles.tableCellType}>Minimum</Text>
+                <Text style={styles.tableCellType}>{t('minimum')}</Text>
                 <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
                 <View style={styles.tableStatusCell}>
                   <Ionicons name="trending-down" size={14} color="#EF4444" />
-                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>Low</Text>
+                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>{t('low')}</Text>
                 </View>
               </View>
 
               <View style={styles.tableRow}>
-                <Text style={styles.tableCellType}>Average</Text>
+                <Text style={styles.tableCellType}>{t('average')}</Text>
                 <Text style={styles.tableCellPrice}>₹{item.avgPrice}</Text>
                 <View style={styles.tableStatusCell}>
                   <Ionicons name="analytics" size={14} color="#6366F1" />
-                  <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>Avg</Text>
+                  <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>{t('avg')}</Text>
                 </View>
               </View>
 
               <View style={[styles.tableRow, styles.tableRowHighlight]}>
-                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>Maximum</Text>
+                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>{t('maximum')}</Text>
                 <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
                 <View style={styles.tableStatusCell}>
                   <Ionicons name="trending-up" size={14} color="#10B981" />
-                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>High</Text>
+                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>{t('high')}</Text>
                 </View>
               </View>
             </View>
@@ -404,7 +404,7 @@ export default function HomeScreen() {
               </View>
             </View>
             <Text style={styles.ultraModernLoadingText}>{t('loading')}</Text>
-            <Text style={styles.ultraModernLoadingSubtext}>Fetching latest market prices...</Text>
+            <Text style={styles.ultraModernLoadingSubtext}>{t('fetchingLatestMarketPrices')}</Text>
           </View>
         </View>
       </SafeAreaView>
@@ -475,7 +475,7 @@ export default function HomeScreen() {
                 <View style={styles.filterCategoryIcon}>
                   <Ionicons name="calendar" size={14} color="#6B7280" />
                 </View>
-                <Text style={styles.ultraModernFilterTitle}>Filter by Date</Text>
+                <Text style={styles.ultraModernFilterTitle}>{t('filterByDateTitle')}</Text>
               </View>
               <View style={styles.dateFilterContainer}>
                 <TouchableOpacity
@@ -533,7 +533,7 @@ export default function HomeScreen() {
           minimumDate={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)} // 7 days ago
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
