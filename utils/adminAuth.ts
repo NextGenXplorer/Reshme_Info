@@ -15,6 +15,14 @@ const getAdminCredentials = (): AdminCredentials[] => {
   const envCredentials: AdminCredentials[] = [];
   const expoExtra = Constants.expoConfig?.extra || {};
 
+  // --- DIAGNOSTIC LOG ---
+  // This will print all the environment variables the app can see.
+  // Helps to debug issues with .env file loading.
+  console.log(
+    '--- DIAGNOSTIC: Expo Extra Config ---',
+    JSON.stringify(Constants.expoConfig?.extra, null, 2)
+  );
+
   // List of known insecure default passwords
   const insecurePasswords = [
     'ReshmeSuper@2025!',
