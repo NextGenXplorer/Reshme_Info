@@ -281,6 +281,20 @@ export default function AdminDashboardScreen({
           <View style={styles.userInfo}>
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{user.username}</Text>
+            <View style={styles.roleContainer}>
+              <View style={[styles.roleBadge, {
+                backgroundColor: user.role === 'super_admin' ? '#3B82F615' : '#10B98115'
+              }]}>
+                <Text style={[styles.roleText, {
+                  color: user.role === 'super_admin' ? '#3B82F6' : '#10B981'
+                }]}>
+                  {user.role === 'super_admin' ? 'Super Admin' : 'Market Admin'}
+                </Text>
+              </View>
+              {user.market !== 'all' && (
+                <Text style={styles.marketText}>• {user.market}</Text>
+              )}
+            </View>
           </View>
         }
         rightComponent={
@@ -382,6 +396,25 @@ const styles = StyleSheet.create({
 
   userInfo: {
     gap: 4,
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  roleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  roleText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  marketText: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500',
   },
   welcomeText: {
     fontSize: 14,
