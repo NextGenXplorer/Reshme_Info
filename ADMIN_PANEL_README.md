@@ -28,29 +28,43 @@ The Reshme Info app includes a comprehensive admin panel for market price manage
 - Auto-calculated average prices
 - Quality grade management (A, B, C)
 
-## Admin Accounts
+## ⚠️ IMPORTANT: Admin Account Security
 
-### Super Admin
-- **Username**: `super_admin`
-- **Password**: `ReshmeSuper@2025!`
-- **Access**: All markets
+This application loads admin credentials from environment variables. For security reasons, **default passwords are not provided**. You must create your own secure credentials by following the steps below.
 
-### Market Admins
-- **Ramanagara Admin**
-  - Username: `admin_ramanagara`
-  - Password: `Reshme@2025!Rama`
+### How to Configure Admin Credentials
 
-- **Kollegala Admin**
-  - Username: `admin_kollegala`
-  - Password: `Reshme@2025!Koll`
+1.  **Create a `.env` file** in the root directory of the project. This file is ignored by Git, so your credentials will not be committed to the repository.
 
-- **Kanakapura Admin**
-  - Username: `admin_kanakapura`
-  - Password: `Reshme@2025!Kana`
+2.  **Add your admin credentials** to the `.env` file in the following format. You can define up to 10 admin accounts.
 
-- **Siddalagatta Admin**
-  - Username: `admin_siddalagatta`
-  - Password: `Reshme@2025!Sidd`
+    ```bash
+    # .env
+
+    # Super Admin (has access to all markets)
+    ADMIN_USERNAME_1="super_admin"
+    ADMIN_PASSWORD_1="YOUR_VERY_SECURE_PASSWORD_HERE"
+    ADMIN_ROLE_1="super_admin"
+    ADMIN_MARKET_1="all"
+
+    # Market Admin for Ramanagara
+    ADMIN_USERNAME_2="admin_ramanagara"
+    ADMIN_PASSWORD_2="ANOTHER_SECURE_PASSWORD"
+    ADMIN_ROLE_2="market_admin"
+    ADMIN_MARKET_2="Ramanagara"
+
+    # Market Admin for Kollegala
+    ADMIN_USERNAME_3="admin_kollegala"
+    ADMIN_PASSWORD_3="YET_ANOTHER_SECURE_PASSWORD"
+    ADMIN_ROLE_3="market_admin"
+    ADMIN_MARKET_3="Kollegala"
+
+    # Add more admins as needed...
+    ```
+
+3.  **Use Strong Passwords**: It is critical to use strong, unique passwords for each admin account to protect the integrity of the market data.
+
+4.  **Restart Your Application**: After creating or modifying the `.env` file, you must restart the Expo development server for the changes to take effect. You can do this by stopping the current server (`Ctrl+C`) and running `expo start -c`.
 
 ## How to Access
 

@@ -15,6 +15,15 @@ const getAdminCredentials = (): AdminCredentials[] => {
   const envCredentials: AdminCredentials[] = [];
   const expoExtra = Constants.expoConfig?.extra || {};
 
+  // List of known insecure default passwords
+  const insecurePasswords = [
+    'ReshmeSuper@2025!',
+    'Reshme@2025!Rama',
+    'Reshme@2025!Koll',
+    'Reshme@2025!Kana',
+    'Reshme@2025!Sidd',
+  ];
+
   // Load all admin credentials from environment variables
   for (let i = 1; i <= 10; i++) {
     const username = expoExtra[`ADMIN_USERNAME_${i}`];
@@ -24,6 +33,17 @@ const getAdminCredentials = (): AdminCredentials[] => {
 
     if (username && password && role && market) {
       envCredentials.push({ username, password, role, market });
+
+      // Security Check: Warn if default password is being used in development
+      if (__DEV__ && insecurePasswords.includes(password)) {
+        console.warn(
+          `\n\n🚨 SECURITY ALERT: Weak Password 🚨\n` +
+          `---------------------------------------\n` +
+          `Admin account "${username}" is using a known default password.\n` +
+          `For security, please change this password in your .env file.\n` +
+          `---------------------------------------\n\n`
+        );
+      }
     }
   }
 
@@ -31,7 +51,7 @@ const getAdminCredentials = (): AdminCredentials[] => {
   if (envCredentials.length === 0) {
     console.error('❌ SECURITY WARNING: No admin credentials found in environment variables');
     console.error('📝 Please configure ADMIN_USERNAME_X, ADMIN_PASSWORD_X, ADMIN_ROLE_X, ADMIN_MARKET_X in .env file');
-    console.error('📖 See .env.example for configuration details');
+    console.error('📖 See ADMIN_PANEL_README.md for configuration details');
 
     // Return empty array to prevent unauthorized access
     return [];

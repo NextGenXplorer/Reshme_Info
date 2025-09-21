@@ -31,6 +31,7 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [isDefaultPassword, setIsDefaultPassword] = useState(false);
 
   // Check if already authenticated
   useEffect(() => {
@@ -69,6 +70,20 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
       const result = await adminAuth.authenticate(username.trim(), password);
 
       if (result.success && result.user) {
+        // Check for default password usage in dev mode
+        const insecurePasswords = [
+          'ReshmeSuper@2025!',
+          'Reshme@2025!Rama',
+          'Reshme@2025!Koll',
+          'Reshme@2025!Kana',
+          'Reshme@2025!Sidd',
+        ];
+        if (__DEV__ && insecurePasswords.includes(password)) {
+          setIsDefaultPassword(true);
+        } else {
+          setIsDefaultPassword(false);
+        }
+
         Alert.alert(
           'Login Successful',
           `Welcome, ${result.user.username}!\nRole: ${result.user.role}\nMarket: ${result.user.market}`,
@@ -196,6 +211,19 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
             </View>
           )}
 
+          {/* Default Password Warning */}
+          {isDefaultPassword && (
+            <View style={styles.defaultPasswordWarningContainer}>
+              <Ionicons name="shield-half-outline" size={20} color="#B45309" />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.defaultPasswordWarningTitle}>Security Warning</Text>
+                <Text style={styles.defaultPasswordWarningText}>
+                  You are using a default password. Please change it in your .env file for better security.
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Login Button */}
           <TouchableOpacity
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
@@ -234,9 +262,8 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
           <View style={styles.devSection}>
             <Text style={styles.devTitle}>Development Mode:</Text>
             <Text style={styles.devText}>• Admin credentials are loaded from .env file</Text>
-            <Text style={styles.devText}>• Check .env.example for configuration format</Text>
-            <Text style={styles.devText}>• No credentials are stored in source code</Text>
-            <Text style={styles.devText}>• Contact administrator for login details</Text>
+            <Text style={styles.devText}>• See ADMIN_PANEL_README.md for details</Text>
+            <Text style={styles.devText}>• Using default passwords will trigger a warning</Text>
           </View>
         )}
       </ScrollView>
@@ -380,6 +407,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#92400E',
     fontWeight: '500',
+  },
+
+  // Default Password Warning
+  defaultPasswordWarningContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    gap: 12,
+  },
+  defaultPasswordWarningTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#92400E',
+    marginBottom: 4,
+  },
+  defaultPasswordWarningText: {
+    fontSize: 12,
+    color: '#B45309',
+    lineHeight: 16,
   },
 
   // Buttons
