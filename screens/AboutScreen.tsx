@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
   Linking,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Header from '../components/Header';
 import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
@@ -20,22 +22,22 @@ export default function AboutScreen() {
   const teamMembers = [
     {
       name: 'Mithun Gowda B',
-      role: 'Founder & Lead Developer',
-      description: 'Leading the vision for transparent silk market pricing',
+      role: t('team_member_mithun_role'),
+      description: t('team_member_mithun_description'),
       icon: 'person-circle',
       color: '#3B82F6',
     },
     {
       name: 'Manvanth Gowda M',
-      role: 'Developer',
-      description: 'Building robust solutions for market transparency',
+      role: t('team_member_manvanth_role'),
+      description: t('team_member_manvanth_description'),
       icon: 'code-slash',
       color: '#10B981',
     },
     {
       name: 'Market Analysts',
-      role: 'Data & Research',
-      description: 'Ensuring accurate and real-time market data',
+      role: t('team_member_analysts_role'),
+      description: t('team_member_analysts_description'),
       icon: 'analytics',
       color: '#F59E0B',
     },
@@ -44,26 +46,26 @@ export default function AboutScreen() {
   const features = [
     {
       icon: 'trending-up',
-      title: 'Real-time Pricing',
-      description: 'Live market rates from verified sources',
+      title: t('feature_real_time_pricing_title'),
+      description: t('feature_real_time_pricing_description'),
       color: '#3B82F6',
     },
     {
       icon: 'location',
-      title: 'Multiple Markets',
-      description: 'Coverage across Karnataka trading centers',
+      title: t('feature_multiple_markets_title'),
+      description: t('feature_multiple_markets_description'),
       color: '#10B981',
     },
     {
       icon: 'language',
-      title: 'Multi-language',
-      description: 'Available in English and Kannada',
+      title: t('feature_multi_language_title'),
+      description: t('feature_multi_language_description'),
       color: '#8B5CF6',
     },
     {
       icon: 'shield-checkmark',
-      title: 'Verified Data',
-      description: 'Authenticated market information',
+      title: t('feature_verified_data_title'),
+      description: t('feature_verified_data_description'),
       color: '#F59E0B',
     },
   ];
@@ -122,47 +124,27 @@ export default function AboutScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.titleContainer}>
-            <View style={styles.titleIconContainer}>
-              <Image
-                source={require('../assets/IMG-20250920-WA0022.jpg')}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.titleTextContainer}>
-              <Text style={styles.title}>About ReshmeInfo</Text>
-              <Text style={styles.subtitle}>Your trusted silk market companion</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
+    <SafeAreaView style={styles.container}>
+      <Header />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Mission Section */}
         <View style={styles.missionSection}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../assets/IMG-20250920-WA0022.jpg')}
+              source={require('../assets/reshme-logo.png')}
               style={styles.largeLogo}
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.missionTitle}>Our Mission</Text>
+          <Text style={styles.missionTitle}>{t('ourMission')}</Text>
           <Text style={styles.missionText}>
-            ReshmeInfo is dedicated to bringing transparency and real-time information to the silk cocoon market.
-            We empower farmers, traders, and industry professionals with accurate pricing data from verified market sources
-            across Karnataka's major trading centers.
+            {t('missionMessage')}
           </Text>
         </View>
 
         {/* Features Section */}
         <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>Why Choose ReshmeInfo?</Text>
+          <Text style={styles.sectionTitle}>{t('whyChoose')}</Text>
           <View style={styles.featuresGrid}>
             {features.map((feature, index) => (
               <FeatureCard key={index} feature={feature} />
@@ -172,9 +154,9 @@ export default function AboutScreen() {
 
         {/* Team Section */}
         <View style={styles.teamSection}>
-          <Text style={styles.sectionTitle}>Our Team</Text>
+          <Text style={styles.sectionTitle}>{t('ourTeam')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Dedicated professionals working to transform the silk market
+            {t('teamMessage')}
           </Text>
           {teamMembers.map((member, index) => (
             <TeamCard key={index} member={member} />
@@ -183,14 +165,14 @@ export default function AboutScreen() {
 
         {/* Contact Section */}
         <View style={styles.contactSection}>
-          <Text style={styles.sectionTitle}>Get in Touch</Text>
+          <Text style={styles.sectionTitle}>{t('getInTouch')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Have questions or suggestions? We'd love to hear from you.
+            {t('getInTouchMessage')}
           </Text>
 
           <ContactCard
             icon="mail"
-            title="Email Us"
+            title={t('emailUs')}
             subtitle="mithungowda.b7411@gmail.com"
             onPress={() => handleContactPress('email')}
             color="#3B82F6"
@@ -198,7 +180,7 @@ export default function AboutScreen() {
 
           <ContactCard
             icon="logo-github"
-            title="GitHub"
+            title={t('github')}
             subtitle="github.com/mithun50"
             onPress={() => handleContactPress('github')}
             color="#10B981"
@@ -208,17 +190,17 @@ export default function AboutScreen() {
         {/* App Info */}
         <View style={styles.appInfoSection}>
           <View style={styles.appInfoCard}>
-            <Text style={styles.appInfoTitle}>App Information</Text>
+            <Text style={styles.appInfoTitle}>{t('appInformation')}</Text>
             <View style={styles.appInfoRow}>
-              <Text style={styles.appInfoLabel}>Version:</Text>
+              <Text style={styles.appInfoLabel}>{t('version')}</Text>
               <Text style={styles.appInfoValue}>1.0.0</Text>
             </View>
             <View style={styles.appInfoRow}>
-              <Text style={styles.appInfoLabel}>Last Updated:</Text>
+              <Text style={styles.appInfoLabel}>{t('lastUpdated')}</Text>
               <Text style={styles.appInfoValue}>January 2025</Text>
             </View>
             <View style={styles.appInfoRow}>
-              <Text style={styles.appInfoLabel}>Platform:</Text>
+              <Text style={styles.appInfoLabel}>{t('platform')}</Text>
               <Text style={styles.appInfoValue}>iOS, Android, Web</Text>
             </View>
           </View>
@@ -227,14 +209,14 @@ export default function AboutScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            © 2025 ReshmeInfo. All rights reserved.
+            {t('copyright')}
           </Text>
           <Text style={styles.footerSubtext}>
-            Made with ❤️ for the silk industry
+            {t('madeWithLove')}
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -242,52 +224,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-
-  // Header
-  header: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  headerContent: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  titleIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
-  },
-  logoImage: {
-    width: 40,
-    height: 40,
-  },
-  titleTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-    marginTop: 2,
   },
 
   // Content

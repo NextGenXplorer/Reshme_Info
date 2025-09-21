@@ -13,14 +13,15 @@ import {
   Image,
   Platform,
   Modal,
+  SafeAreaView,
 } from 'react-native';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
-import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import Header from '../components/Header';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -35,6 +36,7 @@ export default function HomeScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(true);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -79,11 +81,11 @@ export default function HomeScreen() {
       if (dateFilter) {
         const dateExists = pricesData.length > 0;
         if (!dateExists) {
-          Alert.alert('No Data', 'No price data available for the selected date.');
+          Alert.alert(t('noData'), t('noDataMessage'));
         }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch cocoon prices');
+      Alert.alert(t('error'), t('failedToFetch'));
       console.error('Error fetching prices:', error);
     } finally {
       setLoading(false);
@@ -176,9 +178,9 @@ export default function HomeScreen() {
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (date.toDateString() === today.toDateString()) {
-      return 'Today';
+      return t('today');
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
+      return t('yesterday');
     } else {
       return date.toLocaleDateString('en-IN', {
         day: '2-digit',
@@ -244,7 +246,7 @@ export default function HomeScreen() {
           onPress={() => setShowLanguageModal(false)}
         >
           <View style={styles.languageModal}>
-            <Text style={styles.modalTitle}>Select Language</Text>
+            <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
 
             <TouchableOpacity
               style={[
@@ -263,7 +265,7 @@ export default function HomeScreen() {
                   styles.languageOptionText,
                   currentLanguage === 'en' && styles.languageOptionTextSelected
                 ]}>
-                  English
+                  {t('english')}
                 </Text>
               </View>
               {currentLanguage === 'en' && (
@@ -288,7 +290,7 @@ export default function HomeScreen() {
                   styles.languageOptionText,
                   currentLanguage === 'kn' && styles.languageOptionTextSelected
                 ]}>
-                  ಕನ್ನಡ (Kannada)
+                  {t('kannada')}
                 </Text>
               </View>
               {currentLanguage === 'kn' && (
@@ -335,40 +337,40 @@ export default function HomeScreen() {
 
             {/* Price Table */}
             <View style={styles.priceTable}>
-              <Text style={styles.priceTableTitle}>Price Details (₹/kg)</Text>
+              <Text style={styles.priceTableTitle}>{t('priceDetails')}</Text>
 
               {/* Table Header */}
               <View style={styles.tableHeader}>
-                <Text style={styles.tableHeaderText}>Type</Text>
-                <Text style={styles.tableHeaderText}>Price</Text>
-                <Text style={styles.tableHeaderText}>Status</Text>
+                <Text style={styles.tableHeaderText}>{t('type')}</Text>
+                <Text style={styles.tableHeaderText}>{t('price')}</Text>
+                <Text style={styles.tableHeaderText}>{t('status')}</Text>
               </View>
 
               {/* Table Rows */}
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCellType}>Minimum</Text>
-                <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
-                <View style={styles.tableStatusCell}>
-                  <Ionicons name="trending-down" size={14} color="#EF4444" />
-                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>Low</Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCellType}>Average</Text>
-                <Text style={styles.tableCellPrice}>₹{item.avgPrice}</Text>
-                <View style={styles.tableStatusCell}>
-                  <Ionicons name="analytics" size={14} color="#6366F1" />
-                  <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>Avg</Text>
-                </View>
-              </View>
-
               <View style={[styles.tableRow, styles.tableRowHighlight]}>
-                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>Maximum</Text>
+                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>{t('maximum')}</Text>
                 <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
                 <View style={styles.tableStatusCell}>
                   <Ionicons name="trending-up" size={14} color="#10B981" />
-                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>High</Text>
+                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>{t('high')}</Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCellType}>{t('average')}</Text>
+                <Text style={styles.tableCellPrice}>₹{item.avgPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="analytics" size={14} color="#6366F1" />
+                  <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>{t('avg')}</Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCellType}>{t('minimum')}</Text>
+                <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="trending-down" size={14} color="#EF4444" />
+                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>{t('low')}</Text>
                 </View>
               </View>
             </View>
@@ -390,59 +392,50 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={styles.ultraModernContainer}>
+      <SafeAreaView style={styles.ultraModernContainer}>
         <View style={styles.ultraModernLoadingContainer}>
           <View style={styles.loadingContent}>
             <View style={styles.loadingSpinner}>
               <View style={styles.loadingSpinnerGradient}>
                 <Image
-                  source={require('../assets/IMG-20250920-WA0022.jpg')}
+                  source={require('../assets/reshme-logo.png')}
                   style={styles.loadingLogoImage}
                   resizeMode="contain"
                 />
               </View>
             </View>
             <Text style={styles.ultraModernLoadingText}>{t('loading')}</Text>
-            <Text style={styles.ultraModernLoadingSubtext}>Fetching latest market prices...</Text>
+            <Text style={styles.ultraModernLoadingSubtext}>{t('fetchingLatestMarketPrices')}</Text>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.ultraModernContainer}>
-      {/* Header */}
-      <View style={styles.compactHeader}>
-        <LinearGradient
-          colors={['#4F46E5', '#7C3AED']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.headerGradient}
-        >
-          <View style={styles.headerContent}>
-            <View style={styles.headerLeft}>
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require('../assets/IMG-20250920-WA0022.jpg')}
-                  style={styles.compactLogo}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.titleSection}>
-                <Text style={styles.compactTitle}>Reshme Info</Text>
-              </View>
-            </View>
-            <LanguageSwitcher />
-          </View>
-        </LinearGradient>
-      </View>
-
+    <SafeAreaView style={styles.ultraModernContainer}>
+      <Header rightComponent={<LanguageSwitcher />} />
       {/* Filter section */}
-      <View style={styles.ultraModernFilterSection}>
-        <View style={styles.ultraModernFilterCard}>
-          <View style={styles.filterContent}>
-            <View style={styles.filterCategory}>
+      <View style={styles.filterHeader}>
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setIsFilterVisible(!isFilterVisible)}
+        >
+          <Ionicons
+            name={isFilterVisible ? 'chevron-up-circle' : 'chevron-down-circle'}
+            size={24}
+            color="#3B82F6"
+          />
+          <Text style={styles.toggleButtonText}>
+            {isFilterVisible ? t('hideFilters') : t('showFilters')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {isFilterVisible && (
+        <View style={styles.ultraModernFilterSection}>
+          <View style={styles.ultraModernFilterCard}>
+            <View style={styles.filterContent}>
+              <View style={styles.filterCategory}>
               <View style={styles.filterCategoryHeader}>
                 <View style={styles.filterCategoryIcon}>
                   <Ionicons name="options" size={14} color="#6B7280" />
@@ -457,7 +450,7 @@ export default function HomeScreen() {
                 {breeds.map((item) => (
                   <ModernFilterButton
                     key={item}
-                    title={item}
+                    title={t(`breed_${item}`)}
                     isSelected={selectedBreed === item}
                     onPress={() => setSelectedBreed(item)}
                     icon={item === 'all' ? 'grid' : 'leaf'}
@@ -481,7 +474,7 @@ export default function HomeScreen() {
                 {markets.map((item) => (
                   <ModernFilterButton
                     key={item}
-                    title={item}
+                    title={t(`market_${item}`)}
                     isSelected={selectedMarket === item}
                     onPress={() => setSelectedMarket(item)}
                     icon={item === 'all' ? 'grid' : 'location'}
@@ -490,39 +483,40 @@ export default function HomeScreen() {
               </ScrollView>
             </View>
 
-            <View style={styles.filterCategory}>
-              <View style={styles.filterCategoryHeader}>
-                <View style={styles.filterCategoryIcon}>
-                  <Ionicons name="calendar" size={14} color="#6B7280" />
-                </View>
-                <Text style={styles.ultraModernFilterTitle}>Filter by Date</Text>
-              </View>
-              <View style={styles.dateFilterContainer}>
-                <TouchableOpacity
-                  style={styles.dateFilterButton}
-                  onPress={showDatePickerModal}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.dateFilterContent}>
-                    <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
-                    <Text style={styles.dateFilterText}>
-                      {formatDateForDisplay(selectedDate)}
-                    </Text>
+              <View style={styles.filterCategory}>
+                <View style={styles.filterCategoryHeader}>
+                  <View style={styles.filterCategoryIcon}>
+                    <Ionicons name="calendar" size={14} color="#6B7280" />
                   </View>
-                </TouchableOpacity>
+                  <Text style={styles.ultraModernFilterTitle}>{t('filterByDateTitle')}</Text>
+                </View>
+                <View style={styles.dateFilterContainer}>
+                  <TouchableOpacity
+                    style={styles.dateFilterButton}
+                    onPress={showDatePickerModal}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.dateFilterContent}>
+                      <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+                      <Text style={styles.dateFilterText}>
+                        {formatDateForDisplay(selectedDate)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.resetDateButton}
-                  onPress={resetDateFilter}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="refresh" size={16} color="#6B7280" />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.resetDateButton}
+                    onPress={resetDateFilter}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="refresh" size={16} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
         </View>
-      </View>
+      )}
 
       {/* Price list */}
       <FlatList
@@ -553,7 +547,7 @@ export default function HomeScreen() {
           minimumDate={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)} // 7 days ago
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -607,58 +601,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     fontWeight: '500',
-  },
-
-  // Compact Header
-  compactHeader: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  headerGradient: {
-    paddingTop: 20,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  logoContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  compactLogo: {
-    width: 28,
-    height: 28,
-  },
-  titleSection: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  compactTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  compactSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '500',
-    marginTop: 1,
   },
 
   // Language Button & Modal
@@ -736,9 +678,27 @@ const styles = StyleSheet.create({
   },
 
   // Filter Section
+  filterHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  toggleButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
+    marginLeft: 8,
+  },
   ultraModernFilterSection: {
     marginHorizontal: 20,
-    marginTop: 0,
+    marginTop: 16,
     marginBottom: 16,
   },
   ultraModernFilterCard: {

@@ -7,9 +7,11 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import Header from '../components/Header';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
@@ -189,7 +191,7 @@ export default function StatsScreen() {
             styles.periodButtonText,
             selectedPeriod === period && styles.periodButtonTextActive
           ]}>
-            {period.charAt(0).toUpperCase() + period.slice(1)}
+            {t(period)}
           </Text>
         </TouchableOpacity>
       ))}
@@ -197,59 +199,41 @@ export default function StatsScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.titleContainer}>
-            <View style={styles.titleIconContainer}>
-              <Image
-                source={require('../assets/IMG-20250920-WA0022.jpg')}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.titleTextContainer}>
-              <Text style={styles.title}>Market Statistics</Text>
-              <Text style={styles.subtitle}>Real-time market analytics</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
+    <SafeAreaView style={styles.container}>
+      <Header />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <PeriodSelector />
 
         {/* Key Stats Grid */}
         <View style={styles.statsGrid}>
           <StatCard
-            title="Total Listings"
+            title={t('totalListings')}
             value={stats.totalListings}
-            subtitle="Active price entries"
+            subtitle={t('activePriceEntries')}
             icon="list"
             color="#3B82F6"
             trend="up"
           />
           <StatCard
-            title="Average Price"
+            title={t('averagePrice')}
             value={`₹${stats.avgPrice}`}
-            subtitle="Per kilogram"
+            subtitle={t('perKilogram')}
             icon="analytics"
             color="#10B981"
             trend="stable"
           />
           <StatCard
-            title="Highest Price"
+            title={t('highestPrice')}
             value={`₹${stats.highestPrice}`}
-            subtitle="Peak market rate"
+            subtitle={t('peakMarketRate')}
             icon="trending-up"
             color="#F59E0B"
             trend="up"
           />
           <StatCard
-            title="Lowest Price"
+            title={t('lowestPrice')}
             value={`₹${stats.lowestPrice}`}
-            subtitle="Minimum market rate"
+            subtitle={t('minimumMarketRate')}
             icon="trending-down"
             color="#EF4444"
             trend="down"
@@ -258,31 +242,31 @@ export default function StatsScreen() {
 
         {/* Market Overview */}
         <View style={styles.overviewSection}>
-          <Text style={styles.sectionTitle}>Market Overview</Text>
+          <Text style={styles.sectionTitle}>{t('marketOverview')}</Text>
           <View style={styles.overviewGrid}>
             <View style={styles.overviewCard}>
               <Text style={styles.overviewNumber}>{stats.totalMarkets}</Text>
-              <Text style={styles.overviewLabel}>Active Markets</Text>
+              <Text style={styles.overviewLabel}>{t('activeMarkets')}</Text>
             </View>
             <View style={styles.overviewCard}>
               <Text style={styles.overviewNumber}>{stats.totalBreeds}</Text>
-              <Text style={styles.overviewLabel}>Breed Types</Text>
+              <Text style={styles.overviewLabel}>{t('breedTypes')}</Text>
             </View>
             <View style={styles.overviewCard}>
               <Text style={styles.overviewNumber}>₹{stats.priceRange}</Text>
-              <Text style={styles.overviewLabel}>Price Range</Text>
+              <Text style={styles.overviewLabel}>{t('priceRange')}</Text>
             </View>
             <View style={styles.overviewCard}>
               <Text style={styles.overviewNumber}>{stats.marketLeader}</Text>
-              <Text style={styles.overviewLabel}>Top Market</Text>
+              <Text style={styles.overviewLabel}>{t('topMarket')}</Text>
             </View>
           </View>
         </View>
 
         {/* Market Distribution */}
         <View style={styles.distributionSection}>
-          <Text style={styles.sectionTitle}>Market Distribution</Text>
-          <Text style={styles.sectionSubtitle}>Listing distribution across markets</Text>
+          <Text style={styles.sectionTitle}>{t('marketDistribution')}</Text>
+          <Text style={styles.sectionSubtitle}>{t('listingDistribution')}</Text>
           <View style={styles.distributionChart}>
             {marketDistribution.map((item, index) => (
               <DistributionBar
@@ -297,8 +281,8 @@ export default function StatsScreen() {
 
         {/* Breed Distribution */}
         <View style={styles.distributionSection}>
-          <Text style={styles.sectionTitle}>Breed Distribution</Text>
-          <Text style={styles.sectionSubtitle}>Cocoon breed type distribution</Text>
+          <Text style={styles.sectionTitle}>{t('breedDistribution')}</Text>
+          <Text style={styles.sectionSubtitle}>{t('cocoonBreedDistribution')}</Text>
           <View style={styles.distributionChart}>
             {breedDistribution.map((item, index) => (
               <DistributionBar
@@ -313,28 +297,28 @@ export default function StatsScreen() {
 
         {/* Insights */}
         <View style={styles.insightsSection}>
-          <Text style={styles.sectionTitle}>Market Insights</Text>
+          <Text style={styles.sectionTitle}>{t('marketInsights')}</Text>
           <View style={styles.insightCard}>
             <Ionicons name="bulb" size={24} color="#F59E0B" />
             <View style={styles.insightContent}>
-              <Text style={styles.insightTitle}>Price Stability</Text>
+              <Text style={styles.insightTitle}>{t('priceStability')}</Text>
               <Text style={styles.insightText}>
-                Market shows stable pricing with ₹{stats.priceRange} range between highest and lowest prices.
+                {t('priceStabilityMessage', { priceRange: stats.priceRange })}
               </Text>
             </View>
           </View>
           <View style={styles.insightCard}>
             <Ionicons name="trending-up" size={24} color="#10B981" />
             <View style={styles.insightContent}>
-              <Text style={styles.insightTitle}>Market Leader</Text>
+              <Text style={styles.insightTitle}>{t('marketLeader')}</Text>
               <Text style={styles.insightText}>
-                {stats.marketLeader} leads with the highest average pricing in the region.
+                {t('marketLeaderMessage', { marketLeader: stats.marketLeader })}
               </Text>
             </View>
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -342,52 +326,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-
-  // Header
-  header: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  headerContent: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  titleIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
-  },
-  logoImage: {
-    width: 40,
-    height: 40,
-  },
-  titleTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-    marginTop: 2,
   },
 
   // Content

@@ -11,10 +11,12 @@ import {
   FlatList,
   Alert,
   Platform,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
+import Header from '../components/Header';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -293,7 +295,7 @@ export default function MarketScreen() {
           </View>
           <View style={styles.marketStatsContainer}>
             <Text style={styles.marketPrice}>₹{stats.avgPrice}</Text>
-            <Text style={styles.marketPriceLabel}>Avg/kg</Text>
+            <Text style={styles.marketPriceLabel}>{t('avgPriceKg') || 'Avg/kg'}</Text>
           </View>
         </View>
 
@@ -302,12 +304,12 @@ export default function MarketScreen() {
         <View style={styles.marketFooter}>
           <View style={styles.marketStat}>
             <Ionicons name="list" size={16} color="#6B7280" />
-            <Text style={styles.marketStatText}>{stats.totalListings} listings</Text>
+            <Text style={styles.marketStatText}>{stats.totalListings} {t('listings') || 'listings'}</Text>
           </View>
           <View style={styles.marketStat}>
             <Ionicons name="time-outline" size={16} color="#6B7280" />
             <Text style={styles.marketStatText}>
-              {stats.lastUpdate ? stats.lastUpdate.toLocaleDateString() : 'No data'}
+              {stats.lastUpdate ? stats.lastUpdate.toLocaleDateString() : (t('noData') || 'No data')}
             </Text>
           </View>
         </View>
@@ -324,30 +326,64 @@ export default function MarketScreen() {
 
     return (
       <View style={styles.overviewCard}>
-        <Text style={styles.overviewTitle}>Market Overview</Text>
+        <Text style={styles.overviewTitle}>{t('marketOverview') || 'Market Overview'}</Text>
         <View style={styles.overviewStats}>
           <View style={styles.overviewStat}>
             <Text style={styles.overviewNumber}>{totalMarkets}</Text>
-            <Text style={styles.overviewLabel}>Active Markets</Text>
+            <Text style={styles.overviewLabel}>{t('activeMarkets') || 'Active Markets'}</Text>
           </View>
           <View style={styles.overviewDivider} />
           <View style={styles.overviewStat}>
             <Text style={styles.overviewNumber}>{totalListings}</Text>
-            <Text style={styles.overviewLabel}>Total Listings</Text>
+            <Text style={styles.overviewLabel}>{t('totalListings') || 'Total Listings'}</Text>
           </View>
           <View style={styles.overviewDivider} />
           <View style={styles.overviewStat}>
             <Text style={styles.overviewNumber}>₹{avgPrice}</Text>
-            <Text style={styles.overviewLabel}>Avg Price/kg</Text>
+            <Text style={styles.overviewLabel}>{t('avgPriceKg') || 'Avg Price/kg'}</Text>
           </View>
         </View>
       </View>
     );
   };
 
+  if (!showPriceComparison) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Header />
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <OverviewCard />
+
+          <View style={styles.marketsSection}>
+            <Text style={styles.sectionTitle}>{t('tradingCenters') || 'Trading Centers'}</Text>
+            <Text style={styles.sectionSubtitle}>
+              {t('marketInfoDetail') || 'Explore major silk cocoon markets across Karnataka'}
+            </Text>
+
+            {markets.map((market, index) => (
+              <MarketCard key={market.name} market={market} index={index} />
+            ))}
+          </View>
+
+          <View style={styles.infoSection}>
+            <View style={styles.infoCard}>
+              <Ionicons name="information-circle" size={24} color="#3B82F6" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>{t('marketInformation') || 'Market Information'}</Text>
+                <Text style={styles.infoText}>
+                  {t('marketInfoDetail') || 'Prices are updated in real-time from verified market sources. All trading centers operate during standard business hours.'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Header with Toggle */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.titleContainer}>
@@ -388,193 +424,164 @@ export default function MarketScreen() {
         </View>
       </View>
 
-      {showPriceComparison ? (
-        <View style={styles.container}>
-          {/* Filter Controls */}
-          <View style={styles.filterContainer}>
-            <View style={styles.filterHeader}>
-              <Text style={styles.filterTitle}>Price Comparison</Text>
-              <TouchableOpacity
-                style={styles.filterToggle}
-                onPress={() => setShowFilters(!showFilters)}
-              >
-                <Ionicons name="options-outline" size={20} color="#3B82F6" />
-                <Text style={styles.filterToggleText}>Filters</Text>
-              </TouchableOpacity>
-            </View>
+      {/* Price Comparison View */}
+      <View style={styles.container}>
+        {/* Filter Controls */}
+        <View style={styles.filterContainer}>
+          <View style={styles.filterHeader}>
+            <Text style={styles.filterTitle}>Price Comparison</Text>
+            <TouchableOpacity
+              style={styles.filterToggle}
+              onPress={() => setShowFilters(!showFilters)}
+            >
+              <Ionicons name="options-outline" size={20} color="#3B82F6" />
+              <Text style={styles.filterToggleText}>Filters</Text>
+            </TouchableOpacity>
+          </View>
 
-            {showFilters && (
-              <View style={styles.filterContent}>
-                {/* Breed Filter */}
-                <View style={styles.filterSection}>
-                  <Text style={styles.filterLabel}>Breed</Text>
+          {showFilters && (
+            <View style={styles.filterContent}>
+              {/* Breed Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterLabel}>Breed</Text>
+                <View style={styles.filterChipsContainer}>
+                  {['All', 'CB', 'BV'].map(breed => (
+                    <FilterChip
+                      key={breed}
+                      label={breed}
+                      isActive={filters.breed === breed}
+                      onPress={() => updateFilter('breed', breed)}
+                    />
+                  ))}
+                </View>
+              </View>
+
+              {/* Market Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterLabel}>Market</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.filterChipsContainer}>
-                    {['All', 'CB', 'BV'].map(breed => (
+                    {uniqueMarkets.map(market => (
                       <FilterChip
-                        key={breed}
-                        label={breed}
-                        isActive={filters.breed === breed}
-                        onPress={() => updateFilter('breed', breed)}
+                        key={market}
+                        label={market}
+                        isActive={filters.market === market}
+                        onPress={() => updateFilter('market', market)}
                       />
                     ))}
                   </View>
-                </View>
+                </ScrollView>
+              </View>
 
-                {/* Market Filter */}
-                <View style={styles.filterSection}>
-                  <Text style={styles.filterLabel}>Market</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={styles.filterChipsContainer}>
-                      {uniqueMarkets.map(market => (
-                        <FilterChip
-                          key={market}
-                          label={market}
-                          isActive={filters.market === market}
-                          onPress={() => updateFilter('market', market)}
-                        />
-                      ))}
-                    </View>
-                  </ScrollView>
+              {/* Date Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterLabel}>Date Range</Text>
+                <View style={styles.dateFilterContainer}>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowDatePicker('from')}
+                  >
+                    <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+                    <Text style={styles.dateButtonText}>
+                      {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : 'From Date'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowDatePicker('to')}
+                  >
+                    <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+                    <Text style={styles.dateButtonText}>
+                      {filters.dateTo ? filters.dateTo.toLocaleDateString() : 'To Date'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
+              </View>
 
-                {/* Date Filter */}
-                <View style={styles.filterSection}>
-                  <Text style={styles.filterLabel}>Date Range</Text>
-                  <View style={styles.dateFilterContainer}>
-                    <TouchableOpacity
-                      style={styles.dateButton}
-                      onPress={() => setShowDatePicker('from')}
-                    >
-                      <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                      <Text style={styles.dateButtonText}>
-                        {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : 'From Date'}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.dateButton}
-                      onPress={() => setShowDatePicker('to')}
-                    >
-                      <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                      <Text style={styles.dateButtonText}>
-                        {filters.dateTo ? filters.dateTo.toLocaleDateString() : 'To Date'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* Sort Options */}
-                <View style={styles.filterSection}>
-                  <Text style={styles.filterLabel}>Sort By</Text>
-                  <View style={styles.sortContainer}>
-                    <View style={styles.filterChipsContainer}>
-                      {[
-                        { key: 'date', label: 'Date' },
-                        { key: 'price', label: 'Price' },
-                        { key: 'market', label: 'Market' }
-                      ].map(sort => (
-                        <FilterChip
-                          key={sort.key}
-                          label={sort.label}
-                          isActive={filters.sortBy === sort.key}
-                          onPress={() => updateFilter('sortBy', sort.key)}
-                        />
-                      ))}
-                    </View>
-                    <TouchableOpacity
-                      style={styles.sortOrderButton}
-                      onPress={() => updateFilter('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                    >
-                      <Ionicons
-                        name={filters.sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
-                        size={16}
-                        color="#3B82F6"
+              {/* Sort Options */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterLabel}>Sort By</Text>
+                <View style={styles.sortContainer}>
+                  <View style={styles.filterChipsContainer}>
+                    {[
+                      { key: 'date', label: 'Date' },
+                      { key: 'price', label: 'Price' },
+                      { key: 'market', label: 'Market' }
+                    ].map(sort => (
+                      <FilterChip
+                        key={sort.key}
+                        label={sort.label}
+                        isActive={filters.sortBy === sort.key}
+                        onPress={() => updateFilter('sortBy', sort.key)}
                       />
-                    </TouchableOpacity>
+                    ))}
                   </View>
+                  <TouchableOpacity
+                    style={styles.sortOrderButton}
+                    onPress={() => updateFilter('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                  >
+                    <Ionicons
+                      name={filters.sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                      size={16}
+                      color="#3B82F6"
+                    />
+                  </TouchableOpacity>
                 </View>
+              </View>
 
-                <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
-                  <Text style={styles.clearFiltersText}>Clear All Filters</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-
-          {/* Results Count */}
-          <View style={styles.resultsContainer}>
-            <Text style={styles.resultsText}>
-              {filteredPrices.length} price{filteredPrices.length !== 1 ? 's' : ''} found
-            </Text>
-          </View>
-
-          {/* Price Comparison Table */}
-          <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <View style={[styles.tableHeaderCell, styles.marketCell]}>
-                <Text style={styles.tableHeaderText}>Market</Text>
-              </View>
-              <View style={[styles.tableHeaderCell, styles.breedCell]}>
-                <Text style={styles.tableHeaderText}>Breed</Text>
-              </View>
-              <View style={[styles.tableHeaderCell, styles.priceCell]}>
-                <Text style={styles.tableHeaderText}>Price/kg</Text>
-              </View>
-              <View style={[styles.tableHeaderCell, styles.qualityCell]}>
-                <Text style={styles.tableHeaderText}>Quality</Text>
-              </View>
-              <View style={[styles.tableHeaderCell, styles.dateCell]}>
-                <Text style={styles.tableHeaderText}>Updated</Text>
-              </View>
+              <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
+                <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+              </TouchableOpacity>
             </View>
-
-            <FlatList
-              data={filteredPrices}
-              renderItem={renderPriceComparisonRow}
-              keyExtractor={(item) => item.id}
-              style={styles.tableContent}
-              showsVerticalScrollIndicator={false}
-            />
-          </View>
-
-          {/* Date Picker */}
-          {showDatePicker && (
-            <DateTimePicker
-              value={showDatePicker === 'from' ? filters.dateFrom || new Date() : filters.dateTo || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onDateChange}
-            />
           )}
         </View>
-      ) : (
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <OverviewCard />
 
-          <View style={styles.marketsSection}>
-            <Text style={styles.sectionTitle}>Trading Centers</Text>
-            <Text style={styles.sectionSubtitle}>
-              Explore major silk cocoon markets across Karnataka
-            </Text>
+        {/* Results Count */}
+        <View style={styles.resultsContainer}>
+          <Text style={styles.resultsText}>
+            {filteredPrices.length} price{filteredPrices.length !== 1 ? 's' : ''} found
+          </Text>
+        </View>
 
-            {markets.map((market, index) => (
-              <MarketCard key={market.name} market={market} index={index} />
-            ))}
-          </View>
-
-          <View style={styles.infoSection}>
-            <View style={styles.infoCard}>
-              <Ionicons name="information-circle" size={24} color="#3B82F6" />
-              <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Market Information</Text>
-                <Text style={styles.infoText}>
-                  Prices are updated in real-time from verified market sources.
-                  All trading centers operate during standard business hours.
-                </Text>
-              </View>
+        {/* Price Comparison Table */}
+        <View style={styles.tableContainer}>
+          <View style={styles.tableHeader}>
+            <View style={[styles.tableHeaderCell, styles.marketCell]}>
+              <Text style={styles.tableHeaderText}>Market</Text>
+            </View>
+            <View style={[styles.tableHeaderCell, styles.breedCell]}>
+              <Text style={styles.tableHeaderText}>Breed</Text>
+            </View>
+            <View style={[styles.tableHeaderCell, styles.priceCell]}>
+              <Text style={styles.tableHeaderText}>Price/kg</Text>
+            </View>
+            <View style={[styles.tableHeaderCell, styles.qualityCell]}>
+              <Text style={styles.tableHeaderText}>Quality</Text>
+            </View>
+            <View style={[styles.tableHeaderCell, styles.dateCell]}>
+              <Text style={styles.tableHeaderText}>Updated</Text>
             </View>
           </View>
-        </ScrollView>
-      )}
+
+          <FlatList
+            data={filteredPrices}
+            renderItem={renderPriceComparisonRow}
+            keyExtractor={(item) => item.id}
+            style={styles.tableContent}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+
+        {/* Date Picker */}
+        {showDatePicker && (
+          <DateTimePicker
+            value={showDatePicker === 'from' ? filters.dateFrom || new Date() : filters.dateTo || new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={onDateChange}
+          />
+        )}
+      </View>
     </View>
   );
 }

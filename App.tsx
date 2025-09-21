@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView, TouchableOpacity, View, StyleSheet } from 'react-native';
 import './i18n';
 
 // Import screen components
@@ -16,8 +17,9 @@ import AdminNavigator from './screens/AdminNavigator';
 
 const Tab = createBottomTabNavigator();
 
-export default function App() {
+const AppContent = () => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   if (showAdminPanel) {
@@ -68,8 +70,8 @@ export default function App() {
               borderTopWidth: 1,
               borderTopColor: '#E5E7EB',
               paddingTop: 8,
-              paddingBottom: 8,
-              height: 70,
+              paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+              height: 70 + insets.bottom,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: -2 },
               shadowOpacity: 0.1,
@@ -116,6 +118,14 @@ export default function App() {
         <StatusBar style="dark" />
       </SafeAreaView>
     </NavigationContainer>
+  );
+};
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
   );
 }
 
