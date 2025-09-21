@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { AdminUser, AdminSession } from '../types';
 
 // Admin credentials configuration
@@ -9,42 +10,35 @@ interface AdminCredentials {
   market: string;
 }
 
-// Load admin credentials with fallback hardcoded credentials for development
+// Load admin credentials ONLY from environment variables
 const getAdminCredentials = (): AdminCredentials[] => {
-  const credentials: AdminCredentials[] = [
-    {
-      username: 'super_admin',
-      password: 'ReshmeSuper@2025!',
-      role: 'super_admin',
-      market: 'all'
-    },
-    {
-      username: 'admin_ramanagara',
-      password: 'Reshme@2025!Rama',
-      role: 'market_admin',
-      market: 'Ramanagara'
-    },
-    {
-      username: 'admin_kollegala',
-      password: 'Reshme@2025!Koll',
-      role: 'market_admin',
-      market: 'Kollegala'
-    },
-    {
-      username: 'admin_kanakapura',
-      password: 'Reshme@2025!Kana',
-      role: 'market_admin',
-      market: 'Kanakapura'
-    },
-    {
-      username: 'admin_siddalagatta',
-      password: 'Reshme@2025!Sidd',
-      role: 'market_admin',
-      market: 'Siddalagatta'
-    }
-  ];
+  const envCredentials: AdminCredentials[] = [];
+  const expoExtra = Constants.expoConfig?.extra || {};
 
-  return credentials;
+  // Load all admin credentials from environment variables
+  for (let i = 1; i <= 10; i++) {
+    const username = expoExtra[`ADMIN_USERNAME_${i}`];
+    const password = expoExtra[`ADMIN_PASSWORD_${i}`];
+    const role = expoExtra[`ADMIN_ROLE_${i}`] as 'super_admin' | 'market_admin';
+    const market = expoExtra[`ADMIN_MARKET_${i}`];
+
+    if (username && password && role && market) {
+      envCredentials.push({ username, password, role, market });
+    }
+  }
+
+  // Security check: Only allow credentials from environment variables
+  if (envCredentials.length === 0) {
+    console.error('❌ SECURITY WARNING: No admin credentials found in environment variables');
+    console.error('📝 Please configure ADMIN_USERNAME_X, ADMIN_PASSWORD_X, ADMIN_ROLE_X, ADMIN_MARKET_X in .env file');
+    console.error('📖 See .env.example for configuration details');
+
+    // Return empty array to prevent unauthorized access
+    return [];
+  }
+
+  console.log(`✅ Loaded ${envCredentials.length} admin accounts from environment variables`);
+  return envCredentials;
 };
 
 // Session management
@@ -67,15 +61,46 @@ export class AdminAuthService {
   // Authenticate admin user
   async authenticate(username: string, password: string): Promise<{ success: boolean; user?: AdminUser; message: string }> {
     try {
+      // Input validation
+      if (!username || !password) {
+        return {
+          success: false,
+          message: 'Username and password are required'
+        };
+      }
+
+      if (username.length < 3 || password.length < 6) {
+        return {
+          success: false,
+          message: 'Invalid credentials format'
+        };
+      }
+
       const credentials = getAdminCredentials();
-      const adminCred = credentials.find(cred => cred.username === username && cred.password === password);
+
+      // Security check: Ensure credentials are loaded from environment
+      if (credentials.length === 0) {
+        console.error('❌ SECURITY: Authentication blocked - no environment credentials configured');
+        return {
+          success: false,
+          message: 'Admin panel is not properly configured. Contact system administrator.'
+        };
+      }
+
+      const adminCred = credentials.find(cred =>
+        cred.username.toLowerCase() === username.toLowerCase().trim() &&
+        cred.password === password
+      );
 
       if (!adminCred) {
+        console.log(`❌ Authentication failed for username: ${username}`);
         return {
           success: false,
           message: 'Invalid username or password'
         };
       }
+
+      console.log(`✅ Authentication successful for user: ${adminCred.username} (${adminCred.role})`);
 
       const user: AdminUser = {
         username: adminCred.username,
@@ -125,21 +150,47 @@ export class AdminAuthService {
       }
 
       const session = JSON.parse(sessionData);
-      const expiresAt = new Date(session.expiresAt);
-      const now = new Date();
 
-      if (now > expiresAt) {
-        // Session expired
+      // Validate session structure
+      if (!session.user || !session.expiresAt) {
+        console.warn('Invalid session structure, clearing session');
         await this.logout();
         return { authenticated: false };
       }
 
+      const expiresAt = new Date(session.expiresAt);
+      const now = new Date();
+
+      // Check if session is expired
+      if (isNaN(expiresAt.getTime()) || now > expiresAt) {
+        console.log('Session expired, clearing session');
+        await this.logout();
+        return { authenticated: false };
+      }
+
+      // Validate user object structure
+      const user = session.user;
+      if (!user.username || !user.role || !user.market) {
+        console.warn('Invalid user structure in session');
+        await this.logout();
+        return { authenticated: false };
+      }
+
+      // Update current session in memory
+      this.currentSession = {
+        user,
+        loginTime: new Date(session.loginTime),
+        expiresAt
+      };
+
       return {
         authenticated: true,
-        user: session.user
+        user: { ...user, isAuthenticated: true }
       };
     } catch (error) {
       console.error('Session check error:', error);
+      // Clear potentially corrupted session
+      await this.logout();
       return { authenticated: false };
     }
   }

@@ -229,13 +229,14 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
           </Text>
         </View>
 
-        {/* Available Accounts (Development Only) */}
+        {/* Security Notice - No Credentials Displayed */}
         {__DEV__ && (
           <View style={styles.devSection}>
-            <Text style={styles.devTitle}>Development Mode - Sample Accounts:</Text>
-            <Text style={styles.devText}>• super_admin / ReshmeSuper@2025!</Text>
-            <Text style={styles.devText}>• admin_ramanagara / Reshme@2025!Rama</Text>
-            <Text style={styles.devText}>• admin_kollegala / Reshme@2025!Koll</Text>
+            <Text style={styles.devTitle}>Development Mode:</Text>
+            <Text style={styles.devText}>• Admin credentials are loaded from .env file</Text>
+            <Text style={styles.devText}>• Check .env.example for configuration format</Text>
+            <Text style={styles.devText}>• No credentials are stored in source code</Text>
+            <Text style={styles.devText}>• Contact administrator for login details</Text>
           </View>
         )}
       </ScrollView>
