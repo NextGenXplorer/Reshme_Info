@@ -25,6 +25,7 @@
     },
     "web": {
       "favicon": "./assets/reshme-logo.png"
-    }
+    },
+    "extra": {}
   }
 }
