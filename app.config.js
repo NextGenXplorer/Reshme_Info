@@ -7,27 +7,25 @@ module.exports = {
     slug: "ReshmeInfo",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/reshme-logo.png",
+    icon: "./assets/reshme_logo.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
     splash: {
-      image: "./assets/reshme-logo.png",
+      image: "./assets/reshme_logo.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },
-    ios: {
-      "supportsTablet": true
-    },
     android: {
+      package: "com.master.reshmeinfo", // Unique Android package name
       adaptiveIcon: {
-        foregroundImage: "./assets/reshme-logo.png",
+        foregroundImage: "./assets/reshme_logo.png",
         backgroundColor: "#ffffff"
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false
     },
     web: {
-      favicon: "./assets/reshme-logo.png"
+      favicon: "./assets/reshme_logo.png"
     },
     extra: {
       // Firebase Environment Variables
@@ -53,6 +51,11 @@ module.exports = {
       EXPO_PUBLIC_ADMIN_PASSWORD_3: process.env.EXPO_PUBLIC_ADMIN_PASSWORD_3,
       EXPO_PUBLIC_ADMIN_ROLE_3: process.env.EXPO_PUBLIC_ADMIN_ROLE_3,
       EXPO_PUBLIC_ADMIN_MARKET_3: process.env.EXPO_PUBLIC_ADMIN_MARKET_3,
+
+      // EAS Project ID
+      eas: {
+        projectId: "c9837104-9fd8-4d26-aa0a-b49889f584bc"
+      }
     }
   }
 };

@@ -16,6 +16,7 @@ import { collection, getDocs, orderBy, query, where, deleteDoc, doc } from 'fire
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, CocoonPrice } from '../types';
 import { adminAuth } from '../utils/adminAuth';
+import Header from '../components/Header';
 
 const { width } = Dimensions.get('window');
 
@@ -273,12 +274,11 @@ export default function AdminDashboardScreen({
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
+      <Header
+        title="Dashboard"
+        subtitle={undefined}
+        leftComponent={
           <View style={styles.userInfo}>
-            <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.userName}>{user.username}</Text>
             <View style={styles.roleContainer}>
               <View style={[styles.roleBadge, {
                 backgroundColor: user.role === 'super_admin' ? '#3B82F615' : '#10B98115'
@@ -294,12 +294,13 @@ export default function AdminDashboardScreen({
               )}
             </View>
           </View>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
-
+        }
+        rightComponent={
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView
         style={styles.content}
         refreshControl={
@@ -391,33 +392,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerLeft: {
-    flex: 1,
-  },
   userInfo: {
     gap: 4,
-  },
-  welcomeText: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  userName: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
   },
   roleContainer: {
     flexDirection: 'row',
@@ -437,6 +413,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     fontWeight: '500',
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
   },
   logoutButton: {
     padding: 8,

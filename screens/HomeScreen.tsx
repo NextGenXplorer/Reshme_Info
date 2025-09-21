@@ -398,7 +398,7 @@ export default function HomeScreen() {
             <View style={styles.loadingSpinner}>
               <View style={styles.loadingSpinnerGradient}>
                 <Image
-                  source={require('../assets/reshme-logo.png')}
+                  source={require('../assets/reshme_logo.png')}
                   style={styles.loadingLogoImage}
                   resizeMode="contain"
                 />

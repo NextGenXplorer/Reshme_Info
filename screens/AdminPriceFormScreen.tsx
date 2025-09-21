@@ -17,6 +17,7 @@ import { collection, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestor
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, CocoonPrice, PriceFormData } from '../types';
 import { adminAuth } from '../utils/adminAuth';
+import Header from '../components/Header';
 
 interface AdminPriceFormScreenProps {
   user: AdminUser;
@@ -69,25 +70,6 @@ export default function AdminPriceFormScreen({
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
 
-    // Auto-calculate average price when min/max/pricePerKg changes
-    if (field === 'minPrice' || field === 'maxPrice' || field === 'pricePerKg') {
-      setTimeout(() => {
-        setFormData(current => {
-          const min = field === 'minPrice' ? value : current.minPrice;
-          const max = field === 'maxPrice' ? value : current.maxPrice;
-          const price = field === 'pricePerKg' ? value : current.pricePerKg;
-
-          let avgPrice = current.avgPrice;
-          if (min > 0 && max > 0) {
-            avgPrice = Math.round((min + max) / 2);
-          } else if (price > 0) {
-            avgPrice = price;
-          }
-
-          return { ...current, avgPrice };
-        });
-      }, 0);
-    }
   };
 
   const validateForm = (): boolean => {
@@ -228,17 +210,15 @@ export default function AdminPriceFormScreen({
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
-          <Ionicons name="arrow-back" size={24} color="#6B7280" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {priceToEdit ? 'Edit Price' : 'Add New Price'}
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
-
+      <Header
+        title={priceToEdit ? 'Edit Price' : 'Add New Price'}
+        subtitle={undefined}
+        leftComponent={
+          <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
+            <Ionicons name="arrow-back" size={24} color="#6B7280" />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -371,15 +351,12 @@ export default function AdminPriceFormScreen({
                 style={styles.textInput}
                 value={formData.avgPrice.toString()}
                 onChangeText={(text) => updateField('avgPrice', parseFloat(text) || 0)}
-                placeholder="Auto-calculated"
+                placeholder="Enter average price"
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
                 editable={!loading}
               />
             </View>
-            <Text style={styles.helperText}>
-              Auto-calculated from min/max prices, but can be manually adjusted
-            </Text>
             {errors.avgPrice && (
               <Text style={styles.errorText}>{errors.avgPrice}</Text>
             )}
@@ -453,30 +430,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 20,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
   backButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#F9FAFB',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  placeholder: {
-    width: 40,
   },
 
   // Content

@@ -5,26 +5,36 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
+  title?: string;
+  subtitle?: string;
+  leftComponent?: React.ReactNode;
   rightComponent?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ rightComponent }) => {
+const Header: React.FC<HeaderProps> = ({ title, subtitle, leftComponent, rightComponent }) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const headerStyle = { paddingTop: insets.top };
 
+  const defaultTitle = t('defaultTitle');
+  const defaultSubtitle = t('defaultSubtitle');
+
   return (
     <View style={[styles.header, headerStyle]}>
       <View style={styles.leftComponent}>
-        <Image
-          source={require('../assets/reshme-logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        {leftComponent !== undefined ? leftComponent : (
+          <Image
+            source={require('../assets/reshme_logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        )}
       </View>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{t('defaultTitle')}</Text>
-        <Text style={styles.subtitle}>{t('defaultSubtitle')}</Text>
+        <Text style={styles.title}>{title || defaultTitle}</Text>
+        {subtitle !== null && (
+          <Text style={styles.subtitle}>{subtitle !== undefined ? subtitle : defaultSubtitle}</Text>
+        )}
       </View>
       <View style={styles.rightComponent}>
         {rightComponent}
@@ -53,6 +63,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 32,
     height: 32,
+    borderRadius: 16,
   },
   titleContainer: {
     flex: 1,
