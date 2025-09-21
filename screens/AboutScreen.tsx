@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
-export default function AboutScreen() {
+export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: (show: boolean) => void }) {
   const { t } = useTranslation();
 
   const teamMembers = [
@@ -184,6 +184,14 @@ export default function AboutScreen() {
             subtitle="github.com/mithun50"
             onPress={() => handleContactPress('github')}
             color="#10B981"
+          />
+
+          <ContactCard
+            icon="shield-checkmark-outline"
+            title="Admin Panel"
+            subtitle="Access the admin dashboard"
+            onPress={() => setShowAdminPanel(true)}
+            color="#8B5CF6"
           />
         </View>
 

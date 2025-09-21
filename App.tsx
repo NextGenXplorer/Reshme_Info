@@ -34,17 +34,6 @@ const AppContent = () => {
   return (
     <NavigationContainer>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-        {/* Admin Access Button - Hidden in Production */}
-        {__DEV__ && (
-          <View style={styles.adminAccess}>
-            <TouchableOpacity
-              style={styles.adminButton}
-              onPress={() => setShowAdminPanel(true)}
-            >
-              <Ionicons name="shield-checkmark-outline" size={16} color="#3B82F6" />
-            </TouchableOpacity>
-          </View>
-        )}
 
         <Tab.Navigator
           screenOptions={({ route }) => ({
@@ -109,11 +98,12 @@ const AppContent = () => {
           />
           <Tab.Screen
             name="About"
-            component={AboutScreen}
             options={{
               tabBarLabel: t('about') || 'About',
             }}
-          />
+          >
+            {() => <AboutScreen setShowAdminPanel={setShowAdminPanel} />}
+          </Tab.Screen>
         </Tab.Navigator>
         <StatusBar style="dark" />
       </SafeAreaView>
@@ -129,26 +119,4 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  adminAccess: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 1000,
-  },
-  adminButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-});
+const styles = StyleSheet.create({});
