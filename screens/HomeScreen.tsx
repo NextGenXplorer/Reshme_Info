@@ -11,9 +11,12 @@ import {
   Easing,
   ScrollView,
   Image,
+  Platform,
+  Modal,
 } from 'react-native';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +31,10 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'en');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -35,9 +42,27 @@ export default function HomeScreen() {
   const breeds = ['all', 'CB', 'BV'];
   const markets = ['all', 'Ramanagara', 'Kollegala', 'Kanakapura', 'Siddalagatta', 'Kolar'];
 
-  const fetchPrices = async () => {
+  const fetchPrices = async (dateFilter?: Date) => {
     try {
-      const q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
+      let q;
+
+      if (dateFilter) {
+        const startOfDay = new Date(dateFilter);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(dateFilter);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        q = query(
+          collection(db, COLLECTIONS.COCOON_PRICES),
+          where('lastUpdated', '>=', Timestamp.fromDate(startOfDay)),
+          where('lastUpdated', '<=', Timestamp.fromDate(endOfDay)),
+          orderBy('lastUpdated', 'desc')
+        );
+      } else {
+        q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
+      }
+
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
 
@@ -50,6 +75,13 @@ export default function HomeScreen() {
       });
 
       setPrices(pricesData);
+
+      if (dateFilter) {
+        const dateExists = pricesData.length > 0;
+        if (!dateExists) {
+          Alert.alert('No Data', 'No price data available for the selected date.');
+        }
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch cocoon prices');
       console.error('Error fetching prices:', error);
@@ -118,6 +150,44 @@ export default function HomeScreen() {
     fetchPrices();
   };
 
+  const onDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+
+    if (date) {
+      setSelectedDate(date);
+      fetchPrices(date);
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
+  };
+
+  const resetDateFilter = () => {
+    setSelectedDate(new Date());
+    fetchPrices();
+  };
+
+  const formatDateForDisplay = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+    }
+  };
+
   const ModernFilterButton = ({
     title,
     isSelected,
@@ -149,48 +219,86 @@ export default function HomeScreen() {
   );
 
   const LanguageSwitcher = () => (
-    <View style={styles.ultraModernLanguageSwitcher}>
+    <>
       <TouchableOpacity
-        style={[
-          styles.ultraModernLanguageButton,
-          currentLanguage === 'en' && styles.ultraModernLanguageButtonActive,
-        ]}
-        onPress={() => {
-          setCurrentLanguage('en');
-          i18n.changeLanguage('en');
-        }}
-        activeOpacity={0.7}
+        style={styles.languageButton}
+        onPress={() => setShowLanguageModal(true)}
+        activeOpacity={0.8}
       >
-        <Text
-          style={[
-            styles.ultraModernLanguageText,
-            currentLanguage === 'en' && styles.ultraModernLanguageTextActive,
-          ]}
-        >
-          EN
+        <Ionicons name="language" size={20} color="#374151" />
+        <Text style={styles.languageButtonText}>
+          {currentLanguage.toUpperCase()}
         </Text>
+        <Ionicons name="chevron-down" size={16} color="#6B7280" />
       </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.ultraModernLanguageButton,
-          currentLanguage === 'kn' && styles.ultraModernLanguageButtonActive,
-        ]}
-        onPress={() => {
-          setCurrentLanguage('kn');
-          i18n.changeLanguage('kn');
-        }}
-        activeOpacity={0.7}
+
+      <Modal
+        visible={showLanguageModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowLanguageModal(false)}
       >
-        <Text
-          style={[
-            styles.ultraModernLanguageText,
-            currentLanguage === 'kn' && styles.ultraModernLanguageTextActive,
-          ]}
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowLanguageModal(false)}
         >
-          KN
-        </Text>
-      </TouchableOpacity>
-    </View>
+          <View style={styles.languageModal}>
+            <Text style={styles.modalTitle}>Select Language</Text>
+
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                currentLanguage === 'en' && styles.languageOptionSelected
+              ]}
+              onPress={() => {
+                setCurrentLanguage('en');
+                i18n.changeLanguage('en');
+                setShowLanguageModal(false);
+              }}
+            >
+              <View style={styles.languageOptionContent}>
+                <Text style={styles.languageFlag}>🇺🇸</Text>
+                <Text style={[
+                  styles.languageOptionText,
+                  currentLanguage === 'en' && styles.languageOptionTextSelected
+                ]}>
+                  English
+                </Text>
+              </View>
+              {currentLanguage === 'en' && (
+                <Ionicons name="checkmark" size={20} color="#3B82F6" />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                currentLanguage === 'kn' && styles.languageOptionSelected
+              ]}
+              onPress={() => {
+                setCurrentLanguage('kn');
+                i18n.changeLanguage('kn');
+                setShowLanguageModal(false);
+              }}
+            >
+              <View style={styles.languageOptionContent}>
+                <Text style={styles.languageFlag}>🇮🇳</Text>
+                <Text style={[
+                  styles.languageOptionText,
+                  currentLanguage === 'kn' && styles.languageOptionTextSelected
+                ]}>
+                  ಕನ್ನಡ (Kannada)
+                </Text>
+              </View>
+              {currentLanguage === 'kn' && (
+                <Ionicons name="checkmark" size={20} color="#3B82F6" />
+              )}
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
   );
 
   const renderPriceCard = ({ item }: { item: CocoonPrice }) => {
@@ -305,27 +413,29 @@ export default function HomeScreen() {
   return (
     <View style={styles.ultraModernContainer}>
       {/* Header */}
-      <View style={styles.ultraModernHeader}>
-        <View style={styles.ultraModernHeaderGradient}>
-          <View style={styles.ultraModernHeaderContent}>
-            <View style={styles.headerTop}>
-              <View style={styles.titleContainer}>
-                <View style={styles.titleIconContainer}>
-                  <Image
-                    source={require('../assets/IMG-20250920-WA0022.jpg')}
-                    style={styles.logoImage}
-                    resizeMode="contain"
-                  />
-                </View>
-                <View style={styles.titleTextContainer}>
-                  <Text style={styles.ultraModernTitle}>{t('cocoonPrices')}</Text>
-                  <Text style={styles.ultraModernSubtitle}>{t('liveMarketRates')}</Text>
-                </View>
+      <View style={styles.compactHeader}>
+        <LinearGradient
+          colors={['#4F46E5', '#7C3AED']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.headerGradient}
+        >
+          <View style={styles.headerContent}>
+            <View style={styles.headerLeft}>
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('../assets/IMG-20250920-WA0022.jpg')}
+                  style={styles.compactLogo}
+                  resizeMode="contain"
+                />
               </View>
-              <LanguageSwitcher />
+              <View style={styles.titleSection}>
+                <Text style={styles.compactTitle}>Reshme Info</Text>
+              </View>
             </View>
+            <LanguageSwitcher />
           </View>
-        </View>
+        </LinearGradient>
       </View>
 
       {/* Filter section */}
@@ -379,6 +489,37 @@ export default function HomeScreen() {
                 ))}
               </ScrollView>
             </View>
+
+            <View style={styles.filterCategory}>
+              <View style={styles.filterCategoryHeader}>
+                <View style={styles.filterCategoryIcon}>
+                  <Ionicons name="calendar" size={14} color="#6B7280" />
+                </View>
+                <Text style={styles.ultraModernFilterTitle}>Filter by Date</Text>
+              </View>
+              <View style={styles.dateFilterContainer}>
+                <TouchableOpacity
+                  style={styles.dateFilterButton}
+                  onPress={showDatePickerModal}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.dateFilterContent}>
+                    <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+                    <Text style={styles.dateFilterText}>
+                      {formatDateForDisplay(selectedDate)}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.resetDateButton}
+                  onPress={resetDateFilter}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="refresh" size={16} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </View>
       </View>
@@ -400,6 +541,18 @@ export default function HomeScreen() {
         contentContainerStyle={styles.ultraModernListContainer}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onDateChange}
+          maximumDate={new Date()}
+          minimumDate={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)} // 7 days ago
+        />
+      )}
     </View>
   );
 }
@@ -456,93 +609,130 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Header
-  ultraModernHeader: {
+  // Compact Header
+  compactHeader: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  headerGradient: {
     paddingTop: 20,
-    paddingBottom: 20,
+    paddingBottom: 16,
     paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
-  ultraModernHeaderGradient: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-  },
-  ultraModernHeaderContent: {
-    gap: 20,
-  },
-  headerTop: {
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  titleContainer: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  titleIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+  logoContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
     overflow: 'hidden',
   },
-  logoImage: {
-    width: 40,
-    height: 40,
+  compactLogo: {
+    width: 28,
+    height: 28,
   },
-  titleTextContainer: {
-    marginLeft: 16,
+  titleSection: {
+    marginLeft: 12,
     flex: 1,
   },
-  ultraModernTitle: {
-    fontSize: 24,
+  compactTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#FFFFFF',
   },
-  ultraModernSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
+  compactSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
     fontWeight: '500',
-    marginTop: 2,
+    marginTop: 1,
   },
 
-  // Language Switcher
-  ultraModernLanguageSwitcher: {
+  // Language Button & Modal
+  languageButton: {
     flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
-    padding: 2,
-  },
-  ultraModernLanguageButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
-    minWidth: 50,
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
   },
-  ultraModernLanguageButtonActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  ultraModernLanguageText: {
-    fontSize: 13,
+  languageButtonText: {
+    fontSize: 12,
     fontWeight: '600',
-    color: '#6B7280',
+    color: '#FFFFFF',
   },
-  ultraModernLanguageTextActive: {
-    color: '#111827',
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  languageModal: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 300,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
     fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: '#F9FAFB',
+  },
+  languageOptionSelected: {
+    backgroundColor: '#EBF4FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  languageOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  languageFlag: {
+    fontSize: 20,
+  },
+  languageOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  languageOptionTextSelected: {
+    color: '#1D4ED8',
+    fontWeight: '600',
   },
 
   // Filter Section
@@ -813,5 +1003,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 20,
+  },
+
+  // Date Filter Styles
+  dateFilterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  dateFilterButton: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  dateFilterContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  dateFilterText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  resetDateButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
 });
