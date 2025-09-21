@@ -69,25 +69,6 @@ export default function AdminPriceFormScreen({
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
 
-    // Auto-calculate average price when min/max/pricePerKg changes
-    if (field === 'minPrice' || field === 'maxPrice' || field === 'pricePerKg') {
-      setTimeout(() => {
-        setFormData(current => {
-          const min = field === 'minPrice' ? value : current.minPrice;
-          const max = field === 'maxPrice' ? value : current.maxPrice;
-          const price = field === 'pricePerKg' ? value : current.pricePerKg;
-
-          let avgPrice = current.avgPrice;
-          if (min > 0 && max > 0) {
-            avgPrice = Math.round((min + max) / 2);
-          } else if (price > 0) {
-            avgPrice = price;
-          }
-
-          return { ...current, avgPrice };
-        });
-      }, 0);
-    }
   };
 
   const validateForm = (): boolean => {
@@ -371,15 +352,12 @@ export default function AdminPriceFormScreen({
                 style={styles.textInput}
                 value={formData.avgPrice.toString()}
                 onChangeText={(text) => updateField('avgPrice', parseFloat(text) || 0)}
-                placeholder="Auto-calculated"
+                placeholder="Enter average price"
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
                 editable={!loading}
               />
             </View>
-            <Text style={styles.helperText}>
-              Auto-calculated from min/max prices, but can be manually adjusted
-            </Text>
             {errors.avgPrice && (
               <Text style={styles.errorText}>{errors.avgPrice}</Text>
             )}
