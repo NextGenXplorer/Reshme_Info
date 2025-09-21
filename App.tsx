@@ -14,6 +14,7 @@ import {
   Dimensions,
   ScrollView,
   Platform,
+  Image,
 } from 'react-native';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -268,99 +269,64 @@ export default function App() {
     </View>
   );
 
-  const renderPriceCard = ({ item, index }: { item: CocoonPrice; index: number }) => {
-    const cardStyle = {
-      transform: [
-        {
-          translateY: animatedValues[index] ? animatedValues[index].interpolate({
-            inputRange: [0, 1],
-            outputRange: [150, 0],
-          }) : 0,
-        },
-        {
-          scale: animatedValues[index] ? animatedValues[index].interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.8, 1],
-          }) : 1,
-        },
-      ],
-      opacity: animatedValues[index] || 1,
-    };
-
+  const renderPriceCard = ({ item }: { item: CocoonPrice }) => {
     return (
-      <Animated.View style={[styles.ultraModernCard, cardStyle]}>
-        <LinearGradient
-          colors={['#FFFFFF', '#F8FAFC', '#FFFFFF']}
-          style={styles.ultraModernCardGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+      <View style={styles.ultraModernCard}>
+        <View style={styles.ultraModernCardGradient}>
           <View style={styles.ultraModernCardContent}>
             {/* Header with breed and quality */}
             <View style={styles.ultraModernCardHeader}>
               <View style={styles.breedSection}>
-                <LinearGradient
-                  colors={['#10B981', '#059669']}
-                  style={styles.breedIconContainer}
-                >
-                  <Ionicons name="leaf" size={24} color="#FFFFFF" />
-                </LinearGradient>
+                <View style={styles.breedIconContainer}>
+                  <Ionicons name="leaf" size={18} color="#10B981" />
+                </View>
                 <View style={styles.breedInfo}>
                   <Text style={styles.ultraModernBreedText}>{item.breed}</Text>
                   <View style={styles.qualityBadgeContainer}>
-                    <LinearGradient
-                      colors={['#F59E0B', '#D97706']}
-                      style={styles.ultraModernQualityBadge}
-                    >
-                      <Ionicons name="star" size={12} color="#FFFFFF" />
+                    <View style={styles.ultraModernQualityBadge}>
+                      <Ionicons name="star" size={10} color="#92400E" />
                       <Text style={styles.ultraModernQualityText}>
                         {t('grade')} {item.quality}
                       </Text>
-                    </LinearGradient>
+                    </View>
                   </View>
                 </View>
               </View>
 
               <View style={styles.marketBadgeContainer}>
-                <LinearGradient
-                  colors={['#8B5CF6', '#7C3AED']}
-                  style={styles.ultraModernMarketBadge}
-                >
-                  <Ionicons name="location" size={14} color="#FFFFFF" />
+                <View style={styles.ultraModernMarketBadge}>
+                  <Ionicons name="location" size={10} color="#5B21B6" />
                   <Text style={styles.ultraModernMarketText}>{item.market}</Text>
-                </LinearGradient>
+                </View>
               </View>
             </View>
 
             {/* Price showcase */}
             <View style={styles.priceShowcase}>
-              <LinearGradient
-                colors={['#667eea', '#764ba2']}
-                style={styles.priceShowcaseGradient}
-              >
+              <View style={styles.priceShowcaseGradient}>
                 <Text style={styles.priceLabel}>{t('current')}</Text>
                 <View style={styles.priceContainer}>
                   <Text style={styles.currencySymbol}>₹</Text>
                   <Text style={styles.ultraModernPrice}>{item.pricePerKg}</Text>
                   <Text style={styles.priceUnit}>/kg</Text>
                 </View>
-              </LinearGradient>
+              </View>
             </View>
 
             {/* Stats section */}
             <View style={styles.statsSection}>
               <View style={styles.statCard}>
-                <Ionicons name="trending-down" size={16} color="#EF4444" />
+                <Ionicons name="trending-down" size={14} color="#EF4444" />
                 <Text style={styles.statValue}>₹{item.minPrice}</Text>
                 <Text style={styles.statLabel}>{t('min')}</Text>
               </View>
               <View style={styles.statCard}>
-                <Ionicons name="analytics" size={16} color="#6366F1" />
+                <Ionicons name="analytics" size={14} color="#6366F1" />
                 <Text style={styles.statValue}>₹{item.avgPrice}</Text>
                 <Text style={styles.statLabel}>{t('avg')}</Text>
               </View>
               <View style={styles.statCard}>
-                <Ionicons name="trending-up" size={16} color="#10B981" />
+                <Ionicons name="trending-up" size={14} color="#10B981" />
                 <Text style={styles.statValue}>₹{item.maxPrice}</Text>
                 <Text style={styles.statLabel}>{t('max')}</Text>
               </View>
@@ -369,92 +335,56 @@ export default function App() {
             {/* Footer with update time */}
             <View style={styles.ultraModernFooter}>
               <View style={styles.updateTimestamp}>
-                <Ionicons name="time-outline" size={14} color="#9CA3AF" />
+                <Ionicons name="time-outline" size={12} color="#9CA3AF" />
                 <Text style={styles.ultraModernUpdateText}>
                   {t('updated')}: {item.lastUpdated.toLocaleDateString()}
                 </Text>
               </View>
             </View>
           </View>
-        </LinearGradient>
-      </Animated.View>
+        </View>
+      </View>
     );
   };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.ultraModernContainer}>
-        <LinearGradient
-          colors={['#667eea', '#764ba2', '#f093fb']}
-          style={styles.ultraModernLoadingContainer}
-        >
-          <SkeletonLoader />
+        <View style={styles.ultraModernLoadingContainer}>
           <View style={styles.loadingContent}>
-            <Animated.View
-              style={[
-                styles.loadingSpinner,
-                {
-                  transform: [
-                    {
-                      rotate: headerAnimation.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '360deg'],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <LinearGradient
-                colors={['#FFFFFF', '#F0F9FF']}
-                style={styles.loadingSpinnerGradient}
-              >
-                <Ionicons name="trending-up" size={32} color="#667eea" />
-              </LinearGradient>
-            </Animated.View>
+            <View style={styles.loadingSpinner}>
+              <View style={styles.loadingSpinnerGradient}>
+                <Image
+                  source={require('./assets/IMG-20250920-WA0022.jpg')}
+                  style={styles.loadingLogoImage}
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
             <Text style={styles.ultraModernLoadingText}>{t('loading')}</Text>
             <Text style={styles.ultraModernLoadingSubtext}>Fetching latest market prices...</Text>
           </View>
-        </LinearGradient>
-        <StatusBar style="light" />
+        </View>
+        <StatusBar style="dark" />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.ultraModernContainer}>
-      {/* Header with parallax effect */}
-      <Animated.View
-        style={[
-          styles.ultraModernHeader,
-          {
-            transform: [
-              {
-                translateY: scrollY.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: [0, -20],
-                  extrapolate: 'clamp',
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={['#667eea', '#764ba2', '#f093fb']}
-          style={styles.ultraModernHeaderGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+      {/* Header */}
+      <View style={styles.ultraModernHeader}>
+        <View style={styles.ultraModernHeaderGradient}>
           <View style={styles.ultraModernHeaderContent}>
             <View style={styles.headerTop}>
               <View style={styles.titleContainer}>
-                <LinearGradient
-                  colors={['#FFFFFF', '#F0F9FF']}
-                  style={styles.titleIconContainer}
-                >
-                  <Ionicons name="trending-up" size={32} color="#667eea" />
-                </LinearGradient>
+                <View style={styles.titleIconContainer}>
+                  <Image
+                    source={require('./assets/IMG-20250920-WA0022.jpg')}
+                    style={styles.logoImage}
+                    resizeMode="contain"
+                  />
+                </View>
                 <View style={styles.titleTextContainer}>
                   <Text style={styles.ultraModernTitle}>{t('cocoonPrices')}</Text>
                   <Text style={styles.ultraModernSubtitle}>{t('liveMarketRates')}</Text>
@@ -463,39 +393,18 @@ export default function App() {
               <LanguageSwitcher />
             </View>
           </View>
-        </LinearGradient>
-      </Animated.View>
+        </View>
+      </View>
 
-      {/* Modern filter section */}
-      <Animated.View
-        style={[
-          styles.ultraModernFilterSection,
-          {
-            transform: [
-              {
-                translateY: slideAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [100, 0],
-                }),
-              },
-            ],
-            opacity: slideAnimation,
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={['#FFFFFF', '#F8FAFC']}
-          style={styles.ultraModernFilterCard}
-        >
+      {/* Filter section */}
+      <View style={styles.ultraModernFilterSection}>
+        <View style={styles.ultraModernFilterCard}>
           <View style={styles.filterContent}>
             <View style={styles.filterCategory}>
               <View style={styles.filterCategoryHeader}>
-                <LinearGradient
-                  colors={['#8B5CF6', '#7C3AED']}
-                  style={styles.filterCategoryIcon}
-                >
-                  <Ionicons name="options" size={16} color="#FFFFFF" />
-                </LinearGradient>
+                <View style={styles.filterCategoryIcon}>
+                  <Ionicons name="options" size={14} color="#6B7280" />
+                </View>
                 <Text style={styles.ultraModernFilterTitle}>{t('filterByBreed')}</Text>
               </View>
               <ScrollView
@@ -517,12 +426,9 @@ export default function App() {
 
             <View style={styles.filterCategory}>
               <View style={styles.filterCategoryHeader}>
-                <LinearGradient
-                  colors={['#10B981', '#059669']}
-                  style={styles.filterCategoryIcon}
-                >
-                  <Ionicons name="location" size={16} color="#FFFFFF" />
-                </LinearGradient>
+                <View style={styles.filterCategoryIcon}>
+                  <Ionicons name="location" size={14} color="#6B7280" />
+                </View>
                 <Text style={styles.ultraModernFilterTitle}>{t('filterByMarket')}</Text>
               </View>
               <ScrollView
@@ -542,33 +448,28 @@ export default function App() {
               </ScrollView>
             </View>
           </View>
-        </LinearGradient>
-      </Animated.View>
+        </View>
+      </View>
 
-      {/* Enhanced list with parallax */}
-      <Animated.FlatList
+      {/* Price list */}
+      <FlatList
         data={filteredPrices}
         keyExtractor={(item) => item.id}
         renderItem={renderPriceCard}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#667eea', '#764ba2', '#f093fb']}
-            tintColor="#667eea"
+            colors={['#3B82F6']}
+            tintColor="#3B82F6"
             progressBackgroundColor="#FFFFFF"
           />
         }
         contentContainerStyle={styles.ultraModernListContainer}
         showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
       />
 
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
     </SafeAreaView>
   );
 }
@@ -576,7 +477,7 @@ export default function App() {
 const styles = StyleSheet.create({
   ultraModernContainer: {
     flex: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FFFFFF',
   },
 
   // Loading Screen
@@ -585,40 +486,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF',
   },
   loadingContent: {
     alignItems: 'center',
     marginTop: 40,
   },
   loadingSpinner: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 20,
+    backgroundColor: '#F3F4F6',
   },
   loadingSpinnerGradient: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    overflow: 'hidden',
+  },
+  loadingLogoImage: {
+    width: 50,
+    height: 50,
   },
   ultraModernLoadingText: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
     textAlign: 'center',
-    letterSpacing: 1,
   },
   ultraModernLoadingSubtext: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    color: '#6B7280',
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -688,20 +591,17 @@ const styles = StyleSheet.create({
 
   // Header
   ultraModernHeader: {
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
-    paddingBottom: 40,
-    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 20 : 40,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
   ultraModernHeaderGradient: {
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 15,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF',
   },
   ultraModernHeaderContent: {
     gap: 20,
@@ -717,129 +617,103 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titleIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#667eea',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    backgroundColor: '#F3F4F6',
+    overflow: 'hidden',
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
   },
   titleTextContainer: {
     marginLeft: 16,
     flex: 1,
   },
   ultraModernTitle: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
   },
   ultraModernSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '600',
-    marginTop: 4,
-    letterSpacing: 0.3,
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+    marginTop: 2,
   },
 
   // Language Switcher
   ultraModernLanguageSwitcher: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderRadius: 28,
-    padding: 4,
-    backdropFilter: 'blur(20px)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    padding: 2,
   },
   ultraModernLanguageButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-    minWidth: 60,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+    minWidth: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.3s ease',
   },
   ultraModernLanguageButtonActive: {
     backgroundColor: '#FFFFFF',
-    shadowColor: '#667eea',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-    transform: [{ scale: 1.05 }],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   ultraModernLanguageText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.9)',
-    letterSpacing: 0.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   ultraModernLanguageTextActive: {
-    color: '#667eea',
-    textShadowColor: 'transparent',
-    fontWeight: '800',
+    color: '#111827',
+    fontWeight: '700',
   },
 
   // Filter Section
   ultraModernFilterSection: {
-    marginHorizontal: 24,
-    marginTop: -20,
-    marginBottom: 24,
+    marginHorizontal: 20,
+    marginTop: 0,
+    marginBottom: 16,
   },
   ultraModernFilterCard: {
-    borderRadius: 28,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 12,
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   filterContent: {
-    gap: 24,
+    gap: 16,
   },
   filterCategory: {
-    gap: 16,
+    gap: 12,
   },
   filterCategoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   filterCategoryIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#8B5CF6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    backgroundColor: '#F3F4F6',
   },
   ultraModernFilterTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1F2937',
-    letterSpacing: 0.3,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
   },
   ultraModernFilterList: {
     paddingVertical: 8,
@@ -848,70 +722,66 @@ const styles = StyleSheet.create({
 
   // Filter Buttons
   ultraModernFilter: {
-    borderRadius: 24,
+    borderRadius: 12,
     overflow: 'hidden',
-    marginRight: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
+    marginRight: 8,
   },
   ultraModernFilterSelected: {
-    shadowColor: '#667eea',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 10,
   },
   ultraModernFilterGradient: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#3B82F6',
   },
   ultraModernFilterContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#F9FAFB',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
   },
   ultraModernFilterText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#6B7280',
     textTransform: 'capitalize',
-    letterSpacing: 0.3,
   },
   ultraModernFilterTextSelected: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
     textTransform: 'capitalize',
-    letterSpacing: 0.3,
   },
 
   // Price Cards
   ultraModernCard: {
-    borderRadius: 28,
-    marginBottom: 24,
-    marginHorizontal: 4,
+    borderRadius: 16,
+    marginBottom: 16,
+    marginHorizontal: 2,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   ultraModernCardGradient: {
-    borderRadius: 28,
+    borderRadius: 16,
     overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
   },
   ultraModernCardContent: {
-    padding: 28,
-    gap: 20,
+    padding: 20,
+    gap: 16,
   },
 
   // Card Header
@@ -926,27 +796,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   breedIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#10B981',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    backgroundColor: '#F0FDF4',
   },
   breedInfo: {
     marginLeft: 16,
     flex: 1,
   },
   ultraModernBreedText: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#1F2937',
-    letterSpacing: 0.5,
-    marginBottom: 8,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 4,
   },
   qualityBadgeContainer: {
     alignSelf: 'flex-start',
@@ -954,21 +819,16 @@ const styles = StyleSheet.create({
   ultraModernQualityBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+    backgroundColor: '#FEF3C7',
   },
   ultraModernQualityText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#92400E',
   },
   marketBadgeContainer: {
     alignSelf: 'flex-start',
@@ -976,100 +836,87 @@ const styles = StyleSheet.create({
   ultraModernMarketBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 24,
-    gap: 8,
-    shadowColor: '#8B5CF6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+    backgroundColor: '#EDE9FE',
   },
   ultraModernMarketText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#5B21B6',
   },
 
   // Price Showcase
   priceShowcase: {
-    borderRadius: 24,
+    borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#667eea',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 12,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   priceShowcaseGradient: {
-    paddingVertical: 24,
-    paddingHorizontal: 28,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: 'center',
+    backgroundColor: '#F8FAFC',
   },
   priceLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 12,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 8,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
   },
   currencySymbol: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginRight: 4,
-  },
-  ultraModernPrice: {
-    fontSize: 48,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: -1,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-  },
-  priceUnit: {
     fontSize: 20,
     fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginLeft: 8,
+    color: '#111827',
+    marginRight: 2,
+  },
+  ultraModernPrice: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#111827',
+  },
+  priceUnit: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginLeft: 4,
   },
 
   // Stats Section
   statsSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 8,
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 20,
-    padding: 16,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 10,
+    padding: 12,
     alignItems: 'center',
-    gap: 8,
-    borderWidth: 2,
-    borderColor: '#E2E8F0',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   statValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1F2937',
-    letterSpacing: 0.3,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
   },
   statLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '500',
     color: '#6B7280',
     textTransform: 'uppercase',
-    letterSpacing: 1,
   },
 
   // Footer
@@ -1079,23 +926,22 @@ const styles = StyleSheet.create({
   updateTimestamp: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    gap: 6,
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
   },
   ultraModernUpdateText: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '500',
     color: '#6B7280',
-    letterSpacing: 0.3,
   },
 
   // List Container
   ultraModernListContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 20,
   },
 });
