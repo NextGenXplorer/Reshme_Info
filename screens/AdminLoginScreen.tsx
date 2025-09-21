@@ -127,7 +127,7 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
     >
       <Header
         title="Admin Login"
-        subtitle={null}
+        subtitle={undefined}
         leftComponent={
           <TouchableOpacity style={styles.backButton} onPress={onCancel}>
             <Ionicons name="arrow-back" size={24} color="#6B7280" />

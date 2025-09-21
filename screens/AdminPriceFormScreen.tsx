@@ -212,7 +212,7 @@ export default function AdminPriceFormScreen({
     >
       <Header
         title={priceToEdit ? 'Edit Price' : 'Add New Price'}
-        subtitle={null}
+        subtitle={undefined}
         leftComponent={
           <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
             <Ionicons name="arrow-back" size={24} color="#6B7280" />

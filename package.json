@@ -16,6 +16,7 @@
     "@react-navigation/bottom-tabs": "^7.4.7",
     "@react-navigation/native": "^7.1.17",
     "expo": "~54.0.9",
+    "expo-constants": "^18.0.9",
     "expo-linear-gradient": "^15.0.7",
     "expo-status-bar": "~3.0.8",
     "firebase": "^12.3.0",
