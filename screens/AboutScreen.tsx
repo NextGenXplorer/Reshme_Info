@@ -19,15 +19,15 @@ export default function AboutScreen() {
 
   const teamMembers = [
     {
-      name: 'Mithun Kumar',
-      role: 'Founder & CEO',
+      name: 'Mithun Gowda B',
+      role: 'Founder & Lead Developer',
       description: 'Leading the vision for transparent silk market pricing',
       icon: 'person-circle',
       color: '#3B82F6',
     },
     {
-      name: 'Development Team',
-      role: 'Technical Excellence',
+      name: 'Manvanth Gowda M',
+      role: 'Developer',
       description: 'Building robust solutions for market transparency',
       icon: 'code-slash',
       color: '#10B981',
@@ -68,13 +68,13 @@ export default function AboutScreen() {
     },
   ];
 
-  const handleContactPress = (type: 'email' | 'phone' | 'website') => {
+  const handleContactPress = (type: 'email' | 'github' | 'website') => {
     switch (type) {
       case 'email':
-        Linking.openURL('mailto:contact@reshmeinfo.com');
+        Linking.openURL('mailto:mithungowda.b7411@gmail.com');
         break;
-      case 'phone':
-        Linking.openURL('tel:+919876543210');
+      case 'github':
+        Linking.openURL('https://github.com/mithun50');
         break;
       case 'website':
         Linking.openURL('https://reshmeinfo.com');
@@ -194,16 +194,16 @@ export default function AboutScreen() {
           <ContactCard
             icon="mail"
             title="Email Us"
-            subtitle="contact@reshmeinfo.com"
+            subtitle="mithungowda.b7411@gmail.com"
             onPress={() => handleContactPress('email')}
             color="#3B82F6"
           />
 
           <ContactCard
-            icon="call"
-            title="Call Us"
-            subtitle="+91 98765 43210"
-            onPress={() => handleContactPress('phone')}
+            icon="logo-github"
+            title="GitHub"
+            subtitle="github.com/mithun50"
+            onPress={() => handleContactPress('github')}
             color="#10B981"
           />
 
