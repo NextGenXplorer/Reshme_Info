@@ -33,3 +33,25 @@ export interface PriceStatistics {
   priceCount: number;
   lastUpdated: Date;
 }
+export interface AdminUser {
+  username: string;
+  role: 'super_admin' | 'market_admin';
+  market: string;
+  isAuthenticated: boolean;
+}
+
+export interface AdminSession {
+  user: AdminUser | null;
+  loginTime: Date | null;
+  expiresAt: Date | null;
+}
+
+export interface PriceFormData {
+  breed: 'CB' | 'BV';
+  market: string;
+  pricePerKg: number;
+  minPrice: number;
+  maxPrice: number;
+  avgPrice: number;
+  quality: 'A' | 'B' | 'C';
+}

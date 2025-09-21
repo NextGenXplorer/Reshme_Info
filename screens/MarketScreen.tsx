@@ -7,19 +7,46 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  TextInput,
+  FlatList,
+  Alert,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const { width } = Dimensions.get('window');
+
+interface FilterOptions {
+  breed: 'All' | 'CB' | 'BV';
+  market: string;
+  dateFrom: Date | null;
+  dateTo: Date | null;
+  sortBy: 'price' | 'date' | 'market';
+  sortOrder: 'asc' | 'desc';
+}
 
 export default function MarketScreen() {
   const { t } = useTranslation();
   const [prices, setPrices] = useState<CocoonPrice[]>([]);
+  const [filteredPrices, setFilteredPrices] = useState<CocoonPrice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showPriceComparison, setShowPriceComparison] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState<'from' | 'to' | null>(null);
+
+  const [filters, setFilters] = useState<FilterOptions>({
+    breed: 'All',
+    market: 'All',
+    dateFrom: null,
+    dateTo: null,
+    sortBy: 'date',
+    sortOrder: 'desc',
+  });
 
   const markets = [
     {
@@ -59,9 +86,15 @@ export default function MarketScreen() {
     },
   ];
 
+  const uniqueMarkets = ['All', ...Array.from(new Set(prices.map(p => p.market)))];
+
   useEffect(() => {
     fetchMarketData();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, prices]);
 
   const fetchMarketData = async () => {
     try {
@@ -85,6 +118,79 @@ export default function MarketScreen() {
     }
   };
 
+  const applyFilters = () => {
+    let filtered = [...prices];
+
+    // Filter by breed
+    if (filters.breed !== 'All') {
+      filtered = filtered.filter(price => price.breed === filters.breed);
+    }
+
+    // Filter by market
+    if (filters.market !== 'All') {
+      filtered = filtered.filter(price => price.market === filters.market);
+    }
+
+    // Filter by date range
+    if (filters.dateFrom) {
+      filtered = filtered.filter(price => price.lastUpdated >= filters.dateFrom!);
+    }
+    if (filters.dateTo) {
+      const endDate = new Date(filters.dateTo);
+      endDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(price => price.lastUpdated <= endDate);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+
+      switch (filters.sortBy) {
+        case 'price':
+          compareValue = a.avgPrice - b.avgPrice;
+          break;
+        case 'date':
+          compareValue = a.lastUpdated.getTime() - b.lastUpdated.getTime();
+          break;
+        case 'market':
+          compareValue = a.market.localeCompare(b.market);
+          break;
+      }
+
+      return filters.sortOrder === 'asc' ? compareValue : -compareValue;
+    });
+
+    setFilteredPrices(filtered);
+  };
+
+  const updateFilter = (key: keyof FilterOptions, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      breed: 'All',
+      market: 'All',
+      dateFrom: null,
+      dateTo: null,
+      sortBy: 'date',
+      sortOrder: 'desc',
+    });
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || (showDatePicker === 'from' ? filters.dateFrom : filters.dateTo);
+    setShowDatePicker(null);
+
+    if (currentDate) {
+      if (showDatePicker === 'from') {
+        updateFilter('dateFrom', currentDate);
+      } else {
+        updateFilter('dateTo', currentDate);
+      }
+    }
+  };
+
   const getMarketStats = (marketName: string) => {
     const marketPrices = prices.filter(price => price.market === marketName);
     if (marketPrices.length === 0) {
@@ -97,6 +203,80 @@ export default function MarketScreen() {
 
     return { avgPrice: Math.round(avgPrice), totalListings, lastUpdate };
   };
+
+  const getPriceChangeColor = (price: number, avgPrice: number) => {
+    if (price > avgPrice * 1.05) return '#10B981'; // Green for above average
+    if (price < avgPrice * 0.95) return '#EF4444'; // Red for below average
+    return '#6B7280'; // Gray for neutral
+  };
+
+  const renderPriceComparisonRow = ({ item }: { item: CocoonPrice }) => {
+    const marketAvg = prices
+      .filter(p => p.market === item.market)
+      .reduce((sum, p) => sum + p.avgPrice, 0) / prices.filter(p => p.market === item.market).length;
+
+    return (
+      <View style={styles.tableRow}>
+        <View style={[styles.tableCell, styles.marketCell]}>
+          <Text style={styles.tableCellText}>{item.market}</Text>
+        </View>
+        <View style={[styles.tableCell, styles.breedCell]}>
+          <View style={[styles.breedBadge, { backgroundColor: item.breed === 'CB' ? '#3B82F615' : '#10B98115' }]}>
+            <Text style={[styles.breedText, { color: item.breed === 'CB' ? '#3B82F6' : '#10B981' }]}>
+              {item.breed}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.tableCell, styles.priceCell]}>
+          <Text style={[styles.priceCellText, { color: getPriceChangeColor(item.avgPrice, marketAvg) }]}>
+            ₹{item.avgPrice}
+          </Text>
+          <Text style={styles.priceRangeText}>
+            {item.minPrice}-{item.maxPrice}
+          </Text>
+        </View>
+        <View style={[styles.tableCell, styles.qualityCell]}>
+          <View style={[styles.qualityBadge, {
+            backgroundColor: item.quality === 'A' ? '#10B98115' :
+                           item.quality === 'B' ? '#F59E0B15' : '#EF444415'
+          }]}>
+            <Text style={[styles.qualityText, {
+              color: item.quality === 'A' ? '#10B981' :
+                     item.quality === 'B' ? '#F59E0B' : '#EF4444'
+            }]}>
+              {item.quality}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.tableCell, styles.dateCell]}>
+          <Text style={styles.tableCellText}>
+            {item.lastUpdated.toLocaleDateString('en-IN', {
+              day: '2-digit',
+              month: '2-digit',
+              year: '2-digit'
+            })}
+          </Text>
+          <Text style={styles.timeText}>
+            {item.lastUpdated.toLocaleTimeString('en-IN', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  const FilterChip = ({ label, isActive, onPress }: { label: string; isActive: boolean; onPress: () => void }) => (
+    <TouchableOpacity
+      style={[styles.filterChip, isActive && styles.filterChipActive]}
+      onPress={onPress}
+    >
+      <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
 
   const MarketCard = ({ market, index }: { market: any; index: number }) => {
     const stats = getMarketStats(market.name);
@@ -183,36 +363,218 @@ export default function MarketScreen() {
               <Text style={styles.subtitle}>Silk cocoon trading hubs</Text>
             </View>
           </View>
+
+          {/* Toggle buttons */}
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity
+              style={[styles.toggleButton, !showPriceComparison && styles.toggleButtonActive]}
+              onPress={() => setShowPriceComparison(false)}
+            >
+              <Ionicons name="grid-outline" size={16} color={!showPriceComparison ? '#FFFFFF' : '#6B7280'} />
+              <Text style={[styles.toggleButtonText, !showPriceComparison && styles.toggleButtonTextActive]}>
+                Markets
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleButton, showPriceComparison && styles.toggleButtonActive]}
+              onPress={() => setShowPriceComparison(true)}
+            >
+              <Ionicons name="analytics-outline" size={16} color={showPriceComparison ? '#FFFFFF' : '#6B7280'} />
+              <Text style={[styles.toggleButtonText, showPriceComparison && styles.toggleButtonTextActive]}>
+                Prices
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <OverviewCard />
+      {showPriceComparison ? (
+        <View style={styles.container}>
+          {/* Filter Controls */}
+          <View style={styles.filterContainer}>
+            <View style={styles.filterHeader}>
+              <Text style={styles.filterTitle}>Price Comparison</Text>
+              <TouchableOpacity
+                style={styles.filterToggle}
+                onPress={() => setShowFilters(!showFilters)}
+              >
+                <Ionicons name="options-outline" size={20} color="#3B82F6" />
+                <Text style={styles.filterToggleText}>Filters</Text>
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.marketsSection}>
-          <Text style={styles.sectionTitle}>Trading Centers</Text>
-          <Text style={styles.sectionSubtitle}>
-            Explore major silk cocoon markets across Karnataka
-          </Text>
+            {showFilters && (
+              <View style={styles.filterContent}>
+                {/* Breed Filter */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Breed</Text>
+                  <View style={styles.filterChipsContainer}>
+                    {['All', 'CB', 'BV'].map(breed => (
+                      <FilterChip
+                        key={breed}
+                        label={breed}
+                        isActive={filters.breed === breed}
+                        onPress={() => updateFilter('breed', breed)}
+                      />
+                    ))}
+                  </View>
+                </View>
 
-          {markets.map((market, index) => (
-            <MarketCard key={market.name} market={market} index={index} />
-          ))}
+                {/* Market Filter */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Market</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <View style={styles.filterChipsContainer}>
+                      {uniqueMarkets.map(market => (
+                        <FilterChip
+                          key={market}
+                          label={market}
+                          isActive={filters.market === market}
+                          onPress={() => updateFilter('market', market)}
+                        />
+                      ))}
+                    </View>
+                  </ScrollView>
+                </View>
+
+                {/* Date Filter */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Date Range</Text>
+                  <View style={styles.dateFilterContainer}>
+                    <TouchableOpacity
+                      style={styles.dateButton}
+                      onPress={() => setShowDatePicker('from')}
+                    >
+                      <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+                      <Text style={styles.dateButtonText}>
+                        {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : 'From Date'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.dateButton}
+                      onPress={() => setShowDatePicker('to')}
+                    >
+                      <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+                      <Text style={styles.dateButtonText}>
+                        {filters.dateTo ? filters.dateTo.toLocaleDateString() : 'To Date'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Sort Options */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Sort By</Text>
+                  <View style={styles.sortContainer}>
+                    <View style={styles.filterChipsContainer}>
+                      {[
+                        { key: 'date', label: 'Date' },
+                        { key: 'price', label: 'Price' },
+                        { key: 'market', label: 'Market' }
+                      ].map(sort => (
+                        <FilterChip
+                          key={sort.key}
+                          label={sort.label}
+                          isActive={filters.sortBy === sort.key}
+                          onPress={() => updateFilter('sortBy', sort.key)}
+                        />
+                      ))}
+                    </View>
+                    <TouchableOpacity
+                      style={styles.sortOrderButton}
+                      onPress={() => updateFilter('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                    >
+                      <Ionicons
+                        name={filters.sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                        size={16}
+                        color="#3B82F6"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
+                  <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* Results Count */}
+          <View style={styles.resultsContainer}>
+            <Text style={styles.resultsText}>
+              {filteredPrices.length} price{filteredPrices.length !== 1 ? 's' : ''} found
+            </Text>
+          </View>
+
+          {/* Price Comparison Table */}
+          <View style={styles.tableContainer}>
+            <View style={styles.tableHeader}>
+              <View style={[styles.tableHeaderCell, styles.marketCell]}>
+                <Text style={styles.tableHeaderText}>Market</Text>
+              </View>
+              <View style={[styles.tableHeaderCell, styles.breedCell]}>
+                <Text style={styles.tableHeaderText}>Breed</Text>
+              </View>
+              <View style={[styles.tableHeaderCell, styles.priceCell]}>
+                <Text style={styles.tableHeaderText}>Price/kg</Text>
+              </View>
+              <View style={[styles.tableHeaderCell, styles.qualityCell]}>
+                <Text style={styles.tableHeaderText}>Quality</Text>
+              </View>
+              <View style={[styles.tableHeaderCell, styles.dateCell]}>
+                <Text style={styles.tableHeaderText}>Updated</Text>
+              </View>
+            </View>
+
+            <FlatList
+              data={filteredPrices}
+              renderItem={renderPriceComparisonRow}
+              keyExtractor={(item) => item.id}
+              style={styles.tableContent}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+
+          {/* Date Picker */}
+          {showDatePicker && (
+            <DateTimePicker
+              value={showDatePicker === 'from' ? filters.dateFrom || new Date() : filters.dateTo || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onDateChange}
+            />
+          )}
         </View>
+      ) : (
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <OverviewCard />
 
-        <View style={styles.infoSection}>
-          <View style={styles.infoCard}>
-            <Ionicons name="information-circle" size={24} color="#3B82F6" />
-            <View style={styles.infoContent}>
-              <Text style={styles.infoTitle}>Market Information</Text>
-              <Text style={styles.infoText}>
-                Prices are updated in real-time from verified market sources.
-                All trading centers operate during standard business hours.
-              </Text>
+          <View style={styles.marketsSection}>
+            <Text style={styles.sectionTitle}>Trading Centers</Text>
+            <Text style={styles.sectionSubtitle}>
+              Explore major silk cocoon markets across Karnataka
+            </Text>
+
+            {markets.map((market, index) => (
+              <MarketCard key={market.name} market={market} index={index} />
+            ))}
+          </View>
+
+          <View style={styles.infoSection}>
+            <View style={styles.infoCard}>
+              <Ionicons name="information-circle" size={24} color="#3B82F6" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>Market Information</Text>
+                <Text style={styles.infoText}>
+                  Prices are updated in real-time from verified market sources.
+                  All trading centers operate during standard business hours.
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -239,6 +601,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 16,
   },
   titleIconContainer: {
     width: 44,
@@ -267,6 +630,248 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontWeight: '500',
     marginTop: 2,
+  },
+
+  // Toggle Buttons
+  toggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    padding: 4,
+  },
+  toggleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  toggleButtonActive: {
+    backgroundColor: '#3B82F6',
+  },
+  toggleButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  toggleButtonTextActive: {
+    color: '#FFFFFF',
+  },
+
+  // Filter Styles
+  filterContainer: {
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  filterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  filterTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  filterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  filterToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  filterContent: {
+    gap: 16,
+  },
+  filterSection: {
+    gap: 8,
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  filterChipsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  filterChipActive: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
+  },
+  dateFilterContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  dateButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  dateButtonText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  sortOrderButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  clearFiltersButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  clearFiltersText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
+
+  // Results
+  resultsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#F9FAFB',
+  },
+  resultsText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+
+  // Table Styles
+  tableContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#F9FAFB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  tableHeaderCell: {
+    justifyContent: 'center',
+  },
+  tableHeaderText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#374151',
+    textTransform: 'uppercase',
+  },
+  tableContent: {
+    flex: 1,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  tableCell: {
+    justifyContent: 'center',
+  },
+  marketCell: {
+    flex: 2,
+  },
+  breedCell: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  priceCell: {
+    flex: 1.5,
+    alignItems: 'center',
+  },
+  qualityCell: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  dateCell: {
+    flex: 1.5,
+    alignItems: 'flex-end',
+  },
+  tableCellText: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '500',
+  },
+  breedBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  breedText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  priceCellText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  priceRangeText: {
+    fontSize: 11,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  qualityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    minWidth: 24,
+    alignItems: 'center',
+  },
+  qualityText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  timeText: {
+    fontSize: 11,
+    color: '#6B7280',
+    fontWeight: '500',
   },
 
   // Content
