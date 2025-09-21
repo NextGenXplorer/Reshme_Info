@@ -278,9 +278,7 @@ export default function AdminDashboardScreen({
         title="Dashboard"
         subtitle={null}
         leftComponent={
-          <View style={styles.userInfo}>
-            <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.userName}>{user.username}</Text>
+          <View style={styles.userInf}>
             <View style={styles.roleContainer}>
               <View style={[styles.roleBadge, {
                 backgroundColor: user.role === 'super_admin' ? '#3B82F615' : '#10B98115'
