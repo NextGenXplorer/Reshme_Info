@@ -68,16 +68,13 @@ export default function AboutScreen() {
     },
   ];
 
-  const handleContactPress = (type: 'email' | 'github' | 'website') => {
+  const handleContactPress = (type: 'email' | 'github') => {
     switch (type) {
       case 'email':
         Linking.openURL('mailto:mithungowda.b7411@gmail.com');
         break;
       case 'github':
         Linking.openURL('https://github.com/mithun50');
-        break;
-      case 'website':
-        Linking.openURL('https://reshmeinfo.com');
         break;
     }
   };
@@ -205,14 +202,6 @@ export default function AboutScreen() {
             subtitle="github.com/mithun50"
             onPress={() => handleContactPress('github')}
             color="#10B981"
-          />
-
-          <ContactCard
-            icon="globe"
-            title="Visit Website"
-            subtitle="www.reshmeinfo.com"
-            onPress={() => handleContactPress('website')}
-            color="#8B5CF6"
           />
         </View>
 

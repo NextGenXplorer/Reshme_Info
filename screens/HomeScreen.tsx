@@ -225,34 +225,43 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Price showcase */}
-            <View style={styles.priceShowcase}>
-              <View style={styles.priceShowcaseGradient}>
-                <Text style={styles.priceLabel}>Highest Price</Text>
-                <View style={styles.priceContainer}>
-                  <Text style={styles.currencySymbol}>₹</Text>
-                  <Text style={styles.ultraModernPrice}>{item.maxPrice}</Text>
-                  <Text style={styles.priceUnit}>/kg</Text>
+            {/* Price Table */}
+            <View style={styles.priceTable}>
+              <Text style={styles.priceTableTitle}>Price Details (₹/kg)</Text>
+
+              {/* Table Header */}
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>Type</Text>
+                <Text style={styles.tableHeaderText}>Price</Text>
+                <Text style={styles.tableHeaderText}>Status</Text>
+              </View>
+
+              {/* Table Rows */}
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCellType}>Minimum</Text>
+                <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="trending-down" size={14} color="#EF4444" />
+                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>Low</Text>
                 </View>
               </View>
-            </View>
 
-            {/* Stats section */}
-            <View style={styles.statsSection}>
-              <View style={styles.statCard}>
-                <Ionicons name="trending-down" size={14} color="#EF4444" />
-                <Text style={styles.statValue}>₹{item.minPrice}</Text>
-                <Text style={styles.statLabel}>{t('min')}</Text>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCellType}>Average</Text>
+                <Text style={styles.tableCellPrice}>₹{item.avgPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="analytics" size={14} color="#6366F1" />
+                  <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>Avg</Text>
+                </View>
               </View>
-              <View style={styles.statCard}>
-                <Ionicons name="analytics" size={14} color="#6366F1" />
-                <Text style={styles.statValue}>₹{item.avgPrice}</Text>
-                <Text style={styles.statLabel}>{t('avg')}</Text>
-              </View>
-              <View style={styles.statCard}>
-                <Ionicons name="trending-up" size={14} color="#10B981" />
-                <Text style={styles.statValue}>₹{item.maxPrice}</Text>
-                <Text style={styles.statLabel}>{t('max')}</Text>
+
+              <View style={[styles.tableRow, styles.tableRowHighlight]}>
+                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>Maximum</Text>
+                <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="trending-up" size={14} color="#10B981" />
+                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>High</Text>
+                </View>
               </View>
             </View>
 
@@ -706,75 +715,78 @@ const styles = StyleSheet.create({
     color: '#5B21B6',
   },
 
-  // Price Showcase
-  priceShowcase: {
+  // Price Table
+  priceTable: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  priceShowcaseGradient: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-  },
-  priceLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#64748B',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  currencySymbol: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    marginRight: 2,
-  },
-  ultraModernPrice: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#111827',
-  },
-  priceUnit: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginLeft: 4,
-  },
-
-  // Stats Section
-  statsSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 10,
-    padding: 12,
-    alignItems: 'center',
-    gap: 4,
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    overflow: 'hidden',
   },
-  statValue: {
+  priceTableTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#111827',
+    padding: 16,
+    backgroundColor: '#F8FAFC',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    textAlign: 'center',
   },
-  statLabel: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: '#6B7280',
-    textTransform: 'uppercase',
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  tableHeaderText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#374151',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+    alignItems: 'center',
+  },
+  tableRowHighlight: {
+    backgroundColor: '#F0FDF4',
+  },
+  tableCellType: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    textAlign: 'left',
+  },
+  tableCellPrice: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+  },
+  tableStatusCell: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  tableCellStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tableCellHighlight: {
+    color: '#166534',
+    fontWeight: '800',
   },
 
   // Footer
