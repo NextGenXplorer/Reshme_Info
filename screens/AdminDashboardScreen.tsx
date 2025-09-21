@@ -16,6 +16,7 @@ import { collection, getDocs, orderBy, query, where, deleteDoc, doc } from 'fire
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, CocoonPrice } from '../types';
 import { adminAuth } from '../utils/adminAuth';
+import Header from '../components/Header';
 
 const { width } = Dimensions.get('window');
 
@@ -273,33 +274,21 @@ export default function AdminDashboardScreen({
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
+      <Header
+        title="Dashboard"
+        subtitle={null}
+        leftComponent={
           <View style={styles.userInfo}>
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{user.username}</Text>
-            <View style={styles.roleContainer}>
-              <View style={[styles.roleBadge, {
-                backgroundColor: user.role === 'super_admin' ? '#3B82F615' : '#10B98115'
-              }]}>
-                <Text style={[styles.roleText, {
-                  color: user.role === 'super_admin' ? '#3B82F6' : '#10B981'
-                }]}>
-                  {user.role === 'super_admin' ? 'Super Admin' : 'Market Admin'}
-                </Text>
-              </View>
-              {user.market !== 'all' && (
-                <Text style={styles.marketText}>• {user.market}</Text>
-              )}
-            </View>
           </View>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
-
+        }
+        rightComponent={
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView
         style={styles.content}
         refreshControl={
@@ -391,21 +380,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerLeft: {
-    flex: 1,
-  },
   userInfo: {
     gap: 4,
   },
@@ -418,25 +392,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#111827',
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  roleBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  roleText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  marketText: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '500',
   },
   logoutButton: {
     padding: 8,

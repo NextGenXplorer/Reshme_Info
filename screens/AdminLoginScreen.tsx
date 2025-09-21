@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { adminAuth } from '../utils/adminAuth';
 import { AdminUser } from '../types';
+import Header from '../components/Header';
 
 const { width, height } = Dimensions.get('window');
 
@@ -124,20 +125,20 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <Header
+        title="Admin Login"
+        subtitle={null}
+        leftComponent={
+          <TouchableOpacity style={styles.backButton} onPress={onCancel}>
+            <Ionicons name="arrow-back" size={24} color="#6B7280" />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={onCancel}>
-            <Ionicons name="arrow-back" size={24} color="#6B7280" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Admin Login</Text>
-          <View style={styles.placeholder} />
-        </View>
-
         {/* Logo Section */}
         <View style={styles.logoSection}>
           <View style={styles.logoContainer}>
@@ -281,26 +282,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 20,
-    paddingBottom: 20,
-  },
   backButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  placeholder: {
-    width: 40,
   },
 
   // Logo Section

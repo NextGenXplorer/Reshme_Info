@@ -17,6 +17,7 @@ import { collection, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestor
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, CocoonPrice, PriceFormData } from '../types';
 import { adminAuth } from '../utils/adminAuth';
+import Header from '../components/Header';
 
 interface AdminPriceFormScreenProps {
   user: AdminUser;
@@ -209,17 +210,15 @@ export default function AdminPriceFormScreen({
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
-          <Ionicons name="arrow-back" size={24} color="#6B7280" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {priceToEdit ? 'Edit Price' : 'Add New Price'}
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
-
+      <Header
+        title={priceToEdit ? 'Edit Price' : 'Add New Price'}
+        subtitle={null}
+        leftComponent={
+          <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
+            <Ionicons name="arrow-back" size={24} color="#6B7280" />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -431,30 +430,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 20,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
   backButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#F9FAFB',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  placeholder: {
-    width: 40,
   },
 
   // Content
