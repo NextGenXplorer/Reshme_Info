@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, leftComponent, rightCo
       <View style={styles.leftComponent}>
         {leftComponent !== undefined ? leftComponent : (
           <Image
-            source={require('../assets/reshme-logo.png')}
+            source={require('../assets/reshme_logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />

@@ -131,7 +131,7 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
         <View style={styles.missionSection}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../assets/reshme-logo.png')}
+              source={require('../assets/reshme_logo.png')}
               style={styles.largeLogo}
               resizeMode="contain"
             />
