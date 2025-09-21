@@ -228,10 +228,10 @@ export default function HomeScreen() {
             {/* Price showcase */}
             <View style={styles.priceShowcase}>
               <View style={styles.priceShowcaseGradient}>
-                <Text style={styles.priceLabel}>{t('current')}</Text>
+                <Text style={styles.priceLabel}>Highest Price</Text>
                 <View style={styles.priceContainer}>
                   <Text style={styles.currencySymbol}>₹</Text>
-                  <Text style={styles.ultraModernPrice}>{item.pricePerKg}</Text>
+                  <Text style={styles.ultraModernPrice}>{item.maxPrice}</Text>
                   <Text style={styles.priceUnit}>/kg</Text>
                 </View>
               </View>
