@@ -36,6 +36,7 @@ export default function HomeScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(true);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -346,12 +347,12 @@ export default function HomeScreen() {
               </View>
 
               {/* Table Rows */}
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCellType}>{t('minimum')}</Text>
-                <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
+              <View style={[styles.tableRow, styles.tableRowHighlight]}>
+                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>{t('maximum')}</Text>
+                <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
                 <View style={styles.tableStatusCell}>
-                  <Ionicons name="trending-down" size={14} color="#EF4444" />
-                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>{t('low')}</Text>
+                  <Ionicons name="trending-up" size={14} color="#10B981" />
+                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>{t('high')}</Text>
                 </View>
               </View>
 
@@ -364,12 +365,12 @@ export default function HomeScreen() {
                 </View>
               </View>
 
-              <View style={[styles.tableRow, styles.tableRowHighlight]}>
-                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>{t('maximum')}</Text>
-                <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCellType}>{t('minimum')}</Text>
+                <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
                 <View style={styles.tableStatusCell}>
-                  <Ionicons name="trending-up" size={14} color="#10B981" />
-                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>{t('high')}</Text>
+                  <Ionicons name="trending-down" size={14} color="#EF4444" />
+                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>{t('low')}</Text>
                 </View>
               </View>
             </View>
@@ -413,16 +414,28 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.ultraModernContainer}>
-      <Header
-        title="Reshme Info"
-        subtitle="Live Cocoon Prices"
-        rightComponent={<LanguageSwitcher />}
-      />
+      <Header rightComponent={<LanguageSwitcher />} />
       {/* Filter section */}
-      <View style={styles.ultraModernFilterSection}>
-        <View style={styles.ultraModernFilterCard}>
-          <View style={styles.filterContent}>
-            <View style={styles.filterCategory}>
+      <View style={styles.filterHeader}>
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setIsFilterVisible(!isFilterVisible)}
+        >
+          <Ionicons
+            name={isFilterVisible ? 'chevron-up-circle' : 'chevron-down-circle'}
+            size={24}
+            color="#3B82F6"
+          />
+          <Text style={styles.toggleButtonText}>
+            {isFilterVisible ? t('hideFilters') : t('showFilters')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {isFilterVisible && (
+        <View style={styles.ultraModernFilterSection}>
+          <View style={styles.ultraModernFilterCard}>
+            <View style={styles.filterContent}>
+              <View style={styles.filterCategory}>
               <View style={styles.filterCategoryHeader}>
                 <View style={styles.filterCategoryIcon}>
                   <Ionicons name="options" size={14} color="#6B7280" />
@@ -437,7 +450,7 @@ export default function HomeScreen() {
                 {breeds.map((item) => (
                   <ModernFilterButton
                     key={item}
-                    title={item}
+                    title={t(`breed_${item}`)}
                     isSelected={selectedBreed === item}
                     onPress={() => setSelectedBreed(item)}
                     icon={item === 'all' ? 'grid' : 'leaf'}
@@ -461,7 +474,7 @@ export default function HomeScreen() {
                 {markets.map((item) => (
                   <ModernFilterButton
                     key={item}
-                    title={item}
+                    title={t(`market_${item}`)}
                     isSelected={selectedMarket === item}
                     onPress={() => setSelectedMarket(item)}
                     icon={item === 'all' ? 'grid' : 'location'}
@@ -470,39 +483,40 @@ export default function HomeScreen() {
               </ScrollView>
             </View>
 
-            <View style={styles.filterCategory}>
-              <View style={styles.filterCategoryHeader}>
-                <View style={styles.filterCategoryIcon}>
-                  <Ionicons name="calendar" size={14} color="#6B7280" />
-                </View>
-                <Text style={styles.ultraModernFilterTitle}>{t('filterByDateTitle')}</Text>
-              </View>
-              <View style={styles.dateFilterContainer}>
-                <TouchableOpacity
-                  style={styles.dateFilterButton}
-                  onPress={showDatePickerModal}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.dateFilterContent}>
-                    <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
-                    <Text style={styles.dateFilterText}>
-                      {formatDateForDisplay(selectedDate)}
-                    </Text>
+              <View style={styles.filterCategory}>
+                <View style={styles.filterCategoryHeader}>
+                  <View style={styles.filterCategoryIcon}>
+                    <Ionicons name="calendar" size={14} color="#6B7280" />
                   </View>
-                </TouchableOpacity>
+                  <Text style={styles.ultraModernFilterTitle}>{t('filterByDateTitle')}</Text>
+                </View>
+                <View style={styles.dateFilterContainer}>
+                  <TouchableOpacity
+                    style={styles.dateFilterButton}
+                    onPress={showDatePickerModal}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.dateFilterContent}>
+                      <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+                      <Text style={styles.dateFilterText}>
+                        {formatDateForDisplay(selectedDate)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.resetDateButton}
-                  onPress={resetDateFilter}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="refresh" size={16} color="#6B7280" />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.resetDateButton}
+                    onPress={resetDateFilter}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="refresh" size={16} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
         </View>
-      </View>
+      )}
 
       {/* Price list */}
       <FlatList
@@ -664,6 +678,24 @@ const styles = StyleSheet.create({
   },
 
   // Filter Section
+  filterHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  toggleButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
+    marginLeft: 8,
+  },
   ultraModernFilterSection: {
     marginHorizontal: 20,
     marginTop: 16,

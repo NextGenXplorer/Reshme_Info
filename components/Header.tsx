@@ -1,90 +1,78 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
-  title: string;
-  subtitle?: string;
   rightComponent?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, subtitle, rightComponent }) => {
+const Header: React.FC<HeaderProps> = ({ rightComponent }) => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const headerStyle = { paddingTop: insets.top };
 
   return (
-    <View style={{ paddingTop: Platform.OS === 'ios' ? insets.top : 0 }}>
-      <LinearGradient
-        colors={['#4F46E5', '#7C3AED']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.headerGradient}
-      >
-        <View style={styles.headerContent}>
-          <View style={styles.headerLeft}>
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('../assets/reshme-logo.png')}
-                style={styles.compactLogo}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.titleSection}>
-              <Text style={styles.compactTitle}>{title}</Text>
-              {subtitle && <Text style={styles.compactSubtitle}>{subtitle}</Text>}
-            </View>
-          </View>
-          {rightComponent}
-        </View>
-      </LinearGradient>
+    <View style={[styles.header, headerStyle]}>
+      <View style={styles.leftComponent}>
+        <Image
+          source={require('../assets/reshme-logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{t('defaultTitle')}</Text>
+        <Text style={styles.subtitle}>{t('defaultSubtitle')}</Text>
+      </View>
+      <View style={styles.rightComponent}>
+        {rightComponent}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  headerGradient: {
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-  },
-  headerContent: {
+  header: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  logoContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+  leftComponent: {
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
   },
-  compactLogo: {
-    width: 28,
-    height: 28,
+  logo: {
+    width: 32,
+    height: 32,
   },
-  titleSection: {
-    marginLeft: 12,
+  titleContainer: {
     flex: 1,
+    alignItems: 'center',
   },
-  compactTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
   },
-  compactSubtitle: {
+  subtitle: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '500',
-    marginTop: 1,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  rightComponent: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

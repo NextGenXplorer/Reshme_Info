@@ -200,7 +200,7 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="Market Statistics" subtitle="Real-time market analytics" />
+      <Header />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <PeriodSelector />
 

@@ -169,7 +169,7 @@ export default function MarketScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={t('tradingCenters')} subtitle={t('marketInfoDetail')} />
+      <Header />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <OverviewCard />
 
@@ -196,7 +196,7 @@ export default function MarketScreen() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

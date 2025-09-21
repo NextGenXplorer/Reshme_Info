@@ -22,22 +22,22 @@ export default function AboutScreen() {
   const teamMembers = [
     {
       name: 'Mithun Gowda B',
-      role: 'Founder & Lead Developer',
-      description: 'Leading the vision for transparent silk market pricing',
+      role: t('team_member_mithun_role'),
+      description: t('team_member_mithun_description'),
       icon: 'person-circle',
       color: '#3B82F6',
     },
     {
       name: 'Manvanth Gowda M',
-      role: 'Developer',
-      description: 'Building robust solutions for market transparency',
+      role: t('team_member_manvanth_role'),
+      description: t('team_member_manvanth_description'),
       icon: 'code-slash',
       color: '#10B981',
     },
     {
       name: 'Market Analysts',
-      role: 'Data & Research',
-      description: 'Ensuring accurate and real-time market data',
+      role: t('team_member_analysts_role'),
+      description: t('team_member_analysts_description'),
       icon: 'analytics',
       color: '#F59E0B',
     },
@@ -46,26 +46,26 @@ export default function AboutScreen() {
   const features = [
     {
       icon: 'trending-up',
-      title: 'Real-time Pricing',
-      description: 'Live market rates from verified sources',
+      title: t('feature_real_time_pricing_title'),
+      description: t('feature_real_time_pricing_description'),
       color: '#3B82F6',
     },
     {
       icon: 'location',
-      title: 'Multiple Markets',
-      description: 'Coverage across Karnataka trading centers',
+      title: t('feature_multiple_markets_title'),
+      description: t('feature_multiple_markets_description'),
       color: '#10B981',
     },
     {
       icon: 'language',
-      title: 'Multi-language',
-      description: 'Available in English and Kannada',
+      title: t('feature_multi_language_title'),
+      description: t('feature_multi_language_description'),
       color: '#8B5CF6',
     },
     {
       icon: 'shield-checkmark',
-      title: 'Verified Data',
-      description: 'Authenticated market information',
+      title: t('feature_verified_data_title'),
+      description: t('feature_verified_data_description'),
       color: '#F59E0B',
     },
   ];
@@ -125,7 +125,7 @@ export default function AboutScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={t('aboutReshmeInfo')} subtitle={t('tagline')} />
+      <Header />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Mission Section */}
         <View style={styles.missionSection}>
@@ -147,7 +147,7 @@ export default function AboutScreen() {
           <Text style={styles.sectionTitle}>{t('whyChoose')}</Text>
           <View style={styles.featuresGrid}>
             {features.map((feature, index) => (
-              <FeatureCard key={index} feature={{...feature, title: t(feature.title), description: t(feature.description)}} />
+              <FeatureCard key={index} feature={feature} />
             ))}
           </View>
         </View>
@@ -159,7 +159,7 @@ export default function AboutScreen() {
             {t('teamMessage')}
           </Text>
           {teamMembers.map((member, index) => (
-            <TeamCard key={index} member={{...member, role: t(member.role), description: t(member.description)}} />
+            <TeamCard key={index} member={member} />
           ))}
         </View>
 
