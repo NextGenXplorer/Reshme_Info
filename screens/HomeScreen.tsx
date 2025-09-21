@@ -13,14 +13,15 @@ import {
   Image,
   Platform,
   Modal,
+  SafeAreaView,
 } from 'react-native';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
-import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import Header from '../components/Header';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -390,13 +391,13 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={styles.ultraModernContainer}>
+      <SafeAreaView style={styles.ultraModernContainer}>
         <View style={styles.ultraModernLoadingContainer}>
           <View style={styles.loadingContent}>
             <View style={styles.loadingSpinner}>
               <View style={styles.loadingSpinnerGradient}>
                 <Image
-                  source={require('../assets/IMG-20250920-WA0022.jpg')}
+                  source={require('../assets/reshme-logo.png')}
                   style={styles.loadingLogoImage}
                   resizeMode="contain"
                 />
@@ -406,38 +407,17 @@ export default function HomeScreen() {
             <Text style={styles.ultraModernLoadingSubtext}>Fetching latest market prices...</Text>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.ultraModernContainer}>
-      {/* Header */}
-      <View style={styles.compactHeader}>
-        <LinearGradient
-          colors={['#4F46E5', '#7C3AED']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.headerGradient}
-        >
-          <View style={styles.headerContent}>
-            <View style={styles.headerLeft}>
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require('../assets/IMG-20250920-WA0022.jpg')}
-                  style={styles.compactLogo}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.titleSection}>
-                <Text style={styles.compactTitle}>Reshme Info</Text>
-              </View>
-            </View>
-            <LanguageSwitcher />
-          </View>
-        </LinearGradient>
-      </View>
-
+    <SafeAreaView style={styles.ultraModernContainer}>
+      <Header
+        title="Reshme Info"
+        subtitle="Live Cocoon Prices"
+        rightComponent={<LanguageSwitcher />}
+      />
       {/* Filter section */}
       <View style={styles.ultraModernFilterSection}>
         <View style={styles.ultraModernFilterCard}>
@@ -609,58 +589,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Compact Header
-  compactHeader: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  headerGradient: {
-    paddingTop: 20,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  logoContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  compactLogo: {
-    width: 28,
-    height: 28,
-  },
-  titleSection: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  compactTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  compactSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '500',
-    marginTop: 1,
-  },
-
   // Language Button & Modal
   languageButton: {
     flexDirection: 'row',
@@ -738,7 +666,7 @@ const styles = StyleSheet.create({
   // Filter Section
   ultraModernFilterSection: {
     marginHorizontal: 20,
-    marginTop: 0,
+    marginTop: 16,
     marginBottom: 16,
   },
   ultraModernFilterCard: {

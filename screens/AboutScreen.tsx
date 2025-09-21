@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
   Linking,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Header from '../components/Header';
 import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
@@ -122,26 +124,8 @@ export default function AboutScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.titleContainer}>
-            <View style={styles.titleIconContainer}>
-              <Image
-                source={require('../assets/IMG-20250920-WA0022.jpg')}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.titleTextContainer}>
-              <Text style={styles.title}>About ReshmeInfo</Text>
-              <Text style={styles.subtitle}>Your trusted silk market companion</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
+    <SafeAreaView style={styles.container}>
+      <Header title="About ReshmeInfo" subtitle="Your trusted silk market companion" />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Mission Section */}
         <View style={styles.missionSection}>
@@ -242,52 +226,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-
-  // Header
-  header: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  headerContent: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  titleIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
-  },
-  logoImage: {
-    width: 40,
-    height: 40,
-  },
-  titleTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-    marginTop: 2,
   },
 
   // Content
