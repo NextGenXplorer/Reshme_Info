@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for validation
+    function isValidPrice(price) {
+      return price is number && price > 0 && price < 10000;
+    }
+
+    function isValidBreed(breed) {
+      return breed in ['CB', 'BV'];
+    }
+
+    function isValidQuality(quality) {
+      return quality in ['A', 'B', 'C'];
+    }
+
+    function isValidMarket(market) {
+      return market is string && market.size() > 0 && market.size() < 100;
+    }
+
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.token.role == 'super_admin';
+    }
+
+    function isMarketAdmin() {
+      return request.auth != null && request.auth.token.role == 'market_admin';
+    }
+
+    function canWriteToMarket(market) {
+      return isSuperAdmin() || (isMarketAdmin() && request.auth.token.market == market);
+    }
+
+    // Cocoon Prices - Read access for all, write for authenticated admins only
+    match /cocoonPrices/{priceId} {
+      allow read: if true;  // Public read access for price information
+      allow create: if canWriteToMarket(request.resource.data.market)
+        && isValidPrice(request.resource.data.pricePerKg)
+        && isValidBreed(request.resource.data.breed)
+        && isValidQuality(request.resource.data.quality)
+        && isValidMarket(request.resource.data.market);
+      allow update: if canWriteToMarket(request.resource.data.market)
+        && isValidPrice(request.resource.data.pricePerKg);
+      allow delete: if isSuperAdmin();
+    }
+
+    // Markets - Read access for all, write for super admins only
+    match /markets/{marketId} {
+      allow read: if true;  // Public read access
+      allow write: if isSuperAdmin();
+    }
+
+    // Breeds - Read access for all, write for super admins only
+    match /breeds/{breedId} {
+      allow read: if true;  // Public read access
+      allow write: if isSuperAdmin();
+    }
+
+    // Price Alerts - User can only access their own alerts
+    match /priceAlerts/{alertId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Daily Summaries - Read access for all, write for admins or system
+    match /dailySummaries/{summaryId} {
+      allow read: if true;  // Public read access
+      allow write: if isSuperAdmin() || (request.auth != null && request.auth.token.role == 'system');
+    }
+
+    // Default rule - deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
