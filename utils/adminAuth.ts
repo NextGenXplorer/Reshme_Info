@@ -26,10 +26,10 @@ const getAdminCredentials = (): AdminCredentials[] => {
 
   // Load all admin credentials from environment variables
   for (let i = 1; i <= 10; i++) {
-    const username = expoExtra[`ADMIN_USERNAME_${i}`];
-    const password = expoExtra[`ADMIN_PASSWORD_${i}`];
-    const role = expoExtra[`ADMIN_ROLE_${i}`] as 'super_admin' | 'market_admin';
-    const market = expoExtra[`ADMIN_MARKET_${i}`];
+    const username = expoExtra[`EXPO_PUBLIC_ADMIN_USERNAME_${i}`];
+    const password = expoExtra[`EXPO_PUBLIC_ADMIN_PASSWORD_${i}`];
+    const role = expoExtra[`EXPO_PUBLIC_ADMIN_ROLE_${i}`] as 'super_admin' | 'market_admin';
+    const market = expoExtra[`EXPO_PUBLIC_ADMIN_MARKET_${i}`];
 
     if (username && password && role && market) {
       envCredentials.push({ username, password, role, market });
@@ -50,7 +50,7 @@ const getAdminCredentials = (): AdminCredentials[] => {
   // Security check: Only allow credentials from environment variables
   if (envCredentials.length === 0) {
     console.error('❌ SECURITY WARNING: No admin credentials found in environment variables');
-    console.error('📝 Please configure ADMIN_USERNAME_X, ADMIN_PASSWORD_X, ADMIN_ROLE_X, ADMIN_MARKET_X in .env file');
+    console.error('📝 Please configure EXPO_PUBLIC_ADMIN_USERNAME_X, EXPO_PUBLIC_ADMIN_PASSWORD_X, etc. in .env file');
     console.error('📖 See ADMIN_PANEL_README.md for configuration details');
 
     // Return empty array to prevent unauthorized access

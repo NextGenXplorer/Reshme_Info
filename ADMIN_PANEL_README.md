@@ -42,22 +42,22 @@ This application loads admin credentials from environment variables. For securit
     # .env
 
     # Super Admin (has access to all markets)
-    ADMIN_USERNAME_1="super_admin"
-    ADMIN_PASSWORD_1="YOUR_VERY_SECURE_PASSWORD_HERE"
-    ADMIN_ROLE_1="super_admin"
-    ADMIN_MARKET_1="all"
+    EXPO_PUBLIC_ADMIN_USERNAME_1="super_admin"
+    EXPO_PUBLIC_ADMIN_PASSWORD_1="YOUR_VERY_SECURE_PASSWORD_HERE"
+    EXPO_PUBLIC_ADMIN_ROLE_1="super_admin"
+    EXPO_PUBLIC_ADMIN_MARKET_1="all"
 
     # Market Admin for Ramanagara
-    ADMIN_USERNAME_2="admin_ramanagara"
-    ADMIN_PASSWORD_2="ANOTHER_SECURE_PASSWORD"
-    ADMIN_ROLE_2="market_admin"
-    ADMIN_MARKET_2="Ramanagara"
+    EXPO_PUBLIC_ADMIN_USERNAME_2="admin_ramanagara"
+    EXPO_PUBLIC_ADMIN_PASSWORD_2="ANOTHER_SECURE_PASSWORD"
+    EXPO_PUBLIC_ADMIN_ROLE_2="market_admin"
+    EXPO_PUBLIC_ADMIN_MARKET_2="Ramanagara"
 
     # Market Admin for Kollegala
-    ADMIN_USERNAME_3="admin_kollegala"
-    ADMIN_PASSWORD_3="YET_ANOTHER_SECURE_PASSWORD"
-    ADMIN_ROLE_3="market_admin"
-    ADMIN_MARKET_3="Kollegala"
+    EXPO_PUBLIC_ADMIN_USERNAME_3="admin_kollegala"
+    EXPO_PUBLIC_ADMIN_PASSWORD_3="YET_ANOTHER_SECURE_PASSWORD"
+    EXPO_PUBLIC_ADMIN_ROLE_3="market_admin"
+    EXPO_PUBLIC_ADMIN_MARKET_3="Kollegala"
 
     # Add more admins as needed...
     ```
