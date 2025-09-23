@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
@@ -200,7 +201,7 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      <Header rightComponent={<LanguageSwitcher />} />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <PeriodSelector />
 

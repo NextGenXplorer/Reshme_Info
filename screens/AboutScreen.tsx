@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
@@ -40,6 +41,13 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
       description: t('team_member_analysts_description'),
       icon: 'analytics',
       color: '#F59E0B',
+    },
+    {
+      name: 'Prashant R',
+      role: t('team_member_prashant_role'),
+      description: t('team_member_prashant_description'),
+      icon: 'search',
+      color: '#8B5CF6',
     },
   ];
 
@@ -125,7 +133,7 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      <Header rightComponent={<LanguageSwitcher />} />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Mission Section */}
         <View style={styles.missionSection}>

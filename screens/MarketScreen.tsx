@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import Header from '../components/Header';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -350,7 +351,7 @@ export default function MarketScreen() {
   if (!showPriceComparison) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header />
+        <Header rightComponent={<LanguageSwitcher />} />
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           <OverviewCard />
 

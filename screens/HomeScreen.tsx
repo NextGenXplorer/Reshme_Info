@@ -12,7 +12,6 @@ import {
   ScrollView,
   Image,
   Platform,
-  Modal,
   SafeAreaView,
 } from 'react-native';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
@@ -22,6 +21,7 @@ import { CocoonPrice } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -31,11 +31,9 @@ export default function HomeScreen() {
   const [selectedMarket, setSelectedMarket] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'en');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(true);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
@@ -103,15 +101,6 @@ export default function HomeScreen() {
       useNativeDriver: true,
     }).start();
 
-    const handleLanguageChange = (lang: string) => {
-      setCurrentLanguage(lang);
-    };
-
-    i18n.on('languageChanged', handleLanguageChange);
-
-    return () => {
-      i18n.off('languageChanged', handleLanguageChange);
-    };
   }, []);
 
   const animateCards = (itemsToAnimate: CocoonPrice[]) => {
@@ -220,88 +209,6 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const LanguageSwitcher = () => (
-    <>
-      <TouchableOpacity
-        style={styles.languageButton}
-        onPress={() => setShowLanguageModal(true)}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="language" size={20} color="#374151" />
-        <Text style={styles.languageButtonText}>
-          {currentLanguage.toUpperCase()}
-        </Text>
-        <Ionicons name="chevron-down" size={16} color="#6B7280" />
-      </TouchableOpacity>
-
-      <Modal
-        visible={showLanguageModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowLanguageModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowLanguageModal(false)}
-        >
-          <View style={styles.languageModal}>
-            <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
-
-            <TouchableOpacity
-              style={[
-                styles.languageOption,
-                currentLanguage === 'en' && styles.languageOptionSelected
-              ]}
-              onPress={() => {
-                setCurrentLanguage('en');
-                i18n.changeLanguage('en');
-                setShowLanguageModal(false);
-              }}
-            >
-              <View style={styles.languageOptionContent}>
-                <Text style={styles.languageFlag}>🇺🇸</Text>
-                <Text style={[
-                  styles.languageOptionText,
-                  currentLanguage === 'en' && styles.languageOptionTextSelected
-                ]}>
-                  {t('english')}
-                </Text>
-              </View>
-              {currentLanguage === 'en' && (
-                <Ionicons name="checkmark" size={20} color="#3B82F6" />
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.languageOption,
-                currentLanguage === 'kn' && styles.languageOptionSelected
-              ]}
-              onPress={() => {
-                setCurrentLanguage('kn');
-                i18n.changeLanguage('kn');
-                setShowLanguageModal(false);
-              }}
-            >
-              <View style={styles.languageOptionContent}>
-                <Text style={styles.languageFlag}>🇮🇳</Text>
-                <Text style={[
-                  styles.languageOptionText,
-                  currentLanguage === 'kn' && styles.languageOptionTextSelected
-                ]}>
-                  {t('kannada')}
-                </Text>
-              </View>
-              {currentLanguage === 'kn' && (
-                <Ionicons name="checkmark" size={20} color="#3B82F6" />
-              )}
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-    </>
-  );
 
   const renderPriceCard = ({ item }: { item: CocoonPrice }) => {
     return (
@@ -603,79 +510,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Language Button & Modal
-  languageButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  languageButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  languageModal: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    width: '100%',
-    maxWidth: 300,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  languageOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-    backgroundColor: '#F9FAFB',
-  },
-  languageOptionSelected: {
-    backgroundColor: '#EBF4FF',
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-  },
-  languageOptionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  languageFlag: {
-    fontSize: 20,
-  },
-  languageOptionText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#374151',
-  },
-  languageOptionTextSelected: {
-    color: '#1D4ED8',
-    fontWeight: '600',
-  },
 
   // Filter Section
   filterHeader: {
