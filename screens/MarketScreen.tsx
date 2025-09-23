@@ -399,8 +399,8 @@ export default function MarketScreen() {
               />
             </View>
             <View style={styles.titleTextContainer}>
-              <Text style={styles.title}>Market Centers</Text>
-              <Text style={styles.subtitle}>Silk cocoon trading hubs</Text>
+              <Text style={styles.title}>{t('marketCenters')}</Text>
+              <Text style={styles.subtitle}>{t('silkCocoonTradingHubs')}</Text>
             </View>
           </View>
 
@@ -412,7 +412,7 @@ export default function MarketScreen() {
             >
               <Ionicons name="grid-outline" size={16} color={!showPriceComparison ? '#FFFFFF' : '#6B7280'} />
               <Text style={[styles.toggleButtonText, !showPriceComparison && styles.toggleButtonTextActive]}>
-                Markets
+                {t('markets')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -421,7 +421,7 @@ export default function MarketScreen() {
             >
               <Ionicons name="analytics-outline" size={16} color={showPriceComparison ? '#FFFFFF' : '#6B7280'} />
               <Text style={[styles.toggleButtonText, showPriceComparison && styles.toggleButtonTextActive]}>
-                Prices
+                {t('prices')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -433,13 +433,13 @@ export default function MarketScreen() {
         {/* Filter Controls */}
         <View style={styles.filterContainer}>
           <View style={styles.filterHeader}>
-            <Text style={styles.filterTitle}>Price Comparison</Text>
+            <Text style={styles.filterTitle}>{t('priceComparison')}</Text>
             <TouchableOpacity
               style={styles.filterToggle}
               onPress={() => setShowFilters(!showFilters)}
             >
               <Ionicons name="options-outline" size={20} color="#3B82F6" />
-              <Text style={styles.filterToggleText}>Filters</Text>
+              <Text style={styles.filterToggleText}>{t('filters')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -447,12 +447,12 @@ export default function MarketScreen() {
             <View style={styles.filterContent}>
               {/* Breed Filter */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Breed</Text>
+                <Text style={styles.filterLabel}>{t('breed')}</Text>
                 <View style={styles.filterChipsContainer}>
                   {['All', 'CB', 'BV'].map(breed => (
                     <FilterChip
                       key={breed}
-                      label={breed}
+                      label={t(`breed_${breed.toLowerCase()}`)}
                       isActive={filters.breed === breed}
                       onPress={() => updateFilter('breed', breed)}
                     />
@@ -462,13 +462,13 @@ export default function MarketScreen() {
 
               {/* Market Filter */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Market</Text>
+                <Text style={styles.filterLabel}>{t('market')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.filterChipsContainer}>
                     {uniqueMarkets.map(market => (
                       <FilterChip
                         key={market}
-                        label={market}
+                        label={t(`market_${market.toLowerCase()}`)}
                         isActive={filters.market === market}
                         onPress={() => updateFilter('market', market)}
                       />
@@ -479,7 +479,7 @@ export default function MarketScreen() {
 
               {/* Date Filter */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Date Range</Text>
+                <Text style={styles.filterLabel}>{t('dateRange')}</Text>
                 <View style={styles.dateFilterContainer}>
                   <TouchableOpacity
                     style={styles.dateButton}
@@ -487,7 +487,7 @@ export default function MarketScreen() {
                   >
                     <Ionicons name="calendar-outline" size={16} color="#6B7280" />
                     <Text style={styles.dateButtonText}>
-                      {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : 'From Date'}
+                      {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : t('fromDate')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -496,7 +496,7 @@ export default function MarketScreen() {
                   >
                     <Ionicons name="calendar-outline" size={16} color="#6B7280" />
                     <Text style={styles.dateButtonText}>
-                      {filters.dateTo ? filters.dateTo.toLocaleDateString() : 'To Date'}
+                      {filters.dateTo ? filters.dateTo.toLocaleDateString() : t('toDate')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -504,13 +504,13 @@ export default function MarketScreen() {
 
               {/* Sort Options */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Sort By</Text>
+                <Text style={styles.filterLabel}>{t('sortBy')}</Text>
                 <View style={styles.sortContainer}>
                   <View style={styles.filterChipsContainer}>
                     {[
-                      { key: 'date', label: 'Date' },
-                      { key: 'price', label: 'Price' },
-                      { key: 'market', label: 'Market' }
+                      { key: 'date', label: t('date') },
+                      { key: 'price', label: t('price') },
+                      { key: 'market', label: t('market') }
                     ].map(sort => (
                       <FilterChip
                         key={sort.key}
@@ -534,7 +534,7 @@ export default function MarketScreen() {
               </View>
 
               <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
-                <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+                <Text style={styles.clearFiltersText}>{t('clearAllFilters')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -543,7 +543,7 @@ export default function MarketScreen() {
         {/* Results Count */}
         <View style={styles.resultsContainer}>
           <Text style={styles.resultsText}>
-            {filteredPrices.length} price{filteredPrices.length !== 1 ? 's' : ''} found
+            {t('pricesFound', { count: filteredPrices.length })}
           </Text>
         </View>
 
@@ -551,22 +551,22 @@ export default function MarketScreen() {
         <View style={styles.tableContainer}>
           <View style={styles.tableHeader}>
             <View style={[styles.tableHeaderCell, styles.marketCell]}>
-              <Text style={styles.tableHeaderText}>Market</Text>
+              <Text style={styles.tableHeaderText}>{t('market')}</Text>
             </View>
             <View style={[styles.tableHeaderCell, styles.breedCell]}>
-              <Text style={styles.tableHeaderText}>Breed</Text>
+              <Text style={styles.tableHeaderText}>{t('breed')}</Text>
             </View>
             <View style={[styles.tableHeaderCell, styles.priceCell]}>
-              <Text style={styles.tableHeaderText}>Price/kg</Text>
+              <Text style={styles.tableHeaderText}>{t('price_kg')}</Text>
             </View>
             <View style={[styles.tableHeaderCell, styles.qualityCell]}>
-              <Text style={styles.tableHeaderText}>Quality</Text>
+              <Text style={styles.tableHeaderText}>{t('quality')}</Text>
             </View>
             <View style={[styles.tableHeaderCell, styles.lotCell]}>
-              <Text style={styles.tableHeaderText}>Lot</Text>
+              <Text style={styles.tableHeaderText}>{t('lot')}</Text>
             </View>
             <View style={[styles.tableHeaderCell, styles.dateCell]}>
-              <Text style={styles.tableHeaderText}>Updated</Text>
+              <Text style={styles.tableHeaderText}>{t('updated_trans')}</Text>
             </View>
           </View>
 
