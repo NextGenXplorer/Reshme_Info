@@ -108,15 +108,19 @@ export default function MarketScreen() {
 
     const summaries: MarketSummary[] = Object.keys(marketGroups).map(marketName => {
       const marketPrices = marketGroups[marketName];
-      const avgPrices = marketPrices.map(p => p.avgPrice);
-      const maxPrices = marketPrices.map(p => p.maxPrice);
-      const minPrices = marketPrices.map(p => p.minPrice);
+      const avgPrices = marketPrices.map(p => p.avgPrice).filter(p => p != null);
+      const maxPrices = marketPrices.map(p => p.maxPrice).filter(p => p != null);
+      const minPrices = marketPrices.map(p => p.minPrice).filter(p => p != null);
+
+      if (marketPrices.length === 0) {
+        return null;
+      }
       
       return {
         market: marketName,
-        avgPrice: Math.round(avgPrices.reduce((sum, price) => sum + price, 0) / avgPrices.length),
-        maxPrice: Math.max(...maxPrices),
-        minPrice: Math.min(...minPrices),
+        avgPrice: avgPrices.length > 0 ? Math.round(avgPrices.reduce((sum, price) => sum + price, 0) / avgPrices.length) : 0,
+        maxPrice: maxPrices.length > 0 ? Math.max(...maxPrices) : 0,
+        minPrice: minPrices.length > 0 ? Math.min(...minPrices) : 0,
         lotNumbers: [...new Set(marketPrices.map(p => p.lotNumber))],
         breeds: [...new Set(marketPrices.map(p => p.breed))],
         lastUpdated: new Date(Math.max(...marketPrices.map(p => p.lastUpdated.getTime()))),
@@ -124,7 +128,7 @@ export default function MarketScreen() {
       };
     });
 
-    setMarketSummaries(summaries);
+    setMarketSummaries(summaries.filter(s => s !== null) as MarketSummary[]);
   };
 
   const applyFilters = () => {
@@ -198,10 +202,28 @@ export default function MarketScreen() {
     setShowDatePicker(null);
 
     if (currentDate) {
+      let newDateFrom = filters.dateFrom;
+      let newDateTo = filters.dateTo;
+
       if (showDatePicker === 'from') {
-        updateFilter('dateFrom', currentDate);
+        newDateFrom = currentDate;
       } else {
-        updateFilter('dateTo', currentDate);
+        newDateTo = currentDate;
+      }
+
+      if (newDateFrom && newDateTo && newDateFrom > newDateTo) {
+        // Swap dates if from is after to
+        setFilters(prev => ({
+          ...prev,
+          dateFrom: newDateTo,
+          dateTo: newDateFrom,
+        }));
+      } else {
+        if (showDatePicker === 'from') {
+          updateFilter('dateFrom', currentDate);
+        } else {
+          updateFilter('dateTo', currentDate);
+        }
       }
     }
   };
@@ -223,12 +245,12 @@ export default function MarketScreen() {
       <View style={styles.marketCardHeader}>
         <View style={styles.marketInfo}>
           <Text style={styles.marketNameText}>{item.market}</Text>
-          <Text style={styles.listingsText}>{item.totalListings} listings</Text>
+          <Text style={styles.listingsText}>{item.totalListings} {t('listings')}</Text>
         </View>
         <View style={styles.breedContainer}>
           {item.breeds.map(breed => (
-            <View 
-              key={breed} 
+            <View
+              key={breed}
               style={[styles.breedBadge, { backgroundColor: breed === 'CB' ? '#3B82F615' : '#10B98115' }]}
             >
               <Text style={[styles.breedText, { color: breed === 'CB' ? '#3B82F6' : '#10B981' }]}>
@@ -243,21 +265,21 @@ export default function MarketScreen() {
       <View style={styles.pricesRow}>
         <View style={styles.priceItem}>
           <Text style={styles.maxPriceText}>₹{item.maxPrice}</Text>
-          <Text style={styles.priceLabel}>Max Price</Text>
+          <Text style={styles.priceLabel}>{t('maxPriceLabel')}</Text>
         </View>
         <View style={styles.priceItem}>
           <Text style={styles.minPriceText}>₹{item.minPrice}</Text>
-          <Text style={styles.priceLabel}>Min Price</Text>
+          <Text style={styles.priceLabel}>{t('minPriceLabel')}</Text>
         </View>
         <View style={styles.priceItem}>
           <Text style={styles.avgPriceText}>₹{item.avgPrice}</Text>
-          <Text style={styles.priceLabel}>Avg Price</Text>
+          <Text style={styles.priceLabel}>{t('avgPriceLabel')}</Text>
         </View>
       </View>
 
       {/* Lot Numbers */}
       <View style={styles.lotSection}>
-        <Text style={styles.lotLabel}>Lot Numbers:</Text>
+        <Text style={styles.lotLabel}>{t('lotNumbersLabel')}</Text>
         <Text style={styles.lotText}>
           {item.lotNumbers.slice(0, 3).join(', ')}
           {item.lotNumbers.length > 3 && ` +${item.lotNumbers.length - 3} more`}
@@ -268,7 +290,7 @@ export default function MarketScreen() {
       <View style={styles.updateSection}>
         <Ionicons name="time-outline" size={14} color="#6B7280" />
         <Text style={styles.updateText}>
-          Updated {item.lastUpdated.toLocaleDateString('en-IN', {
+          {t('updatedLabel')} {item.lastUpdated.toLocaleDateString('en-IN', {
             day: '2-digit',
             month: 'short',
             year: '2-digit'
@@ -319,9 +341,13 @@ export default function MarketScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header rightComponent={<LanguageSwitcher />} />
+        <Header
+          title={t('marketCenters') || 'Market Centers'}
+          subtitle={t('silkCocoonTradingHubs') || 'Silk cocoon trading hubs'}
+          rightComponent={<LanguageSwitcher />}
+        />
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading market data...</Text>
+          <Text style={styles.loadingText}>{t('loadingMarketData') || 'Loading market data...'}</Text>
         </View>
       </SafeAreaView>
     );
@@ -329,24 +355,11 @@ export default function MarketScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.titleContainer}>
-            <View style={styles.titleIconContainer}>
-              <Image
-                source={require('../assets/IMG-20250920-WA0022.jpg')}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.titleTextContainer}>
-              <Text style={styles.title}>Market Centers</Text>
-              <Text style={styles.subtitle}>Silk cocoon trading data</Text>
-            </View>
-          </View>
-        </View>
-      </View>
+      <Header
+        title={t('marketCenters') || 'Market Centers'}
+        subtitle={t('silkCocoonTradingHubs') || 'Silk cocoon trading hubs'}
+        rightComponent={<LanguageSwitcher />}
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <OverviewCard />
@@ -354,13 +367,13 @@ export default function MarketScreen() {
         {/* Filter Controls */}
         <View style={styles.filterContainer}>
           <View style={styles.filterHeader}>
-            <Text style={styles.filterTitle}>Market Data</Text>
+            <Text style={styles.filterTitle}>{t('marketData')}</Text>
             <TouchableOpacity
               style={styles.filterToggle}
               onPress={() => setShowFilters(!showFilters)}
             >
               <Ionicons name="options-outline" size={20} color="#3B82F6" />
-              <Text style={styles.filterToggleText}>Filters</Text>
+              <Text style={styles.filterToggleText}>{t('filters')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -368,12 +381,12 @@ export default function MarketScreen() {
             <View style={styles.filterContent}>
               {/* Breed Filter */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Breeds</Text>
+                <Text style={styles.filterLabel}>{t('breeds')}</Text>
                 <View style={styles.filterChipsContainer}>
                   {['All', 'CB', 'BV'].map(breed => (
                     <FilterChip
                       key={breed}
-                      label={breed}
+                      label={t(`breed_${breed}` as any, breed)}
                       isActive={filters.breed === breed}
                       onPress={() => updateFilter('breed', breed)}
                     />
@@ -383,13 +396,13 @@ export default function MarketScreen() {
 
               {/* Market Filter */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Market</Text>
+                <Text style={styles.filterLabel}>{t('market')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.filterChipsContainer}>
                     {uniqueMarkets.map(market => (
                       <FilterChip
                         key={market}
-                        label={market}
+                        label={t(`market_${market}` as any, market)}
                         isActive={filters.market === market}
                         onPress={() => updateFilter('market', market)}
                       />
@@ -400,7 +413,7 @@ export default function MarketScreen() {
 
               {/* Date Filter */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Date Range</Text>
+                <Text style={styles.filterLabel}>{t('dateRange')}</Text>
                 <View style={styles.dateFilterContainer}>
                   <TouchableOpacity
                     style={styles.dateButton}
@@ -408,7 +421,7 @@ export default function MarketScreen() {
                   >
                     <Ionicons name="calendar-outline" size={16} color="#6B7280" />
                     <Text style={styles.dateButtonText}>
-                      {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : 'From Date'}
+                      {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : t('fromDate')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -417,7 +430,7 @@ export default function MarketScreen() {
                   >
                     <Ionicons name="calendar-outline" size={16} color="#6B7280" />
                     <Text style={styles.dateButtonText}>
-                      {filters.dateTo ? filters.dateTo.toLocaleDateString() : 'To Date'}
+                      {filters.dateTo ? filters.dateTo.toLocaleDateString() : t('toDate')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -425,15 +438,15 @@ export default function MarketScreen() {
 
               {/* Sort Options */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>Sort By</Text>
+                <Text style={styles.filterLabel}>{t('sortBy')}</Text>
                 <View style={styles.sortContainer}>
                   <View style={styles.filterChipsContainer}>
                     {[
-                      { key: 'market', label: 'Market' },
-                      { key: 'avgPrice', label: 'Avg Price' },
-                      { key: 'maxPrice', label: 'Max Price' },
-                      { key: 'minPrice', label: 'Min Price' },
-                      { key: 'date', label: 'Date' }
+                      { key: 'market', label: t('sort_market') },
+                      { key: 'avgPrice', label: t('sort_avgPrice') },
+                      { key: 'maxPrice', label: t('sort_maxPrice') },
+                      { key: 'minPrice', label: t('sort_minPrice') },
+                      { key: 'date', label: t('sort_date') }
                     ].map(sort => (
                       <FilterChip
                         key={sort.key}
@@ -457,7 +470,7 @@ export default function MarketScreen() {
               </View>
 
               <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
-                <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+                <Text style={styles.clearFiltersText}>{t('clearAllFilters')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -466,7 +479,7 @@ export default function MarketScreen() {
         {/* Results Count */}
         <View style={styles.resultsContainer}>
           <Text style={styles.resultsText}>
-            {filteredSummaries.length} market{filteredSummaries.length !== 1 ? 's' : ''} found
+            {t('marketsFound', { count: filteredSummaries.length })}
           </Text>
         </View>
 
@@ -512,52 +525,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     fontWeight: '500',
-  },
-
-  // Header
-  header: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  headerContent: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  titleIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
-  },
-  logoImage: {
-    width: 40,
-    height: 40,
-  },
-  titleTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-    marginTop: 2,
   },
 
   // Content
