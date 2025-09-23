@@ -244,7 +244,7 @@ export default function MarketScreen() {
       {/* Header */}
       <View style={styles.marketCardHeader}>
         <View style={styles.marketInfo}>
-          <Text style={styles.marketNameText}>{item.market}</Text>
+          <Text style={styles.marketNameText}>{t(`market_${item.market}` as any, item.market)}</Text>
           <Text style={styles.listingsText}>{item.totalListings} {t('listings')}</Text>
         </View>
         <View style={styles.breedContainer}>
@@ -254,7 +254,7 @@ export default function MarketScreen() {
               style={[styles.breedBadge, { backgroundColor: breed === 'CB' ? '#3B82F615' : '#10B98115' }]}
             >
               <Text style={[styles.breedText, { color: breed === 'CB' ? '#3B82F6' : '#10B981' }]}>
-                {breed}
+                {t(`breed_${breed}` as any, breed)}
               </Text>
             </View>
           ))}

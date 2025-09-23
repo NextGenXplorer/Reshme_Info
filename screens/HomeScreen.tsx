@@ -222,7 +222,7 @@ export default function HomeScreen() {
                   <Ionicons name="leaf" size={18} color="#10B981" />
                 </View>
                 <View style={styles.breedInfo}>
-                  <Text style={styles.ultraModernBreedText}>{item.breed}</Text>
+                  <Text style={styles.ultraModernBreedText}>{t(`breed_${item.breed}` as any, item.breed)}</Text>
                   <View style={styles.qualityBadgeContainer}>
                     <View style={styles.ultraModernQualityBadge}>
                       <Ionicons name="star" size={10} color="#92400E" />
@@ -237,11 +237,11 @@ export default function HomeScreen() {
               <View style={styles.marketBadgeContainer}>
                 <View style={styles.ultraModernMarketBadge}>
                   <Ionicons name="location" size={10} color="#5B21B6" />
-                  <Text style={styles.ultraModernMarketText}>{item.market}</Text>
+                  <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
                 </View>
                 <View style={styles.lotNumberBadge}>
                   <Ionicons name="apps" size={10} color="#92400E" />
-                  <Text style={styles.lotNumberText}>Lot: {item.lotNumber}</Text>
+                  <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
                 </View>
               </View>
             </View>
