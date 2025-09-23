@@ -190,5 +190,8 @@
   "minPriceLabel": "Min Price",
   "avgPriceLabel": "Avg Price",
   "lotNumbersLabel": "Lot Numbers:",
-  "updatedLabel": "Updated"
+  "updatedLabel": "Updated",
+  "home": "Home",
+  "stats": "Stats",
+  "about": "About"
 }

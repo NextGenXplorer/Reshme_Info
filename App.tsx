@@ -68,7 +68,7 @@ const AppContent = () => {
               elevation: 8,
             },
             tabBarLabelStyle: {
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: '600',
               marginTop: 4,
             },
@@ -79,27 +79,27 @@ const AppContent = () => {
             name="Home"
             component={HomeScreen}
             options={{
-              tabBarLabel: t('home') || 'Home',
+              tabBarLabel: t('home'),
             }}
           />
           <Tab.Screen
             name="Market"
             component={MarketScreen}
             options={{
-              tabBarLabel: t('market') || 'Market',
+              tabBarLabel: t('market'),
             }}
           />
           <Tab.Screen
             name="Stats"
             component={StatsScreen}
             options={{
-              tabBarLabel: t('stats') || 'Stats',
+              tabBarLabel: t('stats'),
             }}
           />
           <Tab.Screen
             name="About"
             options={{
-              tabBarLabel: t('about') || 'About',
+              tabBarLabel: t('about'),
             }}
           >
             {() => <AboutScreen setShowAdminPanel={setShowAdminPanel} />}

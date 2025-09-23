@@ -184,5 +184,8 @@
   "minPriceLabel": "ಕನಿಷ್ಠ ಬೆಲೆ",
   "avgPriceLabel": "ಸರಾಸರಿ ಬೆಲೆ",
   "lotNumbersLabel": "ಲಾಟ್ ಸಂಖ್ಯೆಗಳು:",
-  "updatedLabel": "ನವೀಕರಿಸಲಾಗಿದೆ"
+  "updatedLabel": "ನವೀಕರಿಸಲಾಗಿದೆ",
+  "home": "ಮನೆ",
+  "stats": "ಅಂಕಿಅಂಶಗಳು",
+  "about": "ಬಗ್ಗೆ"
 }
