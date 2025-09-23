@@ -372,8 +372,8 @@ export default function MarketScreen() {
               style={styles.filterToggle}
               onPress={() => setShowFilters(!showFilters)}
             >
-              <Ionicons name="options-outline" size={20} color="#3B82F6" />
-              <Text style={styles.filterToggleText}>{t('filters')}</Text>
+              <Ionicons name={showFilters ? "chevron-up-circle" : "chevron-down-circle"} size={24} color="#3B82F6" />
+              <Text style={styles.filterToggleText}>{showFilters ? t('hideFilters') : t('showFilters')}</Text>
             </TouchableOpacity>
           </View>
 
