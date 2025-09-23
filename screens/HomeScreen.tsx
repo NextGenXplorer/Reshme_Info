@@ -239,6 +239,10 @@ export default function HomeScreen() {
                   <Ionicons name="location" size={10} color="#5B21B6" />
                   <Text style={styles.ultraModernMarketText}>{item.market}</Text>
                 </View>
+                <View style={styles.lotNumberBadge}>
+                  <Ionicons name="apps" size={10} color="#92400E" />
+                  <Text style={styles.lotNumberText}>Lot: {item.lotNumber}</Text>
+                </View>
               </View>
             </View>
 
@@ -697,6 +701,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#5B21B6',
+  },
+  lotNumberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+    backgroundColor: '#FEF3C7',
+    marginTop: 8,
+  },
+  lotNumberText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400E',
   },
 
   // Price Table

@@ -13,6 +13,7 @@ const sampleCocoonPrices = [
     quality: 'A',
     source: 'market_admin',
     verified: true,
+    lotNumber: 101,
     location: {
       state: 'Karnataka',
       district: 'Ramanagara',
@@ -30,6 +31,7 @@ const sampleCocoonPrices = [
     quality: 'A',
     source: 'daily_update',
     verified: true,
+    lotNumber: 102,
     location: {
       state: 'Karnataka',
       district: 'Chamarajanagar',
@@ -47,6 +49,7 @@ const sampleCocoonPrices = [
     quality: 'B',
     source: 'market_admin',
     verified: true,
+    lotNumber: 103,
     location: {
       state: 'Karnataka',
       district: 'Ramanagara',
@@ -64,6 +67,7 @@ const sampleCocoonPrices = [
     quality: 'B',
     source: 'daily_update',
     verified: true,
+    lotNumber: 104,
     location: {
       state: 'Karnataka',
       district: 'Chikkaballapur',
@@ -81,6 +85,7 @@ const sampleCocoonPrices = [
     quality: 'A',
     source: 'market_admin',
     verified: true,
+    lotNumber: 105,
     location: {
       state: 'Karnataka',
       district: 'Tumkur',
@@ -98,6 +103,7 @@ const sampleCocoonPrices = [
     quality: 'B',
     source: 'daily_update',
     verified: true,
+    lotNumber: 106,
     location: {
       state: 'Karnataka',
       district: 'Ramanagara',
@@ -115,6 +121,7 @@ const sampleCocoonPrices = [
     quality: 'C',
     source: 'daily_update',
     verified: true,
+    lotNumber: 107,
     location: {
       state: 'Karnataka',
       district: 'Chamarajanagar',
@@ -132,6 +139,7 @@ const sampleCocoonPrices = [
     quality: 'A',
     source: 'market_admin',
     verified: true,
+    lotNumber: 108,
     location: {
       state: 'Karnataka',
       district: 'Ramanagara',
@@ -149,6 +157,7 @@ const sampleCocoonPrices = [
     quality: 'A',
     source: 'market_admin',
     verified: true,
+    lotNumber: 109,
     location: {
       state: 'Karnataka',
       district: 'Chikkaballapur',
@@ -166,6 +175,7 @@ const sampleCocoonPrices = [
     quality: 'B',
     source: 'daily_update',
     verified: true,
+    lotNumber: 110,
     location: {
       state: 'Karnataka',
       district: 'Tumkur',

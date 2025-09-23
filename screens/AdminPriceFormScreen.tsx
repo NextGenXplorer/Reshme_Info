@@ -44,6 +44,7 @@ export default function AdminPriceFormScreen({
     maxPrice: 0,
     avgPrice: 0,
     quality: 'A',
+    lotNumber: 0,
   });
 
   const availableMarkets = adminAuth.getAvailableMarkets(user);
@@ -58,6 +59,7 @@ export default function AdminPriceFormScreen({
         maxPrice: priceToEdit.maxPrice,
         avgPrice: priceToEdit.avgPrice,
         quality: priceToEdit.quality,
+        lotNumber: priceToEdit.lotNumber || 0,
       });
     }
   }, [priceToEdit]);
@@ -97,6 +99,10 @@ export default function AdminPriceFormScreen({
 
     if (formData.avgPrice <= 0) {
       newErrors.avgPrice = 'Average price must be greater than 0';
+    }
+
+    if (formData.lotNumber <= 0) {
+      newErrors.lotNumber = 'Lot number must be greater than 0';
     }
 
     if (!adminAuth.hasMarketPermission(user, formData.market)) {
@@ -171,7 +177,8 @@ export default function AdminPriceFormScreen({
       formData.minPrice !== priceToEdit.minPrice ||
       formData.maxPrice !== priceToEdit.maxPrice ||
       formData.avgPrice !== priceToEdit.avgPrice ||
-      formData.quality !== priceToEdit.quality
+      formData.quality !== priceToEdit.quality ||
+      formData.lotNumber !== priceToEdit.lotNumber
     );
   };
 
@@ -281,6 +288,26 @@ export default function AdminPriceFormScreen({
             </View>
           </View>
 
+          {/* Lot Number */}
+          <View style={styles.inputSection}>
+            <Text style={styles.inputLabel}>Lot Number *</Text>
+            <View style={[styles.inputWrapper, errors.lotNumber && styles.inputError]}>
+              <Ionicons name="apps-outline" size={20} color="#6B7280" />
+              <TextInput
+                style={styles.textInput}
+                value={formData.lotNumber.toString()}
+                onChangeText={(text) => updateField('lotNumber', parseInt(text, 10) || 0)}
+                placeholder="Enter lot number"
+                placeholderTextColor="#9CA3AF"
+                keyboardType="numeric"
+                editable={!loading}
+              />
+            </View>
+            {errors.lotNumber && (
+              <Text style={styles.errorText}>{errors.lotNumber}</Text>
+            )}
+          </View>
+
           {/* Price Per Kg */}
           <View style={styles.inputSection}>
             <Text style={styles.inputLabel}>Current Price per Kg (₹) *</Text>
@@ -376,6 +403,10 @@ export default function AdminPriceFormScreen({
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Quality:</Text>
               <Text style={styles.summaryValue}>Grade {formData.quality}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Lot Number:</Text>
+              <Text style={styles.summaryValue}>{formData.lotNumber}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Price Range:</Text>

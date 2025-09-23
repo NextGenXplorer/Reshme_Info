@@ -251,6 +251,9 @@ export default function MarketScreen() {
             </Text>
           </View>
         </View>
+        <View style={[styles.tableCell, styles.lotCell]}>
+          <Text style={styles.tableCellText}>{item.lotNumber}</Text>
+        </View>
         <View style={[styles.tableCell, styles.dateCell]}>
           <Text style={styles.tableCellText}>
             {item.lastUpdated.toLocaleDateString('en-IN', {
@@ -559,6 +562,9 @@ export default function MarketScreen() {
             <View style={[styles.tableHeaderCell, styles.qualityCell]}>
               <Text style={styles.tableHeaderText}>Quality</Text>
             </View>
+            <View style={[styles.tableHeaderCell, styles.lotCell]}>
+              <Text style={styles.tableHeaderText}>Lot</Text>
+            </View>
             <View style={[styles.tableHeaderCell, styles.dateCell]}>
               <Text style={styles.tableHeaderText}>Updated</Text>
             </View>
@@ -824,18 +830,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   marketCell: {
-    flex: 2,
+    flex: 1.5,
   },
   breedCell: {
-    flex: 1,
+    flex: 0.8,
     alignItems: 'center',
   },
   priceCell: {
-    flex: 1.5,
+    flex: 1.2,
     alignItems: 'center',
   },
   qualityCell: {
-    flex: 1,
+    flex: 0.8,
+    alignItems: 'center',
+  },
+  lotCell: {
+    flex: 0.8,
     alignItems: 'center',
   },
   dateCell: {
@@ -984,7 +994,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   marketName: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '700',
     color: '#111827',
     marginBottom: 2,
