@@ -202,29 +202,23 @@ export default function MarketScreen() {
     setShowDatePicker(null);
 
     if (currentDate) {
-      let newDateFrom = filters.dateFrom;
-      let newDateTo = filters.dateTo;
+      const isFrom = showDatePicker === 'from';
+      const newFilters = { ...filters };
 
-      if (showDatePicker === 'from') {
-        newDateFrom = currentDate;
+      if (isFrom) {
+        newFilters.dateFrom = currentDate;
       } else {
-        newDateTo = currentDate;
+        newFilters.dateTo = currentDate;
       }
 
-      if (newDateFrom && newDateTo && newDateFrom > newDateTo) {
+      if (newFilters.dateFrom && newFilters.dateTo && newFilters.dateFrom > newFilters.dateTo) {
         // Swap dates if from is after to
-        setFilters(prev => ({
-          ...prev,
-          dateFrom: newDateTo,
-          dateTo: newDateFrom,
-        }));
-      } else {
-        if (showDatePicker === 'from') {
-          updateFilter('dateFrom', currentDate);
-        } else {
-          updateFilter('dateTo', currentDate);
-        }
+        const temp = newFilters.dateFrom;
+        newFilters.dateFrom = newFilters.dateTo;
+        newFilters.dateTo = temp;
       }
+
+      setFilters(newFilters);
     }
   };
 

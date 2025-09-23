@@ -34,7 +34,7 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [isFilterVisible, setIsFilterVisible] = useState(true);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -325,7 +325,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.ultraModernContainer}>
-      <Header rightComponent={<LanguageSwitcher />} />
+      <Header
+        title={t('cocoonPrices')}
+        rightComponent={<LanguageSwitcher />}
+      />
       {/* Filter section */}
       <View style={styles.filterHeader}>
         <TouchableOpacity
