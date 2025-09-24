@@ -8,8 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView, TouchableOpacity, View, StyleSheet, Platform, Alert } from 'react-native';
 import './i18n';
 import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { db } from './firebase.config';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Import screen components
 import HomeScreen from './screens/HomeScreen';
@@ -22,6 +23,8 @@ const Tab = createBottomTabNavigator();
 
 async function registerForPushNotificationsAsync() {
   let token;
+  
+  // Ensure notification channel is set up on Android
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'default',
@@ -31,27 +34,50 @@ async function registerForPushNotificationsAsync() {
     });
   }
 
+  // Get current notification permissions status
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
+  
+  // Request permissions if not granted
   if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
+    const { status } = await Notifications.requestPermissionsAsync({
+      ios: {
+        allowAlert: true,
+        allowBadge: true,
+        allowSound: true,
+        allowAnnouncements: true,
+      },
+    });
     finalStatus = status;
   }
+  
   if (finalStatus !== 'granted') {
     Alert.alert('Failed to get push token for push notification!');
     return;
   }
+  
+  // Get the push token
   token = (await Notifications.getExpoPushTokenAsync()).data;
-  console.log(token);
+  console.log('Push token:', token);
 
+  // Save the token to Firestore with additional metadata
   if (token) {
     try {
-      await setDoc(doc(db, "pushTokens", token), {
+      const tokenDocRef = doc(db, "pushTokens", token);
+      const tokenDocSnap = await getDoc(tokenDocRef);
+      
+      // Update the token document (create if doesn't exist, update if exists)
+      await setDoc(tokenDocRef, {
         token: token,
-        createdAt: new Date(),
-      });
+        createdAt: tokenDocSnap.exists ? tokenDocSnap.data().createdAt : new Date(),
+        updatedAt: new Date(),
+        platform: Platform.OS,
+        appVersion: Constants.expoVersion, // Requires expo-constants
+      }, { merge: true });
+      
+      console.log('Push token saved to Firestore');
     } catch (e) {
-      console.error("Error adding document: ", e);
+      console.error("Error saving push token to Firestore: ", e);
     }
   }
 
@@ -75,7 +101,9 @@ const AppContent = () => {
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
+      console.log('Notification Response:', response);
+      // Handle notification tap here - you can navigate to specific screens
+      // This won't work properly in Expo Go, but will work in standalone app
     });
 
     return () => {
