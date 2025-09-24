@@ -8,6 +8,7 @@ export interface CocoonPrice {
   avgPrice: number;
   lastUpdated: Date;
   quality: 'A' | 'B' | 'C';
+  lotNumber: number;
 }
 
 export interface Market {
@@ -54,4 +55,5 @@ export interface PriceFormData {
   maxPrice: number;
   avgPrice: number;
   quality: 'A' | 'B' | 'C';
+  lotNumber: number;
 }

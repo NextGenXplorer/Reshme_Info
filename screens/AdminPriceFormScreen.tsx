@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { collection, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, Timestamp, getDocs } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, CocoonPrice, PriceFormData } from '../types';
 import { adminAuth } from '../utils/adminAuth';
@@ -44,6 +44,7 @@ export default function AdminPriceFormScreen({
     maxPrice: 0,
     avgPrice: 0,
     quality: 'A',
+    lotNumber: 0,
   });
 
   const availableMarkets = adminAuth.getAvailableMarkets(user);
@@ -58,6 +59,7 @@ export default function AdminPriceFormScreen({
         maxPrice: priceToEdit.maxPrice,
         avgPrice: priceToEdit.avgPrice,
         quality: priceToEdit.quality,
+        lotNumber: priceToEdit.lotNumber || 0,
       });
     }
   }, [priceToEdit]);
@@ -99,6 +101,10 @@ export default function AdminPriceFormScreen({
       newErrors.avgPrice = 'Average price must be greater than 0';
     }
 
+    if (formData.lotNumber <= 0) {
+      newErrors.lotNumber = 'Lot number must be greater than 0';
+    }
+
     if (!adminAuth.hasMarketPermission(user, formData.market)) {
       newErrors.market = 'You do not have permission to update prices for this market';
     }
@@ -109,7 +115,7 @@ export default function AdminPriceFormScreen({
 
   const handleSave = async () => {
     if (!validateForm()) {
-      Alert.alert('Validation Error', 'Please fix the errors before saving');
+      Alert.alert(t('validationError'), t('fixErrors'));
       return;
     }
 
@@ -126,30 +132,61 @@ export default function AdminPriceFormScreen({
       if (priceToEdit) {
         // Update existing price
         await updateDoc(doc(db, COLLECTIONS.COCOON_PRICES, priceToEdit.id), priceData);
-        Alert.alert('Success', 'Price updated successfully');
+        Alert.alert(t('success'), t('priceUpdatedSuccessfully'));
       } else {
         // Add new price
         await addDoc(collection(db, COLLECTIONS.COCOON_PRICES), priceData);
-        Alert.alert('Success', 'New price added successfully');
+        Alert.alert(t('success'), t('newPriceAddedSuccessfully'));
       }
+
+      await sendPushNotifications(priceData);
 
       onSave();
     } catch (error) {
       console.error('Error saving price:', error);
-      Alert.alert('Error', 'Failed to save price. Please try again.');
+      Alert.alert(t('error'), t('failedToSavePrice'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const sendPushNotifications = async (priceData: any) => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "pushTokens"));
+      const tokens = querySnapshot.docs.map(doc => doc.data().token);
+
+      if (tokens.length > 0) {
+        const message = {
+          to: tokens,
+          sound: 'default',
+          title: 'New Price Update!',
+          body: `Price for ${priceData.breed} in ${priceData.market} is now ₹${priceData.pricePerKg}/kg`,
+          data: { priceData },
+        };
+
+        await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        });
+      }
+    } catch (error) {
+      console.error('Error sending push notifications:', error);
     }
   };
 
   const handleCancel = () => {
     if (hasUnsavedChanges()) {
       Alert.alert(
-        'Unsaved Changes',
-        'You have unsaved changes. Are you sure you want to cancel?',
+        t('unsavedChanges'),
+        t('unsavedChangesMessage'),
         [
-          { text: 'Keep Editing', style: 'cancel' },
-          { text: 'Discard Changes', style: 'destructive', onPress: onCancel },
+          { text: t('keepEditing'), style: 'cancel' },
+          { text: t('discardChanges'), style: 'destructive', onPress: onCancel },
         ]
       );
     } else {
@@ -171,7 +208,8 @@ export default function AdminPriceFormScreen({
       formData.minPrice !== priceToEdit.minPrice ||
       formData.maxPrice !== priceToEdit.maxPrice ||
       formData.avgPrice !== priceToEdit.avgPrice ||
-      formData.quality !== priceToEdit.quality
+      formData.quality !== priceToEdit.quality ||
+      formData.lotNumber !== priceToEdit.lotNumber
     );
   };
 
@@ -211,7 +249,7 @@ export default function AdminPriceFormScreen({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <Header
-        title={priceToEdit ? 'Edit Price' : 'Add New Price'}
+        title={priceToEdit ? t('editPrice') : t('addNewPrice')}
         subtitle={undefined}
         leftComponent={
           <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
@@ -227,15 +265,15 @@ export default function AdminPriceFormScreen({
         <View style={styles.formContainer}>
           {/* Form Title */}
           <View style={styles.formHeader}>
-            <Text style={styles.formTitle}>Price Information</Text>
+            <Text style={styles.formTitle}>{t('priceInformation')}</Text>
             <Text style={styles.formSubtitle}>
-              Enter the latest market price details
+              {t('enterLatestMarketPriceDetails')}
             </Text>
           </View>
 
           {/* Market Selection */}
           <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>Market *</Text>
+            <Text style={styles.inputLabel}>{t('marketRequired')}</Text>
             <View style={styles.chipsContainer}>
               {availableMarkets.map(market => (
                 <FilterChip
@@ -253,12 +291,12 @@ export default function AdminPriceFormScreen({
 
           {/* Breed Selection */}
           <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>Cocoon Breed *</Text>
+            <Text style={styles.inputLabel}>{t('cocoonBreedRequired')}</Text>
             <View style={styles.chipsContainer}>
               {(['CB', 'BV'] as const).map(breed => (
                 <FilterChip
                   key={breed}
-                  label={breed === 'CB' ? 'Cross Breed (CB)' : 'Bivoltine (BV)'}
+                  label={t(breed === 'CB' ? 'crossBreed' : 'bivoltine')}
                   isActive={formData.breed === breed}
                   onPress={() => updateField('breed', breed)}
                 />
@@ -268,12 +306,12 @@ export default function AdminPriceFormScreen({
 
           {/* Quality Selection */}
           <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>Quality Grade *</Text>
+            <Text style={styles.inputLabel}>{t('qualityGradeRequired')}</Text>
             <View style={styles.chipsContainer}>
               {(['A', 'B', 'C'] as const).map(quality => (
                 <FilterChip
                   key={quality}
-                  label={`Grade ${quality}`}
+                  label={t(`grade${quality}`)}
                   isActive={formData.quality === quality}
                   onPress={() => updateField('quality', quality)}
                 />
@@ -281,16 +319,36 @@ export default function AdminPriceFormScreen({
             </View>
           </View>
 
+          {/* Lot Number */}
+          <View style={styles.inputSection}>
+            <Text style={styles.inputLabel}>{t('lotNumberRequired')}</Text>
+            <View style={[styles.inputWrapper, errors.lotNumber && styles.inputError]}>
+              <Ionicons name="apps-outline" size={20} color="#6B7280" />
+              <TextInput
+                style={styles.textInput}
+                value={formData.lotNumber.toString()}
+                onChangeText={(text) => updateField('lotNumber', parseInt(text, 10) || 0)}
+                placeholder={t('enterLotNumber')}
+                placeholderTextColor="#9CA3AF"
+                keyboardType="numeric"
+                editable={!loading}
+              />
+            </View>
+            {errors.lotNumber && (
+              <Text style={styles.errorText}>{errors.lotNumber}</Text>
+            )}
+          </View>
+
           {/* Price Per Kg */}
           <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>Current Price per Kg (₹) *</Text>
+            <Text style={styles.inputLabel}>{t('currentPricePerKg')}</Text>
             <View style={[styles.inputWrapper, errors.pricePerKg && styles.inputError]}>
               <Ionicons name="cash-outline" size={20} color="#6B7280" />
               <TextInput
                 style={styles.textInput}
                 value={formData.pricePerKg.toString()}
                 onChangeText={(text) => updateField('pricePerKg', parseFloat(text) || 0)}
-                placeholder="Enter current price"
+                placeholder={t('enterCurrentPrice')}
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
                 editable={!loading}
@@ -304,14 +362,14 @@ export default function AdminPriceFormScreen({
           {/* Price Range */}
           <View style={styles.priceRangeContainer}>
             <View style={styles.priceRangeColumn}>
-              <Text style={styles.inputLabel}>Minimum Price (₹) *</Text>
+              <Text style={styles.inputLabel}>{t('minimumPrice')}</Text>
               <View style={[styles.inputWrapper, errors.minPrice && styles.inputError]}>
                 <Ionicons name="remove-circle-outline" size={20} color="#6B7280" />
                 <TextInput
                   style={styles.textInput}
                   value={formData.minPrice.toString()}
                   onChangeText={(text) => updateField('minPrice', parseFloat(text) || 0)}
-                  placeholder="Min price"
+                  placeholder={t('minPrice')}
                   placeholderTextColor="#9CA3AF"
                   keyboardType="numeric"
                   editable={!loading}
@@ -323,14 +381,14 @@ export default function AdminPriceFormScreen({
             </View>
 
             <View style={styles.priceRangeColumn}>
-              <Text style={styles.inputLabel}>Maximum Price (₹) *</Text>
+              <Text style={styles.inputLabel}>{t('maximumPrice')}</Text>
               <View style={[styles.inputWrapper, errors.maxPrice && styles.inputError]}>
                 <Ionicons name="add-circle-outline" size={20} color="#6B7280" />
                 <TextInput
                   style={styles.textInput}
                   value={formData.maxPrice.toString()}
                   onChangeText={(text) => updateField('maxPrice', parseFloat(text) || 0)}
-                  placeholder="Max price"
+                  placeholder={t('maxPrice')}
                   placeholderTextColor="#9CA3AF"
                   keyboardType="numeric"
                   editable={!loading}
@@ -344,14 +402,14 @@ export default function AdminPriceFormScreen({
 
           {/* Average Price (Auto-calculated) */}
           <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>Average Price (₹) *</Text>
+            <Text style={styles.inputLabel}>{t('averagePrice')}</Text>
             <View style={[styles.inputWrapper, errors.avgPrice && styles.inputError]}>
               <Ionicons name="calculator-outline" size={20} color="#6B7280" />
               <TextInput
                 style={styles.textInput}
                 value={formData.avgPrice.toString()}
                 onChangeText={(text) => updateField('avgPrice', parseFloat(text) || 0)}
-                placeholder="Enter average price"
+                placeholder={t('enterAveragePrice')}
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
                 editable={!loading}
@@ -364,27 +422,31 @@ export default function AdminPriceFormScreen({
 
           {/* Summary Card */}
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Price Summary</Text>
+            <Text style={styles.summaryTitle}>{t('priceSummary')}</Text>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Market:</Text>
+              <Text style={styles.summaryLabel}>{t('marketLabel')}</Text>
               <Text style={styles.summaryValue}>{formData.market}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Breed:</Text>
+              <Text style={styles.summaryLabel}>{t('breedLabel')}</Text>
               <Text style={styles.summaryValue}>{formData.breed}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Quality:</Text>
+              <Text style={styles.summaryLabel}>{t('qualityLabel')}</Text>
               <Text style={styles.summaryValue}>Grade {formData.quality}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Price Range:</Text>
+              <Text style={styles.summaryLabel}>{t('lotNumberLabel')}</Text>
+              <Text style={styles.summaryValue}>{formData.lotNumber}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>{t('priceRangeLabel')}</Text>
               <Text style={styles.summaryValue}>
                 ₹{formData.minPrice} - ₹{formData.maxPrice}
               </Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Average Price:</Text>
+              <Text style={styles.summaryLabel}>{t('averagePriceLabel')}</Text>
               <Text style={[styles.summaryValue, styles.summaryHighlight]}>
                 ₹{formData.avgPrice}/kg
               </Text>
@@ -398,7 +460,7 @@ export default function AdminPriceFormScreen({
               onPress={handleCancel}
               disabled={loading}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -412,7 +474,7 @@ export default function AdminPriceFormScreen({
                 <>
                   <Ionicons name="checkmark-circle-outline" size={20} color="#FFFFFF" />
                   <Text style={styles.saveButtonText}>
-                    {priceToEdit ? 'Update Price' : 'Add Price'}
+                    {priceToEdit ? t('updatePrice') : t('addPrice')}
                   </Text>
                 </>
               )}

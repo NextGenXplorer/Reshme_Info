@@ -56,6 +56,12 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
+    // Push Tokens - Allow anyone to create, but only admins to read
+    match /pushTokens/{token} {
+      allow create: if true;
+      allow read: if request.auth != null && request.auth.token.role in ['super_admin', 'market_admin'];
+    }
+
     // Price Alerts - User can only access their own alerts
     match /priceAlerts/{alertId} {
       allow read, write: if request.auth != null

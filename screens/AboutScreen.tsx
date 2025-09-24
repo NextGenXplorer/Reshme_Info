@@ -22,28 +22,21 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
 
   const teamMembers = [
     {
-      name: 'Mithun Gowda B',
+      name: t('team_member_mithun_name'),
       role: t('team_member_mithun_role'),
       description: t('team_member_mithun_description'),
       icon: 'person-circle',
       color: '#3B82F6',
     },
     {
-      name: 'Manvanth Gowda M',
+      name: t('team_member_manvanth_name'),
       role: t('team_member_manvanth_role'),
       description: t('team_member_manvanth_description'),
       icon: 'code-slash',
       color: '#10B981',
     },
     {
-      name: 'Market Analysts',
-      role: t('team_member_analysts_role'),
-      description: t('team_member_analysts_description'),
-      icon: 'analytics',
-      color: '#F59E0B',
-    },
-    {
-      name: 'Prashant R',
+      name: t('team_member_prashant_name'),
       role: t('team_member_prashant_role'),
       description: t('team_member_prashant_description'),
       icon: 'search',

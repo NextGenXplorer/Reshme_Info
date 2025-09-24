@@ -34,7 +34,7 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [isFilterVisible, setIsFilterVisible] = useState(true);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -92,7 +92,7 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    fetchPrices();
+    fetchPrices(selectedDate);
     Animated.timing(slideAnimation, {
       toValue: 1,
       duration: 1000,
@@ -138,7 +138,7 @@ export default function HomeScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchPrices();
+    fetchPrices(selectedDate);
   };
 
   const onDateChange = (event: any, date?: Date) => {
@@ -157,8 +157,9 @@ export default function HomeScreen() {
   };
 
   const resetDateFilter = () => {
-    setSelectedDate(new Date());
-    fetchPrices();
+    const newDate = new Date();
+    setSelectedDate(newDate);
+    fetchPrices(newDate);
   };
 
   const formatDateForDisplay = (date: Date) => {
@@ -222,7 +223,7 @@ export default function HomeScreen() {
                   <Ionicons name="leaf" size={18} color="#10B981" />
                 </View>
                 <View style={styles.breedInfo}>
-                  <Text style={styles.ultraModernBreedText}>{item.breed}</Text>
+                  <Text style={styles.ultraModernBreedText}>{t(`breed_${item.breed}` as any, item.breed)}</Text>
                   <View style={styles.qualityBadgeContainer}>
                     <View style={styles.ultraModernQualityBadge}>
                       <Ionicons name="star" size={10} color="#92400E" />
@@ -237,7 +238,11 @@ export default function HomeScreen() {
               <View style={styles.marketBadgeContainer}>
                 <View style={styles.ultraModernMarketBadge}>
                   <Ionicons name="location" size={10} color="#5B21B6" />
-                  <Text style={styles.ultraModernMarketText}>{item.market}</Text>
+                  <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
+                </View>
+                <View style={styles.lotNumberBadge}>
+                  <Ionicons name="apps" size={10} color="#92400E" />
+                  <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
                 </View>
               </View>
             </View>
@@ -321,7 +326,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.ultraModernContainer}>
-      <Header rightComponent={<LanguageSwitcher />} />
+      <Header
+        title={t('cocoonPrices')}
+        rightComponent={<LanguageSwitcher />}
+      />
       {/* Filter section */}
       <View style={styles.filterHeader}>
         <TouchableOpacity
@@ -697,6 +705,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#5B21B6',
+  },
+  lotNumberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+    backgroundColor: '#FEF3C7',
+    marginTop: 8,
+  },
+  lotNumberText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400E',
   },
 
   // Price Table
