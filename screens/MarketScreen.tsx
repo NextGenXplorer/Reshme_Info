@@ -64,7 +64,7 @@ export default function MarketScreen() {
 
   useEffect(() => {
     fetchMarketData(filters.dateFrom, filters.dateTo);
-  }, []);
+  }, [filters.dateFrom, filters.dateTo]);
 
   useEffect(() => {
     generateMarketSummaries();
@@ -160,15 +160,6 @@ export default function MarketScreen() {
       filtered = filtered.filter(summary => summary.market === filters.market);
     }
 
-    // Filter by date range
-    if (filters.dateFrom) {
-      filtered = filtered.filter(summary => summary.lastUpdated >= filters.dateFrom!);
-    }
-    if (filters.dateTo) {
-      const endDate = new Date(filters.dateTo);
-      endDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(summary => summary.lastUpdated <= endDate);
-    }
 
     // Sort
     filtered.sort((a, b) => {
