@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { collection, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, Timestamp, getDocs } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, CocoonPrice, PriceFormData } from '../types';
 import { adminAuth } from '../utils/adminAuth';
@@ -139,12 +139,43 @@ export default function AdminPriceFormScreen({
         Alert.alert(t('success'), t('newPriceAddedSuccessfully'));
       }
 
+      await sendPushNotifications(priceData);
+
       onSave();
     } catch (error) {
       console.error('Error saving price:', error);
       Alert.alert(t('error'), t('failedToSavePrice'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const sendPushNotifications = async (priceData: any) => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "pushTokens"));
+      const tokens = querySnapshot.docs.map(doc => doc.data().token);
+
+      if (tokens.length > 0) {
+        const message = {
+          to: tokens,
+          sound: 'default',
+          title: 'New Price Update!',
+          body: `Price for ${priceData.breed} in ${priceData.market} is now ₹${priceData.pricePerKg}/kg`,
+          data: { priceData },
+        };
+
+        await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        });
+      }
+    } catch (error) {
+      console.error('Error sending push notifications:', error);
     }
   };
 

@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { SafeAreaView, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { SafeAreaView, TouchableOpacity, View, StyleSheet, Platform, Alert } from 'react-native';
 import './i18n';
+import * as Notifications from 'expo-notifications';
+import { db } from './firebase.config';
+import { doc, setDoc } from 'firebase/firestore';
 
 // Import screen components
 import HomeScreen from './screens/HomeScreen';
@@ -17,10 +20,73 @@ import AdminNavigator from './screens/AdminNavigator';
 
 const Tab = createBottomTabNavigator();
 
+async function registerForPushNotificationsAsync() {
+  let token;
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+  if (existingStatus !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+  if (finalStatus !== 'granted') {
+    Alert.alert('Failed to get push token for push notification!');
+    return;
+  }
+  token = (await Notifications.getExpoPushTokenAsync()).data;
+  console.log(token);
+
+  if (token) {
+    try {
+      await setDoc(doc(db, "pushTokens", token), {
+        token: token,
+        createdAt: new Date(),
+      });
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  }
+
+  return token;
+}
+
 const AppContent = () => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [notification, setNotification] = useState<Notifications.Notification | false>(false);
+  const notificationListener = useRef<Notifications.Subscription>();
+  const responseListener = useRef<Notifications.Subscription>();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token || ''));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      }
+      if (responseListener.current) {
+        Notifications.removeNotificationSubscription(responseListener.current);
+      }
+    };
+  }, []);
 
   if (showAdminPanel) {
     return (
