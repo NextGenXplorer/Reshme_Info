@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import Header from '../components/Header';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { db, COLLECTIONS } from '../firebase.config';
@@ -54,8 +54,8 @@ export default function MarketScreen() {
   const [filters, setFilters] = useState<FilterOptions>({
     breed: 'All',
     market: 'All',
-    dateFrom: null,
-    dateTo: null,
+    dateFrom: new Date(),
+    dateTo: new Date(),
     sortBy: 'market',
     sortOrder: 'asc',
   });
@@ -63,7 +63,7 @@ export default function MarketScreen() {
   const uniqueMarkets = ['All', ...Array.from(new Set(prices.map(p => p.market)))];
 
   useEffect(() => {
-    fetchMarketData();
+    fetchMarketData(filters.dateFrom, filters.dateTo);
   }, []);
 
   useEffect(() => {
@@ -74,9 +74,25 @@ export default function MarketScreen() {
     applyFilters();
   }, [filters, marketSummaries]);
 
-  const fetchMarketData = async () => {
+  const fetchMarketData = async (dateFrom?: Date, dateTo?: Date) => {
     try {
-      const q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
+      let q;
+      if (dateFrom && dateTo) {
+        const startOfDay = new Date(dateFrom);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        q = query(
+          collection(db, COLLECTIONS.COCOON_PRICES),
+          where('lastUpdated', '>=', Timestamp.fromDate(startOfDay)),
+          where('lastUpdated', '<=', Timestamp.fromDate(endOfDay)),
+          orderBy('lastUpdated', 'desc')
+        );
+      } else {
+        q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
+      }
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
 

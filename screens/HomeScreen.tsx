@@ -92,7 +92,7 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    fetchPrices();
+    fetchPrices(selectedDate);
     Animated.timing(slideAnimation, {
       toValue: 1,
       duration: 1000,
