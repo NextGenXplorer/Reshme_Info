@@ -138,7 +138,7 @@ export default function HomeScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchPrices();
+    fetchPrices(selectedDate);
   };
 
   const onDateChange = (event: any, date?: Date) => {
@@ -157,8 +157,9 @@ export default function HomeScreen() {
   };
 
   const resetDateFilter = () => {
-    setSelectedDate(new Date());
-    fetchPrices();
+    const newDate = new Date();
+    setSelectedDate(newDate);
+    fetchPrices(newDate);
   };
 
   const formatDateForDisplay = (date: Date) => {
