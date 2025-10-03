@@ -22,7 +22,7 @@ class UnityAdsModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
 
     @ReactMethod
     fun showInterstitialAd(adUnitId: String, promise: Promise) {
-        val activity = currentActivity
+        val activity = reactContext.currentActivity
 
         if (activity == null) {
             promise.reject("ERROR", "Activity not available")
@@ -65,7 +65,7 @@ class UnityAdsModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
 
     @ReactMethod
     fun showRewardedAd(adUnitId: String, promise: Promise) {
-        val activity = currentActivity
+        val activity = reactContext.currentActivity
 
         if (activity == null) {
             promise.reject("ERROR", "Activity not available")
@@ -111,7 +111,7 @@ class UnityAdsModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
 
     @ReactMethod
     fun isInitialized(promise: Promise) {
-        promise.resolve(UnityAds.isInitialized())
+        promise.resolve(UnityAds.isInitialized)
     }
 
     private fun sendEvent(eventName: String, params: WritableMap?) {
