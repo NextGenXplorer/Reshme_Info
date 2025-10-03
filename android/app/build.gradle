@@ -159,6 +159,9 @@ dependencies {
     // Unity Ads
     implementation 'com.unity3d.ads:unity-ads:4.12.3'
 
+    // Google AdMob
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";

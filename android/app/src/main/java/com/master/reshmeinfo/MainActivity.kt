@@ -12,6 +12,9 @@ import expo.modules.ReactActivityDelegateWrapper
 
 import com.unity3d.ads.IUnityAdsInitializationListener
 import com.unity3d.ads.UnityAds
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.initialization.InitializationStatus
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener
 
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,6 +26,9 @@ class MainActivity : ReactActivity() {
 
     // Initialize Unity Ads
     initializeUnityAds()
+
+    // Initialize AdMob
+    initializeAdMob()
   }
 
   private fun initializeUnityAds() {
@@ -45,6 +51,12 @@ class MainActivity : ReactActivity() {
         }
       }
     )
+  }
+
+  private fun initializeAdMob() {
+    MobileAds.initialize(this, OnInitializationCompleteListener { initializationStatus ->
+      android.util.Log.d("AdMob", "AdMob initialization complete")
+    })
   }
 
   /**
