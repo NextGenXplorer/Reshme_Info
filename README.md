@@ -2,6 +2,7 @@
 
 A React Native mobile app for tracking cocoon prices per kg with breed-wise and market-wise filtering. Built with Expo and Firebase Firestore.
 
+[![Download APK](https://img.shields.io/badge/Download-APK-green?logo=android)](https://download1590.mediafire.com/z35qht855d1guhGCiizYwWv9zZPR2apnbAcx3nJOnTZyNSUCoyMQdUCJPZDwr9ppBa6HB2OmONn7pJrd76VhrfuBqQF-ZfVQuALbAI3dkNixJ6UFN18IBg5ptuWeZ824mcJp7mT8t3hsRvDMYb15ixbM-2xUjwIDIRO_5R8lLgamC10/oa2o0iffgnidhgj/ReshmeInfo.apk)
 ## Features
 
 - 📊 Real-time cocoon price display
