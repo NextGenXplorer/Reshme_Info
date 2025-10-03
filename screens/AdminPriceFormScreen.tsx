@@ -153,29 +153,45 @@ export default function AdminPriceFormScreen({
   const sendPushNotifications = async (priceData: any) => {
     try {
       const querySnapshot = await getDocs(collection(db, "pushTokens"));
-      const tokens = querySnapshot.docs.map(doc => doc.data().token);
+      const tokens = querySnapshot.docs.map(doc => doc.data().token).filter(token => token); // Filter out null/undefined tokens
 
       if (tokens.length > 0) {
-        const message = {
-          to: tokens,
-          sound: 'default',
-          title: 'New Price Update!',
-          body: `Price for ${priceData.breed} in ${priceData.market} is now ₹${priceData.pricePerKg}/kg`,
-          data: { priceData },
-        };
+        // Split tokens into batches of 100 (Expo's limit per request)
+        const batchSize = 100;
+        for (let i = 0; i < tokens.length; i += batchSize) {
+          const batch = tokens.slice(i, i + batchSize);
+          
+          // Create individual messages for each token in the batch
+          const messages = batch.map(token => ({
+            to: token,
+            sound: 'default',
+            title: 'New Price Update!',
+            body: `Price for ${priceData.breed} in ${priceData.market} is now ₹${priceData.pricePerKg}/kg`,
+            data: { priceData },
+            // Add priority for better delivery
+            priority: 'high',
+          }));
 
-        await fetch('https://exp.host/--/api/v2/push/send', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Accept-encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message),
-        });
+          // Send the batch
+          const response = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Accept-encoding': 'gzip, deflate',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(messages),
+          });
+
+          const result = await response.json();
+          console.log('Push notification result:', result);
+        }
+      } else {
+        console.log('No push tokens found to send notifications');
       }
     } catch (error) {
       console.error('Error sending push notifications:', error);
+      Alert.alert('Error', 'Failed to send push notifications. Please try again.');
     }
   };
 

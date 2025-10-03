@@ -10,6 +10,11 @@ module.exports = {
     icon: "./assets/reshme_logo.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
+    notification: {
+      icon: "./assets/reshme_logo.png", // Notification icon
+      color: "#3B82F6", // Notification color for Android
+      iosDisplayInForeground: true, // Display notification when app is in foreground
+    },
     splash: {
       image: "./assets/reshme_logo.png",
       resizeMode: "contain",
@@ -21,8 +26,14 @@ module.exports = {
         foregroundImage: "./assets/reshme_logo.png",
         backgroundColor: "#ffffff"
       },
+      playStoreUrl: "https://play.google.com/store/apps/details?id=com.master.reshmeinfo", // Add if published
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false
+    },
+    ios: {
+      bundleIdentifier: "com.master.reshmeinfo", // iOS bundle identifier
+      supportsTablet: true,
+      userInterfaceStyle: "light"
     },
     web: {
       favicon: "./assets/reshme_logo.png"
