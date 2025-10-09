@@ -21,6 +21,7 @@ module.exports = {
         foregroundImage: "./assets/reshme_logo.png",
         backgroundColor: "#ffffff"
       },
+      icon: "./assets/reshme_logo.png", // Notification icon
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       googleServicesFile: "./google-services.json",
@@ -32,6 +33,7 @@ module.exports = {
       ]
     },
     notification: {
+      icon: "./assets/reshme_logo.png",
       color: "#3B82F6",
       androidMode: "default",
       androidCollapsedTitle: "ReshmeInfo Updates"
@@ -40,7 +42,9 @@ module.exports = {
       [
         "expo-notifications",
         {
-          color: "#3B82F6"
+          icon: "./assets/reshme_logo.png",
+          color: "#3B82F6",
+          sounds: []
         }
       ]
     ],

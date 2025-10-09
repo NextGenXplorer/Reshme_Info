@@ -71,13 +71,19 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
     },
   ];
 
-  const handleContactPress = (type: 'email' | 'github') => {
+  const handleContactPress = (type: 'email' | 'github' | 'instagram' | 'whatsapp') => {
     switch (type) {
       case 'email':
-        Linking.openURL('mailto:mithungowda.b7411@gmail.com');
+        Linking.openURL('mailto:nxgextra@gmail.com');
         break;
       case 'github':
-        Linking.openURL('https://github.com/mithun50');
+        Linking.openURL('https://github.com/NextGenXplorer');
+        break;
+      case 'instagram':
+        Linking.openURL('https://www.instagram.com/nexgenxplorerr');
+        break;
+      case 'whatsapp':
+        Linking.openURL('https://whatsapp.com/channel/0029VaU05uG9RZAeiXKyEu06');
         break;
     }
   };
@@ -174,7 +180,7 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
           <ContactCard
             icon="mail"
             title={t('emailUs')}
-            subtitle="mithungowda.b7411@gmail.com"
+            subtitle="nxgextra@gmail.com"
             onPress={() => handleContactPress('email')}
             color="#3B82F6"
           />
@@ -182,9 +188,25 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
           <ContactCard
             icon="logo-github"
             title={t('github')}
-            subtitle="github.com/mithun50"
+            subtitle="github.com/NextGenXplorer"
             onPress={() => handleContactPress('github')}
             color="#10B981"
+          />
+
+          <ContactCard
+            icon="logo-instagram"
+            title={t('instagram')}
+            subtitle={t('instagramSubtitle')}
+            onPress={() => handleContactPress('instagram')}
+            color="#E4405F"
+          />
+
+          <ContactCard
+            icon="logo-whatsapp"
+            title={t('whatsappChannel')}
+            subtitle={t('whatsappChannelSubtitle')}
+            onPress={() => handleContactPress('whatsapp')}
+            color="#25D366"
           />
 
           <ContactCard
