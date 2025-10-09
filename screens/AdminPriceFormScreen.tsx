@@ -158,35 +158,35 @@ export default function AdminPriceFormScreen({
 
   const sendPushNotifications = async (priceData: any) => {
     try {
-      const querySnapshot = await getDocs(collection(db, "pushTokens"));
-      const tokens = querySnapshot.docs.map(doc => doc.data().token);
+      // Get backend server URL from environment or use default
+      const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3000';
 
-      if (tokens.length > 0) {
-        const message = {
-          to: tokens,
-          sound: 'default',
-          title: `${priceData.market} - ${priceData.breed} Price Update`,
-          body: `Min: ₹${priceData.minPrice} | Max: ₹${priceData.maxPrice} | Avg: ₹${priceData.avgPrice}/kg`,
-          data: {
-            priceData,
-            screen: 'Market',
-            market: priceData.market,
-            breed: priceData.breed,
-          },
-        };
+      // Send notification request to backend server
+      const response = await fetch(`${BACKEND_URL}/send-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ priceData }),
+      });
 
-        await fetch('https://exp.host/--/api/v2/push/send', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Accept-encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message),
-        });
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Notifications sent successfully');
+        console.log(`📨 FCM: ${result.fcmSent || 0}, Expo: ${result.expoSent || 0}, Total: ${result.totalSent || 0}`);
+        if (result.totalFailed > 0) {
+          console.log(`❌ Failed: ${result.totalFailed}`);
+        }
+        if (result.invalidTokensRemoved > 0) {
+          console.log(`🗑️ Removed ${result.invalidTokensRemoved} invalid tokens`);
+        }
+      } else {
+        console.error('❌ Notification error:', result.error);
       }
     } catch (error) {
       console.error('Error sending push notifications:', error);
+      // Don't throw error - allow price save to complete even if notifications fail
     }
   };
 
