@@ -20,42 +20,82 @@ import AdminNavigator from './screens/AdminNavigator';
 
 const Tab = createBottomTabNavigator();
 
-async function registerForPushNotificationsAsync() {
-  let token;
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
+// Configure notification handler for foreground notifications
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-  if (finalStatus !== 'granted') {
-    Alert.alert('Failed to get push token for push notification!');
-    return;
-  }
-  token = (await Notifications.getExpoPushTokenAsync()).data;
-  console.log(token);
+async function registerForPushNotificationsAsync(): Promise<string | undefined> {
+  let token: string | undefined;
 
-  if (token) {
+  try {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+      Alert.alert(
+        'Permission Required',
+        'Push notifications permission is required to receive price alerts and updates.',
+        [{ text: 'OK' }]
+      );
+      return undefined;
+    }
+
+    // Get device-specific FCM token for production (works in standalone APK)
+    // Falls back to Expo token for development in Expo Go
     try {
+      const deviceToken = await Notifications.getDevicePushTokenAsync();
+      token = deviceToken.data;
+      console.log('FCM Push Token (Production):', token);
+    } catch (deviceTokenError) {
+      console.log('Could not get FCM token, falling back to Expo token (Development)');
+      const expoPushToken = await Notifications.getExpoPushTokenAsync();
+      token = expoPushToken.data;
+      console.log('Expo Push Token (Development):', token);
+    }
+
+    if (token) {
       await setDoc(doc(db, "pushTokens", token), {
         token: token,
         createdAt: new Date(),
+        platform: Platform.OS,
+        tokenType: token.startsWith('ExponentPushToken') ? 'expo' : 'fcm',
+        deviceInfo: {
+          os: Platform.OS,
+          version: Platform.Version,
+        },
       });
-    } catch (e) {
-      console.error("Error adding document: ", e);
+      console.log('Push token saved to Firestore');
     }
-  }
 
-  return token;
+    return token;
+  } catch (error) {
+    console.error('Error in registerForPushNotificationsAsync:', error);
+    Alert.alert(
+      'Notification Setup Error',
+      'Failed to set up push notifications. Please try again later.',
+      [{ text: 'OK' }]
+    );
+    return undefined;
+  }
 }
 
 const AppContent = () => {
@@ -68,14 +108,28 @@ const AppContent = () => {
   const responseListener = useRef<Notifications.Subscription>();
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token || ''));
+    registerForPushNotificationsAsync().then(token => {
+      if (token) {
+        setExpoPushToken(token);
+        console.log('Push notifications registered successfully');
+      }
+    });
 
+    // Listen for notifications received while app is foregrounded
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('Notification received:', notification);
       setNotification(notification);
     });
 
+    // Listen for user interactions with notifications
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
+      console.log('Notification response received:', response);
+      const data = response.notification.request.content.data;
+
+      // Handle notification tap - can add navigation logic here
+      if (data?.screen) {
+        console.log('Navigate to screen:', data.screen);
+      }
     });
 
     return () => {

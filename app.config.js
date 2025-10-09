@@ -22,8 +22,28 @@ module.exports = {
         backgroundColor: "#ffffff"
       },
       edgeToEdgeEnabled: true,
-      predictiveBackGestureEnabled: false
+      predictiveBackGestureEnabled: false,
+      googleServicesFile: "./google-services.json",
+      permissions: [
+        "android.permission.POST_NOTIFICATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "WAKE_LOCK"
+      ]
     },
+    notification: {
+      color: "#3B82F6",
+      androidMode: "default",
+      androidCollapsedTitle: "ReshmeInfo Updates"
+    },
+    plugins: [
+      [
+        "expo-notifications",
+        {
+          color: "#3B82F6"
+        }
+      ]
+    ],
     web: {
       favicon: "./assets/reshme_logo.png"
     },
@@ -52,7 +72,7 @@ module.exports = {
       EXPO_PUBLIC_ADMIN_ROLE_3: process.env.EXPO_PUBLIC_ADMIN_ROLE_3,
       EXPO_PUBLIC_ADMIN_MARKET_3: process.env.EXPO_PUBLIC_ADMIN_MARKET_3,
 
-      // EAS Project ID
+      // EAS Project ID (required for dynamic configs)
       eas: {
         projectId: "c9837104-9fd8-4d26-aa0a-b49889f584bc"
       }

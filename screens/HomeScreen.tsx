@@ -65,13 +65,21 @@ export default function HomeScreen() {
 
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
+      const now = new Date();
 
       querySnapshot.forEach((doc) => {
-        pricesData.push({
-          id: doc.id,
-          ...doc.data(),
-          lastUpdated: doc.data().lastUpdated.toDate(),
-        } as CocoonPrice);
+        const data = doc.data();
+        const expiresAt = data.expiresAt ? data.expiresAt.toDate() : null;
+
+        // Only add non-expired data
+        if (!expiresAt || expiresAt > now) {
+          pricesData.push({
+            id: doc.id,
+            ...data,
+            lastUpdated: data.lastUpdated.toDate(),
+            expiresAt: expiresAt,
+          } as CocoonPrice);
+        }
       });
 
       setPrices(pricesData);

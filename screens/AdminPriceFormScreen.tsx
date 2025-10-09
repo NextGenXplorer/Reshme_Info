@@ -122,11 +122,17 @@ export default function AdminPriceFormScreen({
     setLoading(true);
 
     try {
+      const now = Timestamp.now();
+      const sevenDaysFromNow = Timestamp.fromDate(
+        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days in milliseconds
+      );
+
       const priceData = {
         ...formData,
         source: user.username,
         verified: true,
-        lastUpdated: Timestamp.now(),
+        lastUpdated: now,
+        expiresAt: sevenDaysFromNow, // Auto-delete after 7 days
       };
 
       if (priceToEdit) {
@@ -159,9 +165,14 @@ export default function AdminPriceFormScreen({
         const message = {
           to: tokens,
           sound: 'default',
-          title: 'New Price Update!',
-          body: `Price for ${priceData.breed} in ${priceData.market} is now ₹${priceData.pricePerKg}/kg`,
-          data: { priceData },
+          title: `${priceData.market} - ${priceData.breed} Price Update`,
+          body: `Min: ₹${priceData.minPrice} | Max: ₹${priceData.maxPrice} | Avg: ₹${priceData.avgPrice}/kg`,
+          data: {
+            priceData,
+            screen: 'Market',
+            market: priceData.market,
+            breed: priceData.breed,
+          },
         };
 
         await fetch('https://exp.host/--/api/v2/push/send', {

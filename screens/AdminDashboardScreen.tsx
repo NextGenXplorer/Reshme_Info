@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { collection, getDocs, orderBy, query, where, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, where, deleteDoc, doc, writeBatch, Timestamp } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, CocoonPrice } from '../types';
 import { adminAuth } from '../utils/adminAuth';
@@ -86,13 +86,21 @@ export default function AdminDashboardScreen({
 
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
+      const now = new Date();
 
       querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const expiresAt = data.expiresAt ? data.expiresAt.toDate() : null;
+
+        // Admin sees all data (including expired) to manage it
+        // But we add expiresAt for display/cleanup purposes
         pricesData.push({
           id: doc.id,
-          ...doc.data(),
-          lastUpdated: doc.data().lastUpdated.toDate(),
-        } as CocoonPrice);
+          ...data,
+          lastUpdated: data.lastUpdated.toDate(),
+          expiresAt: expiresAt,
+          isExpired: expiresAt ? expiresAt <= now : false,
+        } as CocoonPrice & { isExpired?: boolean });
       });
 
       setPrices(pricesData);
@@ -176,6 +184,63 @@ export default function AdminDashboardScreen({
           onPress: async () => {
             await adminAuth.logout();
             onLogout();
+          },
+        },
+      ]
+    );
+  };
+
+  const cleanupExpiredData = async () => {
+    Alert.alert(
+      'Clean Up Expired Data',
+      'This will permanently delete all price entries older than 7 days from Firebase. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Expired',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              const now = new Date();
+
+              // Get all prices
+              const q = query(collection(db, COLLECTIONS.COCOON_PRICES));
+              const querySnapshot = await getDocs(q);
+
+              const batch = writeBatch(db);
+              let deletedCount = 0;
+
+              querySnapshot.forEach((document) => {
+                const data = document.data();
+                const expiresAt = data.expiresAt ? data.expiresAt.toDate() : null;
+
+                // Delete if expired
+                if (expiresAt && expiresAt <= now) {
+                  batch.delete(document.ref);
+                  deletedCount++;
+                }
+              });
+
+              if (deletedCount === 0) {
+                Alert.alert(
+                  'No Expired Data',
+                  'There are no expired price entries to clean up.'
+                );
+              } else {
+                await batch.commit();
+                await fetchDashboardData();
+                Alert.alert(
+                  'Cleanup Complete',
+                  `Successfully deleted ${deletedCount} expired price ${deletedCount === 1 ? 'entry' : 'entries'}.`
+                );
+              }
+            } catch (error) {
+              console.error('Error cleaning up expired data:', error);
+              Alert.alert('Error', 'Failed to clean up expired data. Please try again.');
+            } finally {
+              setLoading(false);
+            }
           },
         },
       ]
@@ -352,6 +417,11 @@ export default function AdminDashboardScreen({
               <Ionicons name="refresh-outline" size={32} color="#10B981" />
               <Text style={styles.actionCardTitle}>Refresh Data</Text>
               <Text style={styles.actionCardSubtitle}>Sync latest prices</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionCard} onPress={cleanupExpiredData}>
+              <Ionicons name="trash-outline" size={32} color="#EF4444" />
+              <Text style={styles.actionCardTitle}>Clean Up Old Data</Text>
+              <Text style={styles.actionCardSubtitle}>Delete expired entries</Text>
             </TouchableOpacity>
           </View>
         </View>

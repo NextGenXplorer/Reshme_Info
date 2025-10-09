@@ -7,6 +7,7 @@ export interface CocoonPrice {
   maxPrice: number;
   avgPrice: number;
   lastUpdated: Date;
+  expiresAt: Date;
   quality: 'A' | 'B' | 'C';
   lotNumber: number;
 }

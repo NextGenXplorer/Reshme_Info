@@ -4,10 +4,9 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
-  Dimensions,
   TouchableOpacity,
   SafeAreaView,
+  useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -17,13 +16,19 @@ import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 
-const { width } = Dimensions.get('window');
-
 export default function StatsScreen() {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const [prices, setPrices] = useState<CocoonPrice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('today');
+
+  // Responsive layout calculations
+  const isSmallScreen = width < 380;
+  const isMediumScreen = width >= 380 && width < 768;
+  const isLargeScreen = width >= 768;
+  const numColumns = isLargeScreen ? 3 : 2;
+  const cardSpacing = isSmallScreen ? 8 : 16;
+  const horizontalPadding = isSmallScreen ? 12 : 20;
 
   useEffect(() => {
     fetchStatsData();
@@ -34,13 +39,21 @@ export default function StatsScreen() {
       const q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
+      const now = new Date();
 
       querySnapshot.forEach((doc) => {
-        pricesData.push({
-          id: doc.id,
-          ...doc.data(),
-          lastUpdated: doc.data().lastUpdated.toDate(),
-        } as CocoonPrice);
+        const data = doc.data();
+        const expiresAt = data.expiresAt ? data.expiresAt.toDate() : null;
+
+        // Only add non-expired data
+        if (!expiresAt || expiresAt > now) {
+          pricesData.push({
+            id: doc.id,
+            ...data,
+            lastUpdated: data.lastUpdated.toDate(),
+            expiresAt: expiresAt,
+          } as CocoonPrice);
+        }
       });
 
       setPrices(pricesData);
@@ -51,8 +64,28 @@ export default function StatsScreen() {
     }
   };
 
-  const calculateStats = () => {
-    if (prices.length === 0) {
+  // Group prices by day
+  const groupPricesByDay = () => {
+    const grouped: { [key: string]: CocoonPrice[] } = {};
+
+    prices.forEach(price => {
+      const dateKey = price.lastUpdated.toDateString();
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(price);
+    });
+
+    return Object.entries(grouped)
+      .map(([date, dayPrices]) => ({
+        date: new Date(date),
+        prices: dayPrices,
+      }))
+      .sort((a, b) => b.date.getTime() - a.date.getTime()); // Most recent first
+  };
+
+  const calculateDayStats = (dayPrices: CocoonPrice[]) => {
+    if (dayPrices.length === 0) {
       return {
         totalListings: 0,
         avgPrice: 0,
@@ -65,16 +98,16 @@ export default function StatsScreen() {
       };
     }
 
-    const avgPrice = Math.round(prices.reduce((sum, price) => sum + price.avgPrice, 0) / prices.length);
-    const highestPrice = Math.max(...prices.map(p => p.maxPrice));
-    const lowestPrice = Math.min(...prices.map(p => p.minPrice));
-    const totalMarkets = new Set(prices.map(p => p.market)).size;
-    const totalBreeds = new Set(prices.map(p => p.breed)).size;
+    const avgPrice = Math.round(dayPrices.reduce((sum, price) => sum + price.avgPrice, 0) / dayPrices.length);
+    const highestPrice = Math.max(...dayPrices.map(p => p.maxPrice));
+    const lowestPrice = Math.min(...dayPrices.map(p => p.minPrice));
+    const totalMarkets = new Set(dayPrices.map(p => p.market)).size;
+    const totalBreeds = new Set(dayPrices.map(p => p.breed)).size;
     const priceRange = highestPrice - lowestPrice;
 
     // Find market with highest average price
     const marketPrices: { [key: string]: number[] } = {};
-    prices.forEach(price => {
+    dayPrices.forEach(price => {
       if (!marketPrices[price.market]) {
         marketPrices[price.market] = [];
       }
@@ -92,7 +125,7 @@ export default function StatsScreen() {
     });
 
     return {
-      totalListings: prices.length,
+      totalListings: dayPrices.length,
       avgPrice,
       highestPrice,
       lowestPrice,
@@ -103,29 +136,46 @@ export default function StatsScreen() {
     };
   };
 
-  const getMarketDistribution = () => {
+  const getMarketDistribution = (dayPrices: CocoonPrice[]) => {
     const distribution: { [key: string]: number } = {};
-    prices.forEach(price => {
+    dayPrices.forEach(price => {
       distribution[price.market] = (distribution[price.market] || 0) + 1;
     });
     return Object.entries(distribution)
-      .map(([market, count]) => ({ market, count, percentage: (count / prices.length) * 100 }))
+      .map(([market, count]) => ({ market, count, percentage: (count / dayPrices.length) * 100 }))
       .sort((a, b) => b.count - a.count);
   };
 
-  const getBreedDistribution = () => {
+  const getBreedDistribution = (dayPrices: CocoonPrice[]) => {
     const distribution: { [key: string]: number } = {};
-    prices.forEach(price => {
+    dayPrices.forEach(price => {
       distribution[price.breed] = (distribution[price.breed] || 0) + 1;
     });
     return Object.entries(distribution)
-      .map(([breed, count]) => ({ breed, count, percentage: (count / prices.length) * 100 }))
+      .map(([breed, count]) => ({ breed, count, percentage: (count / dayPrices.length) * 100 }))
       .sort((a, b) => b.count - a.count);
   };
 
-  const stats = calculateStats();
-  const marketDistribution = getMarketDistribution();
-  const breedDistribution = getBreedDistribution();
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return t('today');
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return t('yesterday');
+    } else {
+      return date.toLocaleDateString('en-IN', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+  };
+
+  const dailyData = groupPricesByDay();
 
   const StatCard = ({ title, value, subtitle, icon, color, trend }: {
     title: string;
@@ -134,27 +184,33 @@ export default function StatsScreen() {
     icon: string;
     color: string;
     trend?: 'up' | 'down' | 'stable';
-  }) => (
-    <View style={styles.statCard}>
-      <View style={styles.statHeader}>
-        <View style={[styles.statIconContainer, { backgroundColor: `${color}15` }]}>
-          <Ionicons name={icon as any} size={20} color={color} />
-        </View>
-        {trend && (
-          <View style={styles.trendContainer}>
-            <Ionicons
-              name={trend === 'up' ? 'trending-up' : trend === 'down' ? 'trending-down' : 'remove'}
-              size={16}
-              color={trend === 'up' ? '#10B981' : trend === 'down' ? '#EF4444' : '#6B7280'}
-            />
+  }) => {
+    const cardWidth = (width - (horizontalPadding * 2) - (cardSpacing * (numColumns - 1))) / numColumns;
+    const iconSize = isSmallScreen ? 18 : 20;
+    const trendIconSize = isSmallScreen ? 14 : 16;
+
+    return (
+      <View style={[styles.statCard, { width: cardWidth, marginBottom: cardSpacing }]}>
+        <View style={styles.statHeader}>
+          <View style={[styles.statIconContainer, { backgroundColor: `${color}15` }]}>
+            <Ionicons name={icon as any} size={iconSize} color={color} />
           </View>
-        )}
+          {trend && (
+            <View style={styles.trendContainer}>
+              <Ionicons
+                name={trend === 'up' ? 'trending-up' : trend === 'down' ? 'trending-down' : 'remove'}
+                size={trendIconSize}
+                color={trend === 'up' ? '#10B981' : trend === 'down' ? '#EF4444' : '#6B7280'}
+              />
+            </View>
+          )}
+        </View>
+        <Text style={[styles.statValue, isSmallScreen && styles.statValueSmall]}>{value}</Text>
+        <Text style={[styles.statTitle, isSmallScreen && styles.statTitleSmall]} numberOfLines={1}>{title}</Text>
+        <Text style={[styles.statSubtitle, isSmallScreen && styles.statSubtitleSmall]} numberOfLines={2}>{subtitle}</Text>
       </View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statTitle}>{title}</Text>
-      <Text style={styles.statSubtitle}>{subtitle}</Text>
-    </View>
-  );
+    );
+  };
 
   const DistributionBar = ({ label, percentage, color }: {
     label: string;
@@ -177,147 +233,136 @@ export default function StatsScreen() {
     </View>
   );
 
-  const PeriodSelector = () => (
-    <View style={styles.periodSelector}>
-      {['today', 'week', 'month'].map((period) => (
-        <TouchableOpacity
-          key={period}
-          style={[
-            styles.periodButton,
-            selectedPeriod === period && styles.periodButtonActive
-          ]}
-          onPress={() => setSelectedPeriod(period)}
-        >
-          <Text style={[
-            styles.periodButtonText,
-            selectedPeriod === period && styles.periodButtonTextActive
-          ]}>
-            {t(period)}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <Header rightComponent={<LanguageSwitcher />} />
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <PeriodSelector />
-
-        {/* Key Stats Grid */}
-        <View style={styles.statsGrid}>
-          <StatCard
-            title={t('totalListings')}
-            value={stats.totalListings}
-            subtitle={t('activePriceEntries')}
-            icon="list"
-            color="#3B82F6"
-            trend="up"
-          />
-          <StatCard
-            title={t('averagePrice')}
-            value={`₹${stats.avgPrice}`}
-            subtitle={t('perKilogram')}
-            icon="analytics"
-            color="#10B981"
-            trend="stable"
-          />
-          <StatCard
-            title={t('highestPrice')}
-            value={`₹${stats.highestPrice}`}
-            subtitle={t('peakMarketRate')}
-            icon="trending-up"
-            color="#F59E0B"
-            trend="up"
-          />
-          <StatCard
-            title={t('lowestPrice')}
-            value={`₹${stats.lowestPrice}`}
-            subtitle={t('minimumMarketRate')}
-            icon="trending-down"
-            color="#EF4444"
-            trend="down"
-          />
-        </View>
-
-        {/* Market Overview */}
-        <View style={styles.overviewSection}>
-          <Text style={styles.sectionTitle}>{t('marketOverview')}</Text>
-          <View style={styles.overviewGrid}>
-            <View style={styles.overviewCard}>
-              <Text style={styles.overviewNumber}>{stats.totalMarkets}</Text>
-              <Text style={styles.overviewLabel}>{t('activeMarkets')}</Text>
-            </View>
-            <View style={styles.overviewCard}>
-              <Text style={styles.overviewNumber}>{stats.totalBreeds}</Text>
-              <Text style={styles.overviewLabel}>{t('breedTypes')}</Text>
-            </View>
-            <View style={styles.overviewCard}>
-              <Text style={styles.overviewNumber}>₹{stats.priceRange}</Text>
-              <Text style={styles.overviewLabel}>{t('priceRange')}</Text>
-            </View>
-            <View style={styles.overviewCard}>
-              <Text style={styles.overviewNumber}>{stats.marketLeader}</Text>
-              <Text style={styles.overviewLabel}>{t('topMarket')}</Text>
-            </View>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{ paddingHorizontal: horizontalPadding, paddingTop: 20, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {dailyData.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="analytics-outline" size={64} color="#D1D5DB" />
+            <Text style={styles.emptyStateText}>{t('noDataAvailable')}</Text>
           </View>
-        </View>
+        ) : (
+          dailyData.map((dayData, dayIndex) => {
+            const stats = calculateDayStats(dayData.prices);
+            const marketDistribution = getMarketDistribution(dayData.prices);
+            const breedDistribution = getBreedDistribution(dayData.prices);
 
-        {/* Market Distribution */}
-        <View style={styles.distributionSection}>
-          <Text style={styles.sectionTitle}>{t('marketDistribution')}</Text>
-          <Text style={styles.sectionSubtitle}>{t('listingDistribution')}</Text>
-          <View style={styles.distributionChart}>
-            {marketDistribution.map((item, index) => (
-              <DistributionBar
-                key={item.market}
-                label={item.market}
-                percentage={item.percentage}
-                color={['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5]}
-              />
-            ))}
-          </View>
-        </View>
+            return (
+              <View key={dayIndex} style={styles.daySection}>
+                {/* Date Header */}
+                <View style={styles.dateHeader}>
+                  <Ionicons name="calendar" size={20} color="#3B82F6" />
+                  <Text style={[styles.dateText, isSmallScreen && styles.dateTextSmall]}>
+                    {formatDate(dayData.date)}
+                  </Text>
+                </View>
 
-        {/* Breed Distribution */}
-        <View style={styles.distributionSection}>
-          <Text style={styles.sectionTitle}>{t('breedDistribution')}</Text>
-          <Text style={styles.sectionSubtitle}>{t('cocoonBreedDistribution')}</Text>
-          <View style={styles.distributionChart}>
-            {breedDistribution.map((item, index) => (
-              <DistributionBar
-                key={item.breed}
-                label={item.breed}
-                percentage={item.percentage}
-                color={['#8B5CF6', '#06B6D4', '#84CC16'][index % 3]}
-              />
-            ))}
-          </View>
-        </View>
+                {/* Key Stats Grid */}
+                <View style={[styles.statsGrid, { gap: cardSpacing }]}>
+                  <StatCard
+                    title={t('totalListings')}
+                    value={stats.totalListings}
+                    subtitle={t('activePriceEntries')}
+                    icon="list"
+                    color="#3B82F6"
+                    trend="up"
+                  />
+                  <StatCard
+                    title={t('averagePrice')}
+                    value={`₹${stats.avgPrice}`}
+                    subtitle={t('perKilogram')}
+                    icon="analytics"
+                    color="#10B981"
+                    trend="stable"
+                  />
+                  <StatCard
+                    title={t('highestPrice')}
+                    value={`₹${stats.highestPrice}`}
+                    subtitle={t('peakMarketRate')}
+                    icon="trending-up"
+                    color="#F59E0B"
+                    trend="up"
+                  />
+                  <StatCard
+                    title={t('lowestPrice')}
+                    value={`₹${stats.lowestPrice}`}
+                    subtitle={t('minimumMarketRate')}
+                    icon="trending-down"
+                    color="#EF4444"
+                    trend="down"
+                  />
+                </View>
 
-        {/* Insights */}
-        <View style={styles.insightsSection}>
-          <Text style={styles.sectionTitle}>{t('marketInsights')}</Text>
-          <View style={styles.insightCard}>
-            <Ionicons name="bulb" size={24} color="#F59E0B" />
-            <View style={styles.insightContent}>
-              <Text style={styles.insightTitle}>{t('priceStability')}</Text>
-              <Text style={styles.insightText}>
-                {t('priceStabilityMessage', { priceRange: stats.priceRange })}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.insightCard}>
-            <Ionicons name="trending-up" size={24} color="#10B981" />
-            <View style={styles.insightContent}>
-              <Text style={styles.insightTitle}>{t('marketLeader')}</Text>
-              <Text style={styles.insightText}>
-                {t('marketLeaderMessage', { marketLeader: stats.marketLeader })}
-              </Text>
-            </View>
-          </View>
-        </View>
+                {/* Market Overview */}
+                <View style={styles.overviewSection}>
+                  <Text style={[styles.sectionTitle, isSmallScreen && styles.sectionTitleSmall]}>{t('marketOverview')}</Text>
+                  <View style={[styles.overviewGrid, { gap: cardSpacing }]}>
+                    <View style={[styles.overviewCard, { width: (width - (horizontalPadding * 2) - cardSpacing) / 2 }]}>
+                      <Text style={[styles.overviewNumber, isSmallScreen && styles.overviewNumberSmall]}>{stats.totalMarkets}</Text>
+                      <Text style={[styles.overviewLabel, isSmallScreen && styles.overviewLabelSmall]} numberOfLines={2}>{t('activeMarkets')}</Text>
+                    </View>
+                    <View style={[styles.overviewCard, { width: (width - (horizontalPadding * 2) - cardSpacing) / 2 }]}>
+                      <Text style={[styles.overviewNumber, isSmallScreen && styles.overviewNumberSmall]}>{stats.totalBreeds}</Text>
+                      <Text style={[styles.overviewLabel, isSmallScreen && styles.overviewLabelSmall]} numberOfLines={2}>{t('breedTypes')}</Text>
+                    </View>
+                    <View style={[styles.overviewCard, { width: (width - (horizontalPadding * 2) - cardSpacing) / 2 }]}>
+                      <Text style={[styles.overviewNumber, isSmallScreen && styles.overviewNumberSmall]}>₹{stats.priceRange}</Text>
+                      <Text style={[styles.overviewLabel, isSmallScreen && styles.overviewLabelSmall]} numberOfLines={2}>{t('priceRange')}</Text>
+                    </View>
+                    <View style={[styles.overviewCard, { width: (width - (horizontalPadding * 2) - cardSpacing) / 2 }]}>
+                      <Text style={[styles.overviewNumber, isSmallScreen && styles.overviewNumberSmall]} numberOfLines={1} adjustsFontSizeToFit>{stats.marketLeader}</Text>
+                      <Text style={[styles.overviewLabel, isSmallScreen && styles.overviewLabelSmall]} numberOfLines={2}>{t('topMarket')}</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Market Distribution */}
+                {marketDistribution.length > 0 && (
+                  <View style={styles.distributionSection}>
+                    <Text style={[styles.sectionTitle, isSmallScreen && styles.sectionTitleSmall]}>{t('marketDistribution')}</Text>
+                    <Text style={[styles.sectionSubtitle, isSmallScreen && styles.sectionSubtitleSmall]}>{t('listingDistribution')}</Text>
+                    <View style={styles.distributionChart}>
+                      {marketDistribution.map((item, index) => (
+                        <DistributionBar
+                          key={item.market}
+                          label={item.market}
+                          percentage={item.percentage}
+                          color={['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5]}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Breed Distribution */}
+                {breedDistribution.length > 0 && (
+                  <View style={styles.distributionSection}>
+                    <Text style={[styles.sectionTitle, isSmallScreen && styles.sectionTitleSmall]}>{t('breedDistribution')}</Text>
+                    <Text style={[styles.sectionSubtitle, isSmallScreen && styles.sectionSubtitleSmall]}>{t('cocoonBreedDistribution')}</Text>
+                    <View style={styles.distributionChart}>
+                      {breedDistribution.map((item, index) => (
+                        <DistributionBar
+                          key={item.breed}
+                          label={item.breed}
+                          percentage={item.percentage}
+                          color={['#8B5CF6', '#06B6D4', '#84CC16'][index % 3]}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Day Divider */}
+                {dayIndex < dailyData.length - 1 && <View style={styles.dayDivider} />}
+              </View>
+            );
+          })
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -332,40 +377,47 @@ const styles = StyleSheet.create({
   // Content
   content: {
     flex: 1,
-    paddingHorizontal: 20,
   },
 
-  // Period Selector
-  periodSelector: {
-    flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
-    padding: 4,
-    marginTop: 20,
+  // Empty State
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: '#9CA3AF',
+    marginTop: 16,
+    fontWeight: '500',
+  },
+
+  // Day Section
+  daySection: {
     marginBottom: 24,
   },
-  periodButton: {
-    flex: 1,
-    paddingVertical: 12,
+  dateHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 8,
+    gap: 8,
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 2,
+    borderBottomColor: '#E5E7EB',
   },
-  periodButtonActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  periodButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  periodButtonTextActive: {
-    color: '#111827',
+  dateText: {
+    fontSize: 18,
     fontWeight: '700',
+    color: '#111827',
+  },
+  dateTextSmall: {
+    fontSize: 16,
+  },
+  dayDivider: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    marginVertical: 24,
   },
 
   // Stats Grid
@@ -376,11 +428,9 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   statCard: {
-    width: (width - 60) / 2,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
-    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     shadowColor: '#000',
@@ -414,16 +464,25 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 4,
   },
+  statValueSmall: {
+    fontSize: 20,
+  },
   statTitle: {
     fontSize: 14,
     fontWeight: '600',
     color: '#111827',
     marginBottom: 2,
   },
+  statTitleSmall: {
+    fontSize: 12,
+  },
   statSubtitle: {
     fontSize: 12,
     color: '#6B7280',
     fontWeight: '500',
+  },
+  statSubtitleSmall: {
+    fontSize: 10,
   },
 
   // Overview Section
@@ -436,10 +495,16 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 4,
   },
+  sectionTitleSmall: {
+    fontSize: 18,
+  },
   sectionSubtitle: {
     fontSize: 14,
     color: '#6B7280',
     marginBottom: 16,
+  },
+  sectionSubtitleSmall: {
+    fontSize: 12,
   },
   overviewGrid: {
     flexDirection: 'row',
@@ -447,7 +512,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   overviewCard: {
-    width: (width - 60) / 2,
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     padding: 16,
@@ -460,16 +524,22 @@ const styles = StyleSheet.create({
     color: '#3B82F6',
     marginBottom: 4,
   },
+  overviewNumberSmall: {
+    fontSize: 18,
+  },
   overviewLabel: {
     fontSize: 12,
     fontWeight: '500',
     color: '#6B7280',
     textAlign: 'center',
   },
+  overviewLabelSmall: {
+    fontSize: 10,
+  },
 
   // Distribution Section
   distributionSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   distributionChart: {
     gap: 12,
@@ -501,33 +571,5 @@ const styles = StyleSheet.create({
   distributionBar: {
     height: '100%',
     borderRadius: 4,
-  },
-
-  // Insights Section
-  insightsSection: {
-    marginBottom: 40,
-  },
-  insightCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 12,
-  },
-  insightContent: {
-    flex: 1,
-  },
-  insightTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  insightText: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
   },
 });
