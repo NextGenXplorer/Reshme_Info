@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore } from 'firebase/firestore';
 
 // Firebase configuration from environment variables
 // Make sure to copy .env.example to .env and fill in your Firebase credentials
@@ -15,8 +15,20 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
+// Initialize Cloud Firestore without persistence to avoid BloomFilter errors
+// This is more reliable for React Native environments
+let db;
+try {
+  db = initializeFirestore(app, {
+    experimentalForceLongPolling: true, // Better for React Native
+  });
+} catch (error) {
+  // If initialization fails, fall back to default Firestore
+  console.log('Firestore initialization error, using default:', error);
+  db = getFirestore(app);
+}
+
+export { db };
 
 // Firestore collection names
 export const COLLECTIONS = {
