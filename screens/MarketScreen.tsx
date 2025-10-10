@@ -59,8 +59,8 @@ export default function MarketScreen() {
   const [filters, setFilters] = useState<FilterOptions>({
     breed: 'All',
     market: 'All',
-    dateFrom: new Date(),
-    dateTo: new Date(),
+    dateFrom: null,
+    dateTo: null,
     sortBy: 'market',
     sortOrder: 'asc',
   });
