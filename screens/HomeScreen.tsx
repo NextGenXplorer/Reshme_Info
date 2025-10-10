@@ -146,7 +146,7 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    fetchPrices(); // Fetch all data on initial load (no date filter)
+    fetchPrices(selectedDate); // Fetch today's data on initial load
     Animated.timing(slideAnimation, {
       toValue: 1,
       duration: 1000,
@@ -192,7 +192,7 @@ export default function HomeScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchPrices(); // Refresh all data (no date filter)
+    fetchPrices(selectedDate); // Refresh today's data
   };
 
   const onDateChange = (event: any, date?: Date) => {
@@ -211,8 +211,9 @@ export default function HomeScreen() {
   };
 
   const resetDateFilter = () => {
-    setSelectedDate(new Date()); // Reset to today for display
-    fetchPrices(); // Fetch all data (no date filter)
+    const today = new Date();
+    setSelectedDate(today); // Reset to today
+    fetchPrices(today); // Fetch today's data
   };
 
   const formatDateForDisplay = (date: Date) => {
