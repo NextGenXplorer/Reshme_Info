@@ -94,7 +94,6 @@ app.post('/send-custom-notification', async (req, res) => {
             color: priority === 'high' ? '#EF4444' : priority === 'medium' ? '#F59E0B' : '#10B981',
             sound: 'default',
             priority: priority === 'high' ? 'high' : 'default',
-            icon: 'notification_icon', // Uses app's notification icon
             channelId: 'default',
           },
         },
