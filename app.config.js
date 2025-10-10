@@ -33,7 +33,7 @@ module.exports = {
       ]
     },
     notification: {
-      icon: "./assets/icon.png",
+      icon: "./assets/reshme_logo.png",
       color: "#3B82F6",
       androidMode: "default",
       androidCollapsedTitle: "ReshmeInfo Updates"
@@ -42,7 +42,7 @@ module.exports = {
       [
         "expo-notifications",
         {
-          icon: "./assets/icon.png",
+          icon: "./assets/reshme_logo.png",
           color: "#3B82F6",
           sounds: []
         }
