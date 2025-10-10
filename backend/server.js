@@ -82,6 +82,7 @@ app.post('/send-custom-notification', async (req, res) => {
         notification: {
           title: title,
           body: message,
+          imageUrl: 'https://raw.githubusercontent.com/NextGenXplorer/Reshme_Info/main/assets/reshme_logo.png',
         },
         data: {
           type: 'custom',
@@ -94,6 +95,7 @@ app.post('/send-custom-notification', async (req, res) => {
             color: priority === 'high' ? '#EF4444' : priority === 'medium' ? '#F59E0B' : '#10B981',
             sound: 'default',
             priority: priority === 'high' ? 'high' : 'default',
+            imageUrl: 'https://raw.githubusercontent.com/NextGenXplorer/Reshme_Info/main/assets/reshme_logo.png',
             channelId: 'default',
           },
         },
@@ -103,6 +105,9 @@ app.post('/send-custom-notification', async (req, res) => {
               sound: 'default',
               badge: 1,
             },
+          },
+          fcmOptions: {
+            imageUrl: 'https://raw.githubusercontent.com/NextGenXplorer/Reshme_Info/main/assets/reshme_logo.png',
           },
         },
         tokens: fcmTokens,
@@ -262,6 +267,7 @@ app.post('/send-notification', async (req, res) => {
         notification: {
           title: notificationTitle,
           body: notificationBody,
+          imageUrl: 'https://raw.githubusercontent.com/NextGenXplorer/Reshme_Info/main/assets/reshme_logo.png',
         },
         data: {
           screen: 'Market',
@@ -275,7 +281,7 @@ app.post('/send-notification', async (req, res) => {
           notification: {
             color: '#3B82F6',
             sound: 'default',
-            icon: 'notification_icon', // Uses app's notification icon
+            imageUrl: 'https://raw.githubusercontent.com/NextGenXplorer/Reshme_Info/main/assets/reshme_logo.png',
             channelId: 'default',
           },
         },
@@ -285,6 +291,9 @@ app.post('/send-notification', async (req, res) => {
               sound: 'default',
               badge: 1,
             },
+          },
+          fcmOptions: {
+            imageUrl: 'https://raw.githubusercontent.com/NextGenXplorer/Reshme_Info/main/assets/reshme_logo.png',
           },
         },
         tokens: fcmTokens,
