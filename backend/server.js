@@ -94,6 +94,16 @@ app.post('/send-custom-notification', async (req, res) => {
             color: priority === 'high' ? '#EF4444' : priority === 'medium' ? '#F59E0B' : '#10B981',
             sound: 'default',
             priority: priority === 'high' ? 'high' : 'default',
+            icon: 'notification_icon', // Uses app's notification icon
+            channelId: 'default',
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: 1,
+            },
           },
         },
         tokens: fcmTokens,
@@ -266,6 +276,16 @@ app.post('/send-notification', async (req, res) => {
           notification: {
             color: '#3B82F6',
             sound: 'default',
+            icon: 'notification_icon', // Uses app's notification icon
+            channelId: 'default',
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: 1,
+            },
           },
         },
         tokens: fcmTokens,
