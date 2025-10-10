@@ -10,15 +10,18 @@ import {
   FlatList,
   SafeAreaView,
   Platform,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
+import NetInfo from '@react-native-community/netinfo';
 import Header from '../components/Header';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS } from '../utils/cacheUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +53,8 @@ export default function MarketScreen() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState<'from' | 'to' | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
+  const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
 
   const [filters, setFilters] = useState<FilterOptions>({
     breed: 'All',
@@ -76,6 +81,25 @@ export default function MarketScreen() {
 
   const fetchMarketData = async (dateFrom?: Date, dateTo?: Date) => {
     try {
+      // Check internet connectivity first
+      const netState = await NetInfo.fetch();
+
+      if (!netState.isConnected) {
+        // Load from cache when offline
+        const cachedData = await loadFromCache(CACHE_KEYS.MARKET_PRICES);
+        if (cachedData && cachedData.data.length > 0) {
+          setPrices(cachedData.data);
+          setIsOffline(true);
+          setCacheTimestamp(getCacheAge(cachedData));
+        } else {
+          Alert.alert(t('noInternet'), t('noInternetMessage'));
+        }
+        setLoading(false);
+        return;
+      }
+
+      setIsOffline(false);
+
       let q;
       if (dateFrom && dateTo) {
         const startOfDay = new Date(dateFrom);
@@ -113,7 +137,23 @@ export default function MarketScreen() {
       });
 
       setPrices(pricesData);
+      await saveToCache(CACHE_KEYS.MARKET_PRICES, pricesData);
+      setCacheTimestamp('');
     } catch (error) {
+      // Check if error is due to network issues
+      const netState = await NetInfo.fetch();
+      if (!netState.isConnected) {
+        const cachedData = await loadFromCache(CACHE_KEYS.MARKET_PRICES);
+        if (cachedData && cachedData.data.length > 0) {
+          setPrices(cachedData.data);
+          setIsOffline(true);
+          setCacheTimestamp(getCacheAge(cachedData));
+        } else {
+          Alert.alert(t('noInternet'), t('noInternetMessage'));
+        }
+      } else {
+        Alert.alert(t('error'), t('failedToFetch'));
+      }
       console.error('Error fetching market data:', error);
     } finally {
       setLoading(false);
@@ -369,6 +409,20 @@ export default function MarketScreen() {
         subtitle={t('silkCocoonTradingHubs') || 'Silk cocoon trading hubs'}
         rightComponent={<LanguageSwitcher />}
       />
+
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <View style={styles.offlineBannerContent}>
+            <Ionicons name="cloud-offline" size={18} color="#F59E0B" />
+            <View style={styles.offlineBannerText}>
+              <Text style={styles.offlineBannerTitle}>{t('offlineMode')}</Text>
+              <Text style={styles.offlineBannerSubtitle}>
+                {t('dataFromCache')} • {t('lastUpdated')}: {cacheTimestamp}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <OverviewCard />
@@ -838,6 +892,34 @@ const styles = StyleSheet.create({
   updateText: {
     fontSize: 12,
     color: '#6B7280',
+    fontWeight: '500',
+  },
+
+  // Offline Banner
+  offlineBanner: {
+    backgroundColor: '#FEF3C7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F59E0B',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  offlineBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  offlineBannerText: {
+    flex: 1,
+  },
+  offlineBannerTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#92400E',
+    marginBottom: 2,
+  },
+  offlineBannerSubtitle: {
+    fontSize: 12,
+    color: '#B45309',
     fontWeight: '500',
   },
 });

@@ -58,3 +58,25 @@ export interface PriceFormData {
   quality: 'A' | 'B' | 'C';
   lotNumber: number;
 }
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high';
+  targetAudience: 'all' | 'market_specific';
+  targetMarket?: string;
+  createdBy: string;
+  createdAt: Date;
+  expiresAt: Date | null;
+  isActive: boolean;
+}
+
+export interface NotificationFormData {
+  title: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high';
+  targetAudience: 'all' | 'market_specific';
+  targetMarket?: string;
+  expiryDays: number;
+}

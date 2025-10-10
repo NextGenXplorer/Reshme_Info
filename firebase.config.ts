@@ -22,5 +22,6 @@ export const db = getFirestore(app);
 export const COLLECTIONS = {
   COCOON_PRICES: 'cocoonPrices',
   MARKETS: 'markets',
-  BREEDS: 'breeds'
+  BREEDS: 'breeds',
+  NOTIFICATIONS: 'notifications'
 } as const;

@@ -7,9 +7,12 @@ import {
   TouchableOpacity,
   SafeAreaView,
   useWindowDimensions,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import NetInfo from '@react-native-community/netinfo';
+import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS } from '../utils/cacheUtils';
 import Header from '../components/Header';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
@@ -21,6 +24,8 @@ export default function StatsScreen() {
   const { width } = useWindowDimensions();
   const [prices, setPrices] = useState<CocoonPrice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
+  const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
 
   // Responsive layout calculations
   const isSmallScreen = width < 380;
@@ -36,6 +41,25 @@ export default function StatsScreen() {
 
   const fetchStatsData = async () => {
     try {
+      // Check internet connectivity first
+      const netState = await NetInfo.fetch();
+
+      if (!netState.isConnected) {
+        // Load from cache when offline
+        const cachedData = await loadFromCache(CACHE_KEYS.STATS_PRICES);
+        if (cachedData && cachedData.data.length > 0) {
+          setPrices(cachedData.data);
+          setIsOffline(true);
+          setCacheTimestamp(getCacheAge(cachedData));
+        } else {
+          Alert.alert(t('noInternet'), t('noInternetMessage'));
+        }
+        setLoading(false);
+        return;
+      }
+
+      setIsOffline(false);
+
       const q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
@@ -57,7 +81,23 @@ export default function StatsScreen() {
       });
 
       setPrices(pricesData);
+      await saveToCache(CACHE_KEYS.STATS_PRICES, pricesData);
+      setCacheTimestamp('');
     } catch (error) {
+      // Check if error is due to network issues
+      const netState = await NetInfo.fetch();
+      if (!netState.isConnected) {
+        const cachedData = await loadFromCache(CACHE_KEYS.STATS_PRICES);
+        if (cachedData && cachedData.data.length > 0) {
+          setPrices(cachedData.data);
+          setIsOffline(true);
+          setCacheTimestamp(getCacheAge(cachedData));
+        } else {
+          Alert.alert(t('noInternet'), t('noInternetMessage'));
+        }
+      } else {
+        Alert.alert(t('error'), t('failedToFetch'));
+      }
       console.error('Error fetching stats data:', error);
     } finally {
       setLoading(false);
@@ -236,6 +276,21 @@ export default function StatsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Header rightComponent={<LanguageSwitcher />} />
+
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <View style={styles.offlineBannerContent}>
+            <Ionicons name="cloud-offline" size={18} color="#F59E0B" />
+            <View style={styles.offlineBannerText}>
+              <Text style={styles.offlineBannerTitle}>{t('offlineMode')}</Text>
+              <Text style={styles.offlineBannerSubtitle}>
+                {t('dataFromCache')} • {t('lastUpdated')}: {cacheTimestamp}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
+
       <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingHorizontal: horizontalPadding, paddingTop: 20, paddingBottom: 40 }}
@@ -571,5 +626,33 @@ const styles = StyleSheet.create({
   distributionBar: {
     height: '100%',
     borderRadius: 4,
+  },
+
+  // Offline Banner
+  offlineBanner: {
+    backgroundColor: '#FEF3C7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F59E0B',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  offlineBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  offlineBannerText: {
+    flex: 1,
+  },
+  offlineBannerTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#92400E',
+    marginBottom: 2,
+  },
+  offlineBannerSubtitle: {
+    fontSize: 12,
+    color: '#B45309',
+    fontWeight: '500',
   },
 });

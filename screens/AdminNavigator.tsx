@@ -5,8 +5,9 @@ import { AdminUser, CocoonPrice } from '../types';
 import AdminLoginScreen from './AdminLoginScreen';
 import AdminDashboardScreen from './AdminDashboardScreen';
 import AdminPriceFormScreen from './AdminPriceFormScreen';
+import AdminNotificationScreen from './AdminNotificationScreen';
 
-type AdminScreen = 'login' | 'dashboard' | 'add_price' | 'edit_price';
+type AdminScreen = 'login' | 'dashboard' | 'add_price' | 'edit_price' | 'notifications';
 
 interface AdminNavigatorProps {
   onExit: () => void;
@@ -58,6 +59,10 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
         );
         return true;
 
+      case 'notifications':
+        setCurrentScreen('dashboard');
+        return true;
+
       case 'add_price':
       case 'edit_price':
         Alert.alert(
@@ -107,6 +112,14 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
     setCurrentScreen('edit_price');
   };
 
+  const handleManageNotifications = () => {
+    setCurrentScreen('notifications');
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentScreen('dashboard');
+  };
+
   const handlePriceSaved = () => {
     setPriceToEdit(null);
     setCurrentScreen('dashboard');
@@ -138,6 +151,15 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
           onLogout={handleLogout}
           onAddPrice={handleAddPrice}
           onEditPrice={handleEditPrice}
+          onManageNotifications={handleManageNotifications}
+        />
+      ) : null;
+
+    case 'notifications':
+      return currentUser ? (
+        <AdminNotificationScreen
+          user={currentUser}
+          onBack={handleBackToDashboard}
         />
       ) : null;
 

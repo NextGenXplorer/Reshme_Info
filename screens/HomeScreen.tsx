@@ -16,12 +16,14 @@ import {
 } from 'react-native';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import NetInfo from '@react-native-community/netinfo';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS, CachedData } from '../utils/cacheUtils';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -35,6 +37,8 @@ export default function HomeScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -44,6 +48,30 @@ export default function HomeScreen() {
 
   const fetchPrices = async (dateFilter?: Date) => {
     try {
+      // Check internet connectivity first
+      const netState = await NetInfo.fetch();
+
+      if (!netState.isConnected) {
+        // Load from cache when offline
+        const cachedData = await loadFromCache(CACHE_KEYS.HOME_PRICES);
+
+        if (cachedData && cachedData.data.length > 0) {
+          setPrices(cachedData.data);
+          setIsOffline(true);
+          setCacheTimestamp(getCacheAge(cachedData));
+        } else {
+          // No cache available
+          Alert.alert(t('noInternet'), t('noInternetMessage'));
+        }
+
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+
+      // Online - fetch from Firebase
+      setIsOffline(false);
+
       let q;
 
       if (dateFilter) {
@@ -84,6 +112,10 @@ export default function HomeScreen() {
 
       setPrices(pricesData);
 
+      // Save to cache
+      await saveToCache(CACHE_KEYS.HOME_PRICES, pricesData);
+      setCacheTimestamp('');
+
       if (dateFilter) {
         const dateExists = pricesData.length > 0;
         if (!dateExists) {
@@ -91,7 +123,21 @@ export default function HomeScreen() {
         }
       }
     } catch (error) {
-      Alert.alert(t('error'), t('failedToFetch'));
+      // Check if error is due to network issues
+      const netState = await NetInfo.fetch();
+      if (!netState.isConnected) {
+        // Try cache on error
+        const cachedData = await loadFromCache(CACHE_KEYS.HOME_PRICES);
+        if (cachedData && cachedData.data.length > 0) {
+          setPrices(cachedData.data);
+          setIsOffline(true);
+          setCacheTimestamp(getCacheAge(cachedData));
+        } else {
+          Alert.alert(t('noInternet'), t('noInternetMessage'));
+        }
+      } else {
+        Alert.alert(t('error'), t('failedToFetch'));
+      }
       console.error('Error fetching prices:', error);
     } finally {
       setLoading(false);
@@ -338,6 +384,20 @@ export default function HomeScreen() {
         title={t('cocoonPrices')}
         rightComponent={<LanguageSwitcher />}
       />
+      {/* Offline Mode Banner */}
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <View style={styles.offlineBannerContent}>
+            <Ionicons name="cloud-offline" size={18} color="#F59E0B" />
+            <View style={styles.offlineBannerText}>
+              <Text style={styles.offlineBannerTitle}>{t('offlineMode')}</Text>
+              <Text style={styles.offlineBannerSubtitle}>
+                {t('dataFromCache')} • {t('lastUpdated')}: {cacheTimestamp}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
       {/* Filter section */}
       <View style={styles.filterHeader}>
         <TouchableOpacity
@@ -871,5 +931,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     borderWidth: 1,
     borderColor: '#E5E7EB',
+  },
+
+  // Offline Banner Styles
+  offlineBanner: {
+    backgroundColor: '#FEF3C7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F59E0B',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  offlineBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  offlineBannerText: {
+    flex: 1,
+  },
+  offlineBannerTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#92400E',
+    marginBottom: 2,
+  },
+  offlineBannerSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#B45309',
   },
 });
