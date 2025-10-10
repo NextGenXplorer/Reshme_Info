@@ -186,6 +186,9 @@ export default function HomeScreen() {
       filtered = filtered.filter((price) => price.market === selectedMarket);
     }
 
+    // Sort alphabetically by market (A-Z)
+    filtered = filtered.sort((a, b) => a.market.localeCompare(b.market));
+
     setFilteredPrices(filtered);
     animateCards(filtered);
   }, [selectedBreed, selectedMarket, prices]);
