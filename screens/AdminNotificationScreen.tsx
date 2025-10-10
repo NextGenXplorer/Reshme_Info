@@ -88,17 +88,23 @@ export default function AdminNotificationScreen({
         : null;
 
       // Step 1: Save to Firestore (for in-app notification management)
-      await addDoc(collection(db, COLLECTIONS.NOTIFICATIONS), {
+      const notificationData: any = {
         title: formData.title.trim(),
         message: formData.message.trim(),
         priority: formData.priority,
         targetAudience: formData.targetAudience,
-        targetMarket: formData.targetMarket,
         createdBy: user.username,
         createdAt: Timestamp.now(),
         expiresAt,
         isActive: true,
-      });
+      };
+
+      // Only include targetMarket if it's defined
+      if (formData.targetMarket) {
+        notificationData.targetMarket = formData.targetMarket;
+      }
+
+      await addDoc(collection(db, COLLECTIONS.NOTIFICATIONS), notificationData);
 
       // Step 2: Send push notification via backend
       const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://reshme-info.vercel.app';
