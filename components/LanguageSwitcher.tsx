@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { saveLanguagePreference } from '../i18n';
 
 export default function LanguageSwitcher() {
   const { t, i18n } = useTranslation();
@@ -47,9 +48,10 @@ export default function LanguageSwitcher() {
                 styles.languageOption,
                 currentLanguage === 'en' && styles.languageOptionSelected,
               ]}
-              onPress={() => {
+              onPress={async () => {
                 setCurrentLanguage('en');
-                i18n.changeLanguage('en');
+                await i18n.changeLanguage('en');
+                await saveLanguagePreference('en');
                 setShowLanguageModal(false);
               }}
             >
@@ -75,9 +77,10 @@ export default function LanguageSwitcher() {
                 styles.languageOption,
                 currentLanguage === 'kn' && styles.languageOptionSelected,
               ]}
-              onPress={() => {
+              onPress={async () => {
                 setCurrentLanguage('kn');
-                i18n.changeLanguage('kn');
+                await i18n.changeLanguage('kn');
+                await saveLanguagePreference('kn');
                 setShowLanguageModal(false);
               }}
             >
