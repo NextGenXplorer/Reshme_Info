@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,13 +6,48 @@ import {
   TouchableOpacity,
   Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+
+const LANGUAGE_KEY = '@app_language';
 
 export default function LanguageSwitcher() {
   const { t, i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'en');
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  // Load saved language on component mount
+  useEffect(() => {
+    loadSavedLanguage();
+  }, []);
+
+  const loadSavedLanguage = async () => {
+    try {
+      const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+      if (savedLanguage) {
+        setCurrentLanguage(savedLanguage);
+        i18n.changeLanguage(savedLanguage);
+      }
+    } catch (error) {
+      console.error('Error loading language:', error);
+    }
+  };
+
+  const changeLanguage = async (language: string) => {
+    try {
+      await AsyncStorage.setItem(LANGUAGE_KEY, language);
+      setCurrentLanguage(language);
+      i18n.changeLanguage(language);
+      setShowLanguageModal(false);
+    } catch (error) {
+      console.error('Error saving language:', error);
+      // Still change the language even if save fails
+      setCurrentLanguage(language);
+      i18n.changeLanguage(language);
+      setShowLanguageModal(false);
+    }
+  };
 
   return (
     <>
@@ -21,8 +56,8 @@ export default function LanguageSwitcher() {
         onPress={() => setShowLanguageModal(true)}
         activeOpacity={0.8}
       >
-        <Ionicons name="language" size={20} color="#374151" />
-        <Text style={styles.languageButtonText}>
+        <Ionicons name="language" size={20} color="#374151" style={{ marginRight: 6 }} />
+        <Text style={[styles.languageButtonText, { marginRight: 6 }]}>
           {currentLanguage.toUpperCase()}
         </Text>
         <Ionicons name="chevron-down" size={16} color="#6B7280" />
@@ -47,14 +82,10 @@ export default function LanguageSwitcher() {
                 styles.languageOption,
                 currentLanguage === 'en' && styles.languageOptionSelected,
               ]}
-              onPress={() => {
-                setCurrentLanguage('en');
-                i18n.changeLanguage('en');
-                setShowLanguageModal(false);
-              }}
+              onPress={() => changeLanguage('en')}
             >
               <View style={styles.languageOptionContent}>
-                <Text style={styles.languageFlag}>🇺🇸</Text>
+                <Text style={[styles.languageFlag, { marginRight: 12 }]}>🇺🇸</Text>
                 <Text
                   style={[
                     styles.languageOptionText,
@@ -75,14 +106,10 @@ export default function LanguageSwitcher() {
                 styles.languageOption,
                 currentLanguage === 'kn' && styles.languageOptionSelected,
               ]}
-              onPress={() => {
-                setCurrentLanguage('kn');
-                i18n.changeLanguage('kn');
-                setShowLanguageModal(false);
-              }}
+              onPress={() => changeLanguage('kn')}
             >
               <View style={styles.languageOptionContent}>
-                <Text style={styles.languageFlag}>🇮🇳</Text>
+                <Text style={[styles.languageFlag, { marginRight: 12 }]}>🇮🇳</Text>
                 <Text
                   style={[
                     styles.languageOptionText,
@@ -112,7 +139,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    gap: 6,
   },
   languageButtonText: {
     fontSize: 12,
@@ -163,7 +189,6 @@ const styles = StyleSheet.create({
   languageOptionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
   },
   languageFlag: {
     fontSize: 20,

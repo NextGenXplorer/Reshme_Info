@@ -236,5 +236,6 @@
   "createdBy": "Created By",
   "expiresOn": "Expires On",
   "manageNotifications": "Manage Notifications",
-  "sendCustomNotification": "Send custom notification"
+  "sendCustomNotification": "Send custom notification",
+  "ttsError": "Unable to play audio. Please try again."
 }

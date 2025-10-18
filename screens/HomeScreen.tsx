@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS, CachedData } from '../utils/cacheUtils';
+import * as Speech from 'expo-speech';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -39,6 +40,7 @@ export default function HomeScreen() {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -237,6 +239,52 @@ export default function HomeScreen() {
     }
   };
 
+  const speakPrice = async (item: CocoonPrice) => {
+    try {
+      // Stop any ongoing speech
+      await Speech.stop();
+
+      // If currently playing this item, stop it
+      if (playingId === item.id) {
+        setPlayingId(null);
+        return;
+      }
+
+      setPlayingId(item.id);
+
+      // Get current language
+      const currentLang = i18n.language;
+      const langCode = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
+
+      // Build the speech text based on current language
+      const breedText = t(`breed_${item.breed}` as any, item.breed);
+      const marketText = t(`market_${item.market}` as any, item.market);
+      const gradeText = t('grade');
+      const maximumText = t('maximum');
+      const averageText = t('average');
+      const minimumText = t('minimum');
+      const lotText = t('lot');
+      const priceText = currentLang === 'kn' ? 'ರೂಪಾಯಿ' : 'rupees';
+
+      // Add longer pauses using multiple periods for natural speech
+      const speechText = `${breedText}... ${gradeText} ${item.quality}... ${marketText}... ${lotText} ${item.lotNumber}... ${maximumText}... ${item.maxPrice} ${priceText}... ${averageText}... ${item.avgPrice} ${priceText}... ${minimumText}... ${item.minPrice} ${priceText}.`;
+
+      // Speak the text with slower rate for better clarity
+      await Speech.speak(speechText, {
+        language: langCode,
+        pitch: 1.0,
+        rate: 0.65, // Even slower rate for better clarity and pauses
+        onDone: () => setPlayingId(null),
+        onStopped: () => setPlayingId(null),
+        onError: () => setPlayingId(null),
+      });
+    } catch (error) {
+      console.error('TTS Error:', error);
+      setPlayingId(null);
+      Alert.alert(t('error'), t('ttsError'));
+    }
+  };
+
   const ModernFilterButton = ({
     title,
     isSelected,
@@ -283,7 +331,7 @@ export default function HomeScreen() {
                   <Text style={styles.ultraModernBreedText}>{t(`breed_${item.breed}` as any, item.breed)}</Text>
                   <View style={styles.qualityBadgeContainer}>
                     <View style={styles.ultraModernQualityBadge}>
-                      <Ionicons name="star" size={10} color="#92400E" />
+                      <Ionicons name="star" size={10} color="#92400E" style={{ marginRight: 4 }} />
                       <Text style={styles.ultraModernQualityText}>
                         {t('grade')} {item.quality}
                       </Text>
@@ -292,15 +340,33 @@ export default function HomeScreen() {
                 </View>
               </View>
 
-              <View style={styles.marketBadgeContainer}>
-                <View style={styles.ultraModernMarketBadge}>
-                  <Ionicons name="location" size={10} color="#5B21B6" />
-                  <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
-                </View>
-                <View style={styles.lotNumberBadge}>
-                  <Ionicons name="apps" size={10} color="#92400E" />
-                  <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
-                </View>
+              <View style={styles.headerRightSection}>
+                <TouchableOpacity
+                  style={[
+                    styles.playButton,
+                    playingId === item.id && styles.playButtonActive
+                  ]}
+                  onPress={() => speakPrice(item)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={playingId === item.id ? "stop-circle" : "play-circle"}
+                    size={32}
+                    color={playingId === item.id ? "#EF4444" : "#3B82F6"}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Market and Lot badges */}
+            <View style={styles.marketLotsSection}>
+              <View style={styles.ultraModernMarketBadge}>
+                <Ionicons name="location" size={10} color="#5B21B6" style={{ marginRight: 4 }} />
+                <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
+              </View>
+              <View style={styles.lotNumberBadge}>
+                <Ionicons name="apps" size={10} color="#92400E" style={{ marginRight: 4 }} />
+                <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
               </View>
             </View>
 
@@ -320,7 +386,7 @@ export default function HomeScreen() {
                 <Text style={[styles.tableCellType, styles.tableCellHighlight]}>{t('maximum')}</Text>
                 <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
                 <View style={styles.tableStatusCell}>
-                  <Ionicons name="trending-up" size={14} color="#10B981" />
+                  <Ionicons name="trending-up" size={14} color="#10B981" style={{ marginRight: 4 }} />
                   <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>{t('high')}</Text>
                 </View>
               </View>
@@ -329,7 +395,7 @@ export default function HomeScreen() {
                 <Text style={styles.tableCellType}>{t('average')}</Text>
                 <Text style={styles.tableCellPrice}>₹{item.avgPrice}</Text>
                 <View style={styles.tableStatusCell}>
-                  <Ionicons name="analytics" size={14} color="#6366F1" />
+                  <Ionicons name="analytics" size={14} color="#6366F1" style={{ marginRight: 4 }} />
                   <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>{t('avg')}</Text>
                 </View>
               </View>
@@ -338,7 +404,7 @@ export default function HomeScreen() {
                 <Text style={styles.tableCellType}>{t('minimum')}</Text>
                 <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
                 <View style={styles.tableStatusCell}>
-                  <Ionicons name="trending-down" size={14} color="#EF4444" />
+                  <Ionicons name="trending-down" size={14} color="#EF4444" style={{ marginRight: 4 }} />
                   <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>{t('low')}</Text>
                 </View>
               </View>
@@ -347,7 +413,7 @@ export default function HomeScreen() {
             {/* Footer with update time */}
             <View style={styles.ultraModernFooter}>
               <View style={styles.updateTimestamp}>
-                <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+                <Ionicons name="time-outline" size={12} color="#9CA3AF" style={{ marginRight: 4 }} />
                 <Text style={styles.ultraModernUpdateText}>
                   {t('updated')}: {item.lastUpdated.toLocaleDateString()}
                 </Text>
@@ -391,7 +457,7 @@ export default function HomeScreen() {
       {isOffline && (
         <View style={styles.offlineBanner}>
           <View style={styles.offlineBannerContent}>
-            <Ionicons name="cloud-offline" size={18} color="#F59E0B" />
+            <Ionicons name="cloud-offline" size={18} color="#F59E0B" style={{ marginRight: 12 }} />
             <View style={styles.offlineBannerText}>
               <Text style={styles.offlineBannerTitle}>{t('offlineMode')}</Text>
               <Text style={styles.offlineBannerSubtitle}>
@@ -426,7 +492,7 @@ export default function HomeScreen() {
                 <View style={styles.filterCategoryIcon}>
                   <Ionicons name="options" size={14} color="#6B7280" />
                 </View>
-                <Text style={styles.ultraModernFilterTitle}>{t('filterByBreed')}</Text>
+                <Text style={[styles.ultraModernFilterTitle, { marginLeft: 8 }]}>{t('filterByBreed')}</Text>
               </View>
               <ScrollView
                 horizontal
@@ -450,7 +516,7 @@ export default function HomeScreen() {
                 <View style={styles.filterCategoryIcon}>
                   <Ionicons name="location" size={14} color="#6B7280" />
                 </View>
-                <Text style={styles.ultraModernFilterTitle}>{t('filterByMarket')}</Text>
+                <Text style={[styles.ultraModernFilterTitle, { marginLeft: 8 }]}>{t('filterByMarket')}</Text>
               </View>
               <ScrollView
                 horizontal
@@ -474,16 +540,16 @@ export default function HomeScreen() {
                   <View style={styles.filterCategoryIcon}>
                     <Ionicons name="calendar" size={14} color="#6B7280" />
                   </View>
-                  <Text style={styles.ultraModernFilterTitle}>{t('filterByDateTitle')}</Text>
+                  <Text style={[styles.ultraModernFilterTitle, { marginLeft: 8 }]}>{t('filterByDateTitle')}</Text>
                 </View>
                 <View style={styles.dateFilterContainer}>
                   <TouchableOpacity
-                    style={styles.dateFilterButton}
+                    style={[styles.dateFilterButton, { marginRight: 12 }]}
                     onPress={showDatePickerModal}
                     activeOpacity={0.8}
                   >
                     <View style={styles.dateFilterContent}>
-                      <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+                      <Ionicons name="calendar-outline" size={16} color="#3B82F6" style={{ marginRight: 8 }} />
                       <Text style={styles.dateFilterText}>
                         {formatDateForDisplay(selectedDate)}
                       </Text>
@@ -622,15 +688,15 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   filterContent: {
-    gap: 16,
+    paddingVertical: 4,
   },
   filterCategory: {
-    gap: 12,
+    marginBottom: 12,
   },
   filterCategoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 8,
   },
   filterCategoryIcon: {
     width: 24,
@@ -647,7 +713,6 @@ const styles = StyleSheet.create({
   },
   ultraModernFilterList: {
     paddingVertical: 8,
-    gap: 12,
   },
 
   // Filter Buttons
@@ -711,19 +776,31 @@ const styles = StyleSheet.create({
   },
   ultraModernCardContent: {
     padding: 20,
-    gap: 16,
   },
 
   // Card Header
   ultraModernCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   breedSection: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+  },
+  headerRightSection: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playButton: {
+    padding: 4,
+    borderRadius: 20,
+    backgroundColor: '#F0F9FF',
+  },
+  playButtonActive: {
+    backgroundColor: '#FEE2E2',
   },
   breedIconContainer: {
     width: 40,
@@ -752,13 +829,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
-    gap: 4,
     backgroundColor: '#FEF3C7',
   },
   ultraModernQualityText: {
     fontSize: 11,
     fontWeight: '600',
     color: '#92400E',
+  },
+  marketLotsSection: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 8,
   },
   marketBadgeContainer: {
     alignSelf: 'flex-start',
@@ -769,8 +850,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    gap: 4,
     backgroundColor: '#EDE9FE',
+    marginRight: 8,
   },
   ultraModernMarketText: {
     fontSize: 12,
@@ -783,9 +864,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    gap: 4,
     backgroundColor: '#FEF3C7',
-    marginTop: 8,
   },
   lotNumberText: {
     fontSize: 12,
@@ -856,7 +935,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
   },
   tableCellStatus: {
     fontSize: 12,
@@ -878,7 +956,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
-    gap: 4,
   },
   ultraModernUpdateText: {
     fontSize: 10,
@@ -897,7 +974,6 @@ const styles = StyleSheet.create({
   dateFilterContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
     paddingVertical: 8,
   },
   dateFilterButton: {
@@ -918,7 +994,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    gap: 8,
   },
   dateFilterText: {
     fontSize: 14,
@@ -947,7 +1022,6 @@ const styles = StyleSheet.create({
   offlineBannerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
   },
   offlineBannerText: {
     flex: 1,
