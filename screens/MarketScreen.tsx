@@ -22,7 +22,6 @@ import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS } from '../utils/cacheUtils';
-import AdBanner from '../components/AdBanner';
 
 const { width } = Dimensions.get('window');
 
@@ -569,9 +568,6 @@ export default function MarketScreen() {
           />
         )}
       </ScrollView>
-
-      {/* AdMob Banner Ad */}
-      <AdBanner />
     </SafeAreaView>
   );
 }

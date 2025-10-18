@@ -24,7 +24,6 @@ import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS, CachedData } from '../utils/cacheUtils';
-import AdBanner from '../components/AdBanner';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -534,9 +533,6 @@ export default function HomeScreen() {
           minimumDate={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)} // 7 days ago
         />
       )}
-
-      {/* AdMob Banner Ad */}
-      <AdBanner />
     </SafeAreaView>
   );
 }
