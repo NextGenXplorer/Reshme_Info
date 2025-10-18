@@ -11,6 +11,7 @@ import * as Notifications from 'expo-notifications';
 import { db } from './firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { useInterstitialAd } from './hooks/useInterstitialAd';
+import { useExitAd } from './hooks/useExitAd';
 import MobileAds from 'react-native-google-mobile-ads';
 
 // Import screen components
@@ -122,8 +123,11 @@ const AppContent = () => {
       });
   }, []);
 
-  // Interstitial ad hook
+  // Interstitial ad hook for tab navigation
   const { showAd, isLoaded } = useInterstitialAd();
+
+  // Exit ad hook - shows rewarded interstitial when user presses back button
+  useExitAd({ enabled: true });
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
