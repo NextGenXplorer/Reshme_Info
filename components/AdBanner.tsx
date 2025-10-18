@@ -15,7 +15,8 @@ import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads'
  */
 
 // TEST AD UNIT ID - Replace with production ID when ready
-const TEST_AD_UNIT_ID = TestIds.ADAPTIVE_BANNER;
+// Use BANNER instead of ADAPTIVE_BANNER for better compatibility
+const TEST_AD_UNIT_ID = TestIds.BANNER;
 
 // For production, use your actual ad unit IDs:
 // const PRODUCTION_AD_UNIT_ID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
@@ -31,20 +32,25 @@ export default function AdBanner({ adUnitId }: AdBannerProps) {
   // Use test ad unit ID by default, or custom ID if provided
   const finalAdUnitId = adUnitId || TEST_AD_UNIT_ID;
 
+  useEffect(() => {
+    console.log('🎯 AdBanner component mounted with ID:', finalAdUnitId);
+  }, []);
+
   return (
     <View style={styles.container}>
       <BannerAd
         unitId={finalAdUnitId}
-        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        size={BannerAdSize.BANNER}
         requestOptions={{
-          requestNonPersonalizedAdsOnly: true, // For GDPR compliance
+          requestNonPersonalizedAdsOnly: true,
         }}
         onAdLoaded={() => {
-          console.log('Banner ad loaded successfully');
+          console.log('✅ Banner ad loaded successfully');
           setIsAdLoaded(true);
         }}
         onAdFailedToLoad={(error) => {
-          console.error('Banner ad failed to load:', error);
+          console.error('❌ Banner ad failed to load:', error);
+          console.error('❌ Error details:', JSON.stringify(error));
           setIsAdLoaded(false);
         }}
       />
@@ -56,8 +62,9 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
+    backgroundColor: '#F3F4F6',
+    minHeight: 60,
+    width: '100%',
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
   },
