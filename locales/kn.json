@@ -230,5 +230,7 @@
   "createdBy": "ರಚಿಸಿದವರು",
   "expiresOn": "ಇಂದು ಮುಕ್ತಾಯವಾಗುತ್ತದೆ",
   "manageNotifications": "ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
-  "sendCustomNotification": "ಕಸ್ಟಮ್ ಅಧಿಸೂಚನೆ ಕಳುಹಿಸಿ"
+  "sendCustomNotification": "ಕಸ್ಟಮ್ ಅಧಿಸೂಚನೆ ಕಳುಹಿಸಿ",
+  "noDataToSpeak": "ಓದಲು ಯಾವುದೇ ಬೆಲೆ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ",
+  "speechError": "ಬೆಲೆಗಳನ್ನು ಓದಲು ವಿಫಲವಾಗಿದೆ"
 }

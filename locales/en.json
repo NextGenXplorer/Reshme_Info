@@ -236,5 +236,7 @@
   "createdBy": "Created By",
   "expiresOn": "Expires On",
   "manageNotifications": "Manage Notifications",
-  "sendCustomNotification": "Send custom notification"
+  "sendCustomNotification": "Send custom notification",
+  "noDataToSpeak": "No price data available to read",
+  "speechError": "Failed to read prices"
 }

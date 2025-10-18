@@ -39,6 +39,7 @@ module.exports = {
       androidCollapsedTitle: "ReshmeInfo Updates"
     },
     plugins: [
+      "expo-font",
       [
         "expo-notifications",
         {

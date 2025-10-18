@@ -17,6 +17,7 @@ import {
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import NetInfo from '@react-native-community/netinfo';
+import * as Speech from 'expo-speech';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,6 +40,7 @@ export default function HomeScreen() {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -237,6 +239,52 @@ export default function HomeScreen() {
     }
   };
 
+  const speakPrice = async (item: CocoonPrice) => {
+    try {
+      // Stop any ongoing speech
+      await Speech.stop();
+
+      // If currently playing this item, stop it
+      if (playingId === item.id) {
+        setPlayingId(null);
+        return;
+      }
+
+      setPlayingId(item.id);
+
+      // Get current language
+      const currentLang = i18n.language;
+      const langCode = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
+
+      // Build the speech text based on current language
+      const breedText = t(`breed_${item.breed}` as any, item.breed);
+      const marketText = t(`market_${item.market}` as any, item.market);
+      const gradeText = t('grade');
+      const maximumText = t('maximum');
+      const averageText = t('average');
+      const minimumText = t('minimum');
+      const lotText = t('lot');
+      const priceText = currentLang === 'kn' ? 'ರೂಪಾಯಿ' : 'rupees';
+
+      // Add longer pauses using multiple periods for natural speech
+      const speechText = `${breedText}... ${gradeText} ${item.quality}... ${marketText}... ${lotText} ${item.lotNumber}... ${maximumText}... ${item.maxPrice} ${priceText}... ${averageText}... ${item.avgPrice} ${priceText}... ${minimumText}... ${item.minPrice} ${priceText}.`;
+
+      // Speak the text with slower rate for better clarity
+      await Speech.speak(speechText, {
+        language: langCode,
+        pitch: 1.0,
+        rate: 0.65, // Even slower rate for better clarity and pauses
+        onDone: () => setPlayingId(null),
+        onStopped: () => setPlayingId(null),
+        onError: () => setPlayingId(null),
+      });
+    } catch (error) {
+      console.error('TTS Error:', error);
+      setPlayingId(null);
+      Alert.alert(t('error'), t('speechError') || 'Text-to-speech error');
+    }
+  };
+
   const ModernFilterButton = ({
     title,
     isSelected,
@@ -292,15 +340,33 @@ export default function HomeScreen() {
                 </View>
               </View>
 
-              <View style={styles.marketBadgeContainer}>
-                <View style={styles.ultraModernMarketBadge}>
-                  <Ionicons name="location" size={10} color="#5B21B6" />
-                  <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
-                </View>
-                <View style={styles.lotNumberBadge}>
-                  <Ionicons name="apps" size={10} color="#92400E" />
-                  <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
-                </View>
+              <View style={styles.headerRightSection}>
+                <TouchableOpacity
+                  style={[
+                    styles.playButton,
+                    playingId === item.id && styles.playButtonActive
+                  ]}
+                  onPress={() => speakPrice(item)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={playingId === item.id ? "stop-circle" : "play-circle"}
+                    size={32}
+                    color={playingId === item.id ? "#EF4444" : "#3B82F6"}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Market and Lot badges */}
+            <View style={styles.marketLotsSection}>
+              <View style={styles.ultraModernMarketBadge}>
+                <Ionicons name="location" size={10} color="#5B21B6" />
+                <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
+              </View>
+              <View style={styles.lotNumberBadge}>
+                <Ionicons name="apps" size={10} color="#92400E" />
+                <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
               </View>
             </View>
 
@@ -719,11 +785,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    marginBottom: 12,
   },
   breedSection: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flex: 1,
+  },
+  headerRightSection: {
+    marginLeft: 12,
   },
   breedIconContainer: {
     width: 40,
@@ -760,8 +830,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#92400E',
   },
-  marketBadgeContainer: {
-    alignSelf: 'flex-start',
+  marketLotsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
   },
   ultraModernMarketBadge: {
     flexDirection: 'row',
@@ -962,5 +1035,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: '#B45309',
+  },
+
+  // Play Button Styles
+  playButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: '#EFF6FF',
+  },
+  playButtonActive: {
+    backgroundColor: '#FEE2E2',
   },
 });
