@@ -85,7 +85,7 @@ module.exports = {
 
       // EAS Project ID (required for dynamic configs)
       eas: {
-        projectId: "c9837104-9fd8-4d26-aa0a-b49889f584bc"
+        projectId: "2cb9f6e5-78a4-478c-a133-7c87876c655c"
       }
     }
   }
