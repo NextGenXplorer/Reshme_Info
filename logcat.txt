@@ -1,0 +1,1526 @@
+--------- beginning of crash
+09-21 09:51:52.886 30761 30761 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 30761 (python), pid 30761 (python)
+09-21 09:51:53.055 30903 30903 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 09:51:53.055 30903 30903 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 09:51:53.055 30903 30903 F DEBUG   : Revision: '0'
+09-21 09:51:53.055 30903 30903 F DEBUG   : ABI: 'arm64'
+09-21 09:51:53.056 30903 30903 F DEBUG   : Timestamp: 2025-09-21 09:51:53.013557885+0530
+09-21 09:51:53.056 30903 30903 F DEBUG   : Process uptime: 44s
+09-21 09:51:53.056 30903 30903 F DEBUG   : Cmdline: python /data/data/com.termux/files/home/resh.py
+09-21 09:51:53.056 30903 30903 F DEBUG   : pid: 30761, tid: 30761, name: python  >>> python <<<
+09-21 09:51:53.056 30903 30903 F DEBUG   : uid: 10247
+09-21 09:51:53.057 30903 30903 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 09:51:53.057 30903 30903 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 09:51:53.057 30903 30903 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007db3e3e280'
+09-21 09:51:53.057 30903 30903 F DEBUG   :     x0  0000000000000000  x1  0000000000007829  x2  0000000000000006  x3  0000007fe0216b00
+09-21 09:51:53.058 30903 30903 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 09:51:53.058 30903 30903 F DEBUG   :     x8  00000000000000f0  x9  0000007e7686e418  x10 0000000000000001  x11 0000007e768c0070
+09-21 09:51:53.058 30903 30903 F DEBUG   :     x12 0000000068cf7d60  x13 000000007fffffff  x14 000000000a340296  x15 000009b515f9589f
+09-21 09:51:53.058 30903 30903 F DEBUG   :     x16 0000007e76929fe8  x17 0000007e76913ac0  x18 0000007e76fe4000  x19 0000000000007829
+09-21 09:51:53.058 30903 30903 F DEBUG   :     x20 0000000000007829  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 09:51:53.059 30903 30903 F DEBUG   :     x24 0000007e74491a38  x25 0000007e7443de28  x26 0000000000000000  x27 0000000000000000
+09-21 09:51:53.059 30903 30903 F DEBUG   :     x28 0000000000000000  x29 0000007fe0216b80
+09-21 09:51:53.059 30903 30903 F DEBUG   :     lr  0000007e768a8998  sp  0000007fe0216ae0  pc  0000007e768a89c4  pst 0000000000001000
+09-21 09:51:53.059 30903 30903 F DEBUG   : 14 total frames
+09-21 09:51:53.059 30903 30903 F DEBUG   : backtrace:
+09-21 09:51:53.059 30903 30903 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 09:51:53.059 30903 30903 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 09:51:53.059 30903 30903 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 09:51:53.059 30903 30903 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 09:51:53.059 30903 30903 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 09:51:53.059 30903 30903 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.060 30903 30903 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:51:53.060 30903 30903 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:51:53.060 30903 30903 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:51:53.060 30903 30903 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:51:53.060 30903 30903 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:51:53.061 30903 30903 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:51:53.061 30903 30903 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.061 30903 30903 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.061 30903 30903 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.062 30903 30903 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.062 30903 30903 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.062 30903 30903 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.062 30903 30903 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:51:53.062 30903 30903 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:53:32.671 30942 30942 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 30942 (python), pid 30942 (python)
+09-21 09:53:32.738 31718 31718 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 09:53:32.739 31718 31718 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 09:53:32.739 31718 31718 F DEBUG   : Revision: '0'
+09-21 09:53:32.739 31718 31718 F DEBUG   : ABI: 'arm64'
+09-21 09:53:32.739 31718 31718 F DEBUG   : Timestamp: 2025-09-21 09:53:32.724624352+0530
+09-21 09:53:32.739 31718 31718 F DEBUG   : Process uptime: 99s
+09-21 09:53:32.739 31718 31718 F DEBUG   : Cmdline: python /data/data/com.termux/files/home/resh.py
+09-21 09:53:32.739 31718 31718 F DEBUG   : pid: 30942, tid: 30942, name: python  >>> python <<<
+09-21 09:53:32.739 31718 31718 F DEBUG   : uid: 10247
+09-21 09:53:32.739 31718 31718 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 09:53:32.739 31718 31718 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 09:53:32.739 31718 31718 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007b70c16850'
+09-21 09:53:32.739 31718 31718 F DEBUG   :     x0  0000000000000000  x1  00000000000078de  x2  0000000000000006  x3  0000007fcf9b3be0
+09-21 09:53:32.739 31718 31718 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 09:53:32.739 31718 31718 F DEBUG   :     x8  00000000000000f0  x9  0000007d63682418  x10 0000000000000001  x11 0000007d636d4070
+09-21 09:53:32.740 31718 31718 F DEBUG   :     x12 0000000068cf7dc4  x13 000000007fffffff  x14 000000000a34c570  x15 000009b5634b1d7b
+09-21 09:53:32.740 31718 31718 F DEBUG   :     x16 0000007d6373dfe8  x17 0000007d63727ac0  x18 0000007d65f40000  x19 00000000000078de
+09-21 09:53:32.740 31718 31718 F DEBUG   :     x20 00000000000078de  x21 00000000ffffffff  x22 0000000000000440  x23 0000007d61287950
+09-21 09:53:32.740 31718 31718 F DEBUG   :     x24 0000007d61287d08  x25 0000007d61217e28  x26 0000000000000000  x27 0000000000000000
+09-21 09:53:32.740 31718 31718 F DEBUG   :     x28 0000000000000000  x29 0000007fcf9b3c60
+09-21 09:53:32.740 31718 31718 F DEBUG   :     lr  0000007d636bc998  sp  0000007fcf9b3bc0  pc  0000007d636bc9c4  pst 0000000000001000
+09-21 09:53:32.740 31718 31718 F DEBUG   : 14 total frames
+09-21 09:53:32.740 31718 31718 F DEBUG   : backtrace:
+09-21 09:53:32.740 31718 31718 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 09:53:32.740 31718 31718 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 09:53:32.740 31718 31718 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 09:53:32.740 31718 31718 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 09:53:32.740 31718 31718 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 09:53:32.740 31718 31718 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.740 31718 31718 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:53:32.740 31718 31718 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:53:32.740 31718 31718 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:53:32.740 31718 31718 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:53:32.740 31718 31718 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:53:32.740 31718 31718 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 09:53:32.740 31718 31718 F DEBUG   :       #06 pc 00000000003ebdd8  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.741 31718 31718 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.741 31718 31718 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.741 31718 31718 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.741 31718 31718 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.741 31718 31718 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.741 31718 31718 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 09:53:32.741 31718 31718 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 10:19:24.350  1882  1882 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 1882 (python), pid 1882 (python)
+09-21 10:19:24.452  5643  5643 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 10:19:24.452  5643  5643 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 10:19:24.452  5643  5643 F DEBUG   : Revision: '0'
+09-21 10:19:24.452  5643  5643 F DEBUG   : ABI: 'arm64'
+09-21 10:19:24.452  5643  5643 F DEBUG   : Timestamp: 2025-09-21 10:19:24.418260198+0530
+09-21 10:19:24.452  5643  5643 F DEBUG   : Process uptime: 1264s
+09-21 10:19:24.452  5643  5643 F DEBUG   : Cmdline: python /data/data/com.termux/files/home/resh.py
+09-21 10:19:24.452  5643  5643 F DEBUG   : pid: 1882, tid: 1882, name: python  >>> python <<<
+09-21 10:19:24.452  5643  5643 F DEBUG   : uid: 10247
+09-21 10:19:24.452  5643  5643 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 10:19:24.452  5643  5643 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 10:19:24.452  5643  5643 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000071e14e3520'
+09-21 10:19:24.452  5643  5643 F DEBUG   :     x0  0000000000000000  x1  000000000000075a  x2  0000000000000006  x3  0000007fda610d10
+09-21 10:19:24.452  5643  5643 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 10:19:24.452  5643  5643 F DEBUG   :     x8  00000000000000f0  x9  00000073014fa418  x10 0000000000000001  x11 000000730154c070
+09-21 10:19:24.452  5643  5643 F DEBUG   :     x12 0000000068cf83d4  x13 000000007fffffff  x14 000000000a395766  x15 000009ba15a0c007
+09-21 10:19:24.452  5643  5643 F DEBUG   :     x16 00000073015b5fe8  x17 000000730159fac0  x18 0000007306e94000  x19 000000000000075a
+09-21 10:19:24.453  5643  5643 F DEBUG   :     x20 000000000000075a  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 10:19:24.453  5643  5643 F DEBUG   :     x24 0000007305b07a38  x25 0000007305ab3e28  x26 0000000000000000  x27 0000000000000000
+09-21 10:19:24.453  5643  5643 F DEBUG   :     x28 0000000000000000  x29 0000007fda610d90
+09-21 10:19:24.453  5643  5643 F DEBUG   :     lr  0000007301534998  sp  0000007fda610cf0  pc  00000073015349c4  pst 0000000000001000
+09-21 10:19:24.453  5643  5643 F DEBUG   : 14 total frames
+09-21 10:19:24.453  5643  5643 F DEBUG   : backtrace:
+09-21 10:19:24.453  5643  5643 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 10:19:24.453  5643  5643 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 10:19:24.453  5643  5643 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 10:19:24.453  5643  5643 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 10:19:24.453  5643  5643 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 10:19:24.453  5643  5643 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 10:19:24.453  5643  5643 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 12:35:33.990  3643  3643 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 3643 (python), pid 3643 (python)
+09-21 12:35:34.144  4328  4328 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 12:35:34.144  4328  4328 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 12:35:34.145  4328  4328 F DEBUG   : Revision: '0'
+09-21 12:35:34.145  4328  4328 F DEBUG   : ABI: 'arm64'
+09-21 12:35:34.145  4328  4328 F DEBUG   : Timestamp: 2025-09-21 12:35:34.093952597+0530
+09-21 12:35:34.145  4328  4328 F DEBUG   : Process uptime: 116s
+09-21 12:35:34.145  4328  4328 F DEBUG   : Cmdline: python resh.py
+09-21 12:35:34.145  4328  4328 F DEBUG   : pid: 3643, tid: 3643, name: python  >>> python <<<
+09-21 12:35:34.145  4328  4328 F DEBUG   : uid: 10247
+09-21 12:35:34.145  4328  4328 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 12:35:34.145  4328  4328 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 12:35:34.145  4328  4328 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200006ecb487400'
+09-21 12:35:34.145  4328  4328 F DEBUG   :     x0  0000000000000000  x1  0000000000000e3b  x2  0000000000000006  x3  0000007fe8c26660
+09-21 12:35:34.145  4328  4328 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 12:35:34.146  4328  4328 F DEBUG   :     x8  00000000000000f0  x9  0000006fdb4a0418  x10 0000000000000001  x11 0000006fdb4f2070
+09-21 12:35:34.146  4328  4328 F DEBUG   :     x12 0000000068cfa3bd  x13 000000007fffffff  x14 000000000a6cf03c  x15 000009d2cff5688c
+09-21 12:35:34.146  4328  4328 F DEBUG   :     x16 0000006fdb55bfe8  x17 0000006fdb545ac0  x18 0000006fe14c8000  x19 0000000000000e3b
+09-21 12:35:34.146  4328  4328 F DEBUG   :     x20 0000000000000e3b  x21 00000000ffffffff  x22 0000000000000440  x23 0000006fded64950
+09-21 12:35:34.146  4328  4328 F DEBUG   :     x24 0000006fded64d08  x25 0000006fdecf4e28  x26 0000000000000000  x27 0000000000000000
+09-21 12:35:34.146  4328  4328 F DEBUG   :     x28 0000000000000000  x29 0000007fe8c266e0
+09-21 12:35:34.146  4328  4328 F DEBUG   :     lr  0000006fdb4da998  sp  0000007fe8c26640  pc  0000006fdb4da9c4  pst 0000000000001000
+09-21 12:35:34.146  4328  4328 F DEBUG   : 14 total frames
+09-21 12:35:34.146  4328  4328 F DEBUG   : backtrace:
+09-21 12:35:34.146  4328  4328 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 12:35:34.146  4328  4328 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 12:35:34.146  4328  4328 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 12:35:34.146  4328  4328 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 12:35:34.146  4328  4328 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 12:35:34.146  4328  4328 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #06 pc 00000000003ebdd8  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.147  4328  4328 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.148  4328  4328 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.148  4328  4328 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.148  4328  4328 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 12:35:34.148  4328  4328 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:05:54.054 12219 12219 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 12219 (python), pid 12219 (python)
+09-21 13:05:54.203 14207 14207 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 13:05:54.203 14207 14207 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 13:05:54.203 14207 14207 F DEBUG   : Revision: '0'
+09-21 13:05:54.203 14207 14207 F DEBUG   : ABI: 'arm64'
+09-21 13:05:54.203 14207 14207 F DEBUG   : Timestamp: 2025-09-21 13:05:54.162669703+0530
+09-21 13:05:54.203 14207 14207 F DEBUG   : Process uptime: 168s
+09-21 13:05:54.204 14207 14207 F DEBUG   : Cmdline: python resh.py
+09-21 13:05:54.204 14207 14207 F DEBUG   : pid: 12219, tid: 12219, name: python  >>> python <<<
+09-21 13:05:54.204 14207 14207 F DEBUG   : uid: 10247
+09-21 13:05:54.204 14207 14207 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 13:05:54.204 14207 14207 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 13:05:54.204 14207 14207 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x20000775d483220'
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x0  0000000000000000  x1  0000000000002fbb  x2  0000000000000006  x3  0000007fce7fb5f0
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x8  00000000000000f0  x9  0000007840ee5418  x10 0000000000000001  x11 0000007840f37070
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x12 0000000068cfaada  x13 000000007fffffff  x14 000000000a79e6f2  x15 000009d8523faf3f
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x16 0000007840fa0fe8  x17 0000007840f8aac0  x18 0000007843a40000  x19 0000000000002fbb
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x20 0000000000002fbb  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x24 000000783dad3a38  x25 000000783da7fe28  x26 0000000000000000  x27 0000000000000000
+09-21 13:05:54.204 14207 14207 F DEBUG   :     x28 0000000000000000  x29 0000007fce7fb670
+09-21 13:05:54.204 14207 14207 F DEBUG   :     lr  0000007840f1f998  sp  0000007fce7fb5d0  pc  0000007840f1f9c4  pst 0000000000001000
+09-21 13:05:54.204 14207 14207 F DEBUG   : 14 total frames
+09-21 13:05:54.204 14207 14207 F DEBUG   : backtrace:
+09-21 13:05:54.204 14207 14207 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 13:05:54.204 14207 14207 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 13:05:54.204 14207 14207 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 13:05:54.204 14207 14207 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 13:05:54.204 14207 14207 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 13:05:54.204 14207 14207 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.204 14207 14207 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:05:54.204 14207 14207 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:05:54.204 14207 14207 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:05:54.204 14207 14207 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:05:54.204 14207 14207 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:05:54.205 14207 14207 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:30:34.903 25585 25585 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 25585 (python), pid 25585 (python)
+09-21 13:30:35.029 26953 26953 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 13:30:35.029 26953 26953 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 13:30:35.029 26953 26953 F DEBUG   : Revision: '0'
+09-21 13:30:35.029 26953 26953 F DEBUG   : ABI: 'arm64'
+09-21 13:30:35.029 26953 26953 F DEBUG   : Timestamp: 2025-09-21 13:30:34.992481171+0530
+09-21 13:30:35.029 26953 26953 F DEBUG   : Process uptime: 161s
+09-21 13:30:35.029 26953 26953 F DEBUG   : Cmdline: python resh.py
+09-21 13:30:35.029 26953 26953 F DEBUG   : pid: 25585, tid: 25585, name: python  >>> python <<<
+09-21 13:30:35.029 26953 26953 F DEBUG   : uid: 10247
+09-21 13:30:35.029 26953 26953 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 13:30:35.029 26953 26953 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 13:30:35.029 26953 26953 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007eb649f910'
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x0  0000000000000000  x1  00000000000063f1  x2  0000000000000006  x3  0000007fcac6d1e0
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x8  00000000000000f0  x9  0000007f864be418  x10 0000000000000001  x11 0000007f86510070
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x12 0000000068cfb0a2  x13 000000007fffffff  x14 000000000a84b060  x15 000009dccdb490bc
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x16 0000007f86579fe8  x17 0000007f86563ac0  x18 0000007f8940c000  x19 00000000000063f1
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x20 00000000000063f1  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x24 0000007f8818ca38  x25 0000007f88138e28  x26 0000000000000000  x27 0000000000000000
+09-21 13:30:35.029 26953 26953 F DEBUG   :     x28 0000000000000000  x29 0000007fcac6d260
+09-21 13:30:35.029 26953 26953 F DEBUG   :     lr  0000007f864f8998  sp  0000007fcac6d1c0  pc  0000007f864f89c4  pst 0000000000001000
+09-21 13:30:35.029 26953 26953 F DEBUG   : 14 total frames
+09-21 13:30:35.029 26953 26953 F DEBUG   : backtrace:
+09-21 13:30:35.029 26953 26953 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 13:30:35.029 26953 26953 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 13:30:35.029 26953 26953 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 13:30:35.029 26953 26953 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 13:30:35.029 26953 26953 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 13:30:35.029 26953 26953 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:30:35.029 26953 26953 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:49:43.148 31660 31660 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 31660 (python), pid 31660 (python)
+09-21 13:49:43.285  4137  4137 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 13:49:43.285  4137  4137 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 13:49:43.285  4137  4137 F DEBUG   : Revision: '0'
+09-21 13:49:43.285  4137  4137 F DEBUG   : ABI: 'arm64'
+09-21 13:49:43.285  4137  4137 F DEBUG   : Timestamp: 2025-09-21 13:49:43.242583086+0530
+09-21 13:49:43.285  4137  4137 F DEBUG   : Process uptime: 476s
+09-21 13:49:43.285  4137  4137 F DEBUG   : Cmdline: python resh.py
+09-21 13:49:43.285  4137  4137 F DEBUG   : pid: 31660, tid: 31660, name: python  >>> python <<<
+09-21 13:49:43.285  4137  4137 F DEBUG   : uid: 10247
+09-21 13:49:43.285  4137  4137 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 13:49:43.285  4137  4137 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 13:49:43.285  4137  4137 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200006f0d631580'
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x0  0000000000000000  x1  0000000000007bac  x2  0000000000000006  x3  0000007fdcae78f0
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x8  00000000000000f0  x9  0000006fbd646418  x10 0000000000000001  x11 0000006fbd698070
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x12 0000000068cfb51f  x13 000000007fffffff  x14 000000000a8d5b12  x15 000009e0476ee357
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x16 0000006fbd701fe8  x17 0000006fbd6ebac0  x18 0000006fc1a44000  x19 0000000000007bac
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x20 0000000000007bac  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x24 0000006fbfb8aa38  x25 0000006fbfb36e28  x26 0000000000000000  x27 0000000000000000
+09-21 13:49:43.285  4137  4137 F DEBUG   :     x28 0000000000000000  x29 0000007fdcae7970
+09-21 13:49:43.285  4137  4137 F DEBUG   :     lr  0000006fbd680998  sp  0000007fdcae78d0  pc  0000006fbd6809c4  pst 0000000000001000
+09-21 13:49:43.285  4137  4137 F DEBUG   : 14 total frames
+09-21 13:49:43.285  4137  4137 F DEBUG   : backtrace:
+09-21 13:49:43.285  4137  4137 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 13:49:43.285  4137  4137 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 13:49:43.285  4137  4137 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 13:49:43.285  4137  4137 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 13:49:43.285  4137  4137 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 13:49:43.285  4137  4137 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:49:43.285  4137  4137 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:57:35.568  4413  4413 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 4413 (python), pid 4413 (python)
+09-21 13:57:35.695  8317  8317 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 13:57:35.695  8317  8317 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 13:57:35.695  8317  8317 F DEBUG   : Revision: '0'
+09-21 13:57:35.695  8317  8317 F DEBUG   : ABI: 'arm64'
+09-21 13:57:35.695  8317  8317 F DEBUG   : Timestamp: 2025-09-21 13:57:35.627486727+0530
+09-21 13:57:35.695  8317  8317 F DEBUG   : Process uptime: 395s
+09-21 13:57:35.695  8317  8317 F DEBUG   : Cmdline: python resh.py
+09-21 13:57:35.695  8317  8317 F DEBUG   : pid: 4413, tid: 4413, name: python  >>> python <<<
+09-21 13:57:35.695  8317  8317 F DEBUG   : uid: 10247
+09-21 13:57:35.695  8317  8317 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 13:57:35.696  8317  8317 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 13:57:35.696  8317  8317 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000076b9ca9760'
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x0  0000000000000000  x1  000000000000113d  x2  0000000000000006  x3  0000007fe8508f30
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x8  00000000000000f0  x9  00000077d9cc7418  x10 0000000000000001  x11 00000077d9d19070
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x12 0000000068cfb6f7  x13 000000007fffffff  x14 000000000a909b50  x15 000009e1b57e793b
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x16 00000077d9d82fe8  x17 00000077d9d6cac0  x18 00000077dd6fc000  x19 000000000000113d
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x20 000000000000113d  x21 00000000ffffffff  x22 b4000076b9ca95e0  x23 000000000005d7d8
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x24 00000077dcb9aa38  x25 00000077dcb46e28  x26 0000000000000000  x27 0000000000000000
+09-21 13:57:35.696  8317  8317 F DEBUG   :     x28 0000000000000000  x29 0000007fe8508fb0
+09-21 13:57:35.696  8317  8317 F DEBUG   :     lr  00000077d9d01998  sp  0000007fe8508f10  pc  00000077d9d019c4  pst 0000000000001000
+09-21 13:57:35.696  8317  8317 F DEBUG   : 14 total frames
+09-21 13:57:35.696  8317  8317 F DEBUG   : backtrace:
+09-21 13:57:35.696  8317  8317 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 13:57:35.696  8317  8317 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 13:57:35.696  8317  8317 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 13:57:35.696  8317  8317 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 13:57:35.696  8317  8317 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 13:57:35.696  8317  8317 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 13:57:35.696  8317  8317 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 14:33:59.073 19143 19143 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19143 (python), pid 19143 (python)
+09-21 14:33:59.194 24709 24709 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 14:33:59.194 24709 24709 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 14:33:59.194 24709 24709 F DEBUG   : Revision: '0'
+09-21 14:33:59.194 24709 24709 F DEBUG   : ABI: 'arm64'
+09-21 14:33:59.194 24709 24709 F DEBUG   : Timestamp: 2025-09-21 14:33:59.157414312+0530
+09-21 14:33:59.194 24709 24709 F DEBUG   : Process uptime: 1002s
+09-21 14:33:59.194 24709 24709 F DEBUG   : Cmdline: python resh.py
+09-21 14:33:59.194 24709 24709 F DEBUG   : pid: 19143, tid: 19143, name: python  >>> python <<<
+09-21 14:33:59.194 24709 24709 F DEBUG   : uid: 10247
+09-21 14:33:59.194 24709 24709 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 14:33:59.194 24709 24709 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 14:33:59.194 24709 24709 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007b20851490'
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x0  0000000000000000  x1  0000000000004ac7  x2  0000000000000006  x3  0000007fc5542ca0
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x8  00000000000000f0  x9  0000007c94d07418  x10 0000000000000001  x11 0000007c94d59070
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x12 0000000068cfbf7f  x13 000000007fffffff  x14 000000000aa054aa  x15 000009e85166bd50
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x16 0000007c94dc2fe8  x17 0000007c94dacac0  x18 0000007c95d88000  x19 0000000000004ac7
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x20 0000000000004ac7  x21 00000000ffffffff  x22 b400007b20851940  x23 000000000005d7d8
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x24 0000007c90e9fa38  x25 0000007c90e4be28  x26 0000000000000000  x27 0000000000000000
+09-21 14:33:59.194 24709 24709 F DEBUG   :     x28 0000000000000000  x29 0000007fc5542d20
+09-21 14:33:59.194 24709 24709 F DEBUG   :     lr  0000007c94d41998  sp  0000007fc5542c80  pc  0000007c94d419c4  pst 0000000000001000
+09-21 14:33:59.194 24709 24709 F DEBUG   : 14 total frames
+09-21 14:33:59.194 24709 24709 F DEBUG   : backtrace:
+09-21 14:33:59.194 24709 24709 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 14:33:59.194 24709 24709 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 14:33:59.194 24709 24709 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 14:33:59.194 24709 24709 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 14:33:59.194 24709 24709 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 14:33:59.194 24709 24709 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 14:33:59.194 24709 24709 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:12:26.697 24773 24773 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 24773 (python), pid 24773 (python)
+09-21 15:12:26.812 11866 11866 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:12:26.812 11866 11866 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:12:26.812 11866 11866 F DEBUG   : Revision: '0'
+09-21 15:12:26.812 11866 11866 F DEBUG   : ABI: 'arm64'
+09-21 15:12:26.812 11866 11866 F DEBUG   : Timestamp: 2025-09-21 15:12:26.769254988+0530
+09-21 15:12:26.812 11866 11866 F DEBUG   : Process uptime: 2307s
+09-21 15:12:26.812 11866 11866 F DEBUG   : Cmdline: python resh.py
+09-21 15:12:26.812 11866 11866 F DEBUG   : pid: 24773, tid: 24773, name: python  >>> python <<<
+09-21 15:12:26.812 11866 11866 F DEBUG   : uid: 10247
+09-21 15:12:26.812 11866 11866 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:12:26.812 11866 11866 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:12:26.812 11866 11866 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000073806716a0'
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x0  0000000000000000  x1  00000000000060c5  x2  0000000000000006  x3  0000007ff400b870
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x8  00000000000000f0  x9  0000007440693418  x10 0000000000000001  x11 00000074406e5070
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x12 0000000068cfc882  x13 000000007fffffff  x14 000000000ab1ce52  x15 000009ef4d7d6d0f
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x16 000000744074efe8  x17 0000007440738ac0  x18 0000007448b50000  x19 00000000000060c5
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x20 00000000000060c5  x21 00000000ffffffff  x22 0000000000000440  x23 0000007444d43950
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x24 0000007444d43d08  x25 0000007444cd3e28  x26 0000000000000000  x27 0000000000000000
+09-21 15:12:26.812 11866 11866 F DEBUG   :     x28 0000000000000000  x29 0000007ff400b8f0
+09-21 15:12:26.812 11866 11866 F DEBUG   :     lr  00000074406cd998  sp  0000007ff400b850  pc  00000074406cd9c4  pst 0000000000001000
+09-21 15:12:26.812 11866 11866 F DEBUG   : 14 total frames
+09-21 15:12:26.812 11866 11866 F DEBUG   : backtrace:
+09-21 15:12:26.812 11866 11866 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:12:26.812 11866 11866 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:12:26.812 11866 11866 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:12:26.812 11866 11866 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:12:26.812 11866 11866 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:12:26.812 11866 11866 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #06 pc 00000000003ebdd8  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:12:26.812 11866 11866 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:23:15.279 11930 11930 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 11930 (python), pid 11930 (python)
+09-21 15:23:15.468 16285 16285 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:23:15.468 16285 16285 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:23:15.468 16285 16285 F DEBUG   : Revision: '0'
+09-21 15:23:15.468 16285 16285 F DEBUG   : ABI: 'arm64'
+09-21 15:23:15.468 16285 16285 F DEBUG   : Timestamp: 2025-09-21 15:23:15.424661565+0530
+09-21 15:23:15.468 16285 16285 F DEBUG   : Process uptime: 639s
+09-21 15:23:15.468 16285 16285 F DEBUG   : Cmdline: python resh.py
+09-21 15:23:15.468 16285 16285 F DEBUG   : pid: 11930, tid: 11930, name: python  >>> python <<<
+09-21 15:23:15.468 16285 16285 F DEBUG   : uid: 10247
+09-21 15:23:15.468 16285 16285 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:23:15.468 16285 16285 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:23:15.468 16285 16285 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x20000778ce6a0a0'
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x0  0000000000000000  x1  0000000000002e9a  x2  0000000000000006  x3  0000007fc73ac990
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x8  00000000000000f0  x9  000000790ce8c418  x10 0000000000000001  x11 000000790cede070
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x12 0000000068cfcb0b  x13 000000007fffffff  x14 000000000ab6c10e  x15 000009f1440cf67c
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x16 000000790cf47fe8  x17 000000790cf31ac0  x18 0000007910d30000  x19 0000000000002e9a
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x20 0000000000002e9a  x21 00000000ffffffff  x22 0000000000000440  x23 000000790f94e950
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x24 000000790f94ed08  x25 000000790f8dee28  x26 0000000000000000  x27 0000000000000000
+09-21 15:23:15.468 16285 16285 F DEBUG   :     x28 0000000000000000  x29 0000007fc73aca10
+09-21 15:23:15.468 16285 16285 F DEBUG   :     lr  000000790cec6998  sp  0000007fc73ac970  pc  000000790cec69c4  pst 0000000000001000
+09-21 15:23:15.468 16285 16285 F DEBUG   : 14 total frames
+09-21 15:23:15.468 16285 16285 F DEBUG   : backtrace:
+09-21 15:23:15.468 16285 16285 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:23:15.468 16285 16285 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:23:15.468 16285 16285 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:23:15.468 16285 16285 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:23:15.468 16285 16285 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:23:15.468 16285 16285 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #06 pc 00000000003ebe48  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:23:15.468 16285 16285 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:26:35.054 16366 16366 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 16366 (python), pid 16366 (python)
+09-21 15:26:35.222 17215 17215 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:26:35.222 17215 17215 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:26:35.222 17215 17215 F DEBUG   : Revision: '0'
+09-21 15:26:35.222 17215 17215 F DEBUG   : ABI: 'arm64'
+09-21 15:26:35.222 17215 17215 F DEBUG   : Timestamp: 2025-09-21 15:26:35.165618807+0530
+09-21 15:26:35.222 17215 17215 F DEBUG   : Process uptime: 199s
+09-21 15:26:35.222 17215 17215 F DEBUG   : Cmdline: python resh.py
+09-21 15:26:35.223 17215 17215 F DEBUG   : pid: 16366, tid: 16366, name: python  >>> python <<<
+09-21 15:26:35.223 17215 17215 F DEBUG   : uid: 10247
+09-21 15:26:35.223 17215 17215 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:26:35.223 17215 17215 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:26:35.223 17215 17215 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x20000794a74f970'
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x0  0000000000000000  x1  0000000000003fee  x2  0000000000000006  x3  0000007fd3a6bc90
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x8  00000000000000f0  x9  0000007aab291418  x10 0000000000000001  x11 0000007aab2e3070
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x12 0000000068cfcbd3  x13 000000007fffffff  x14 000000000ab8473e  x15 000009f1ded9ad9c
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x16 0000007aab34cfe8  x17 0000007aab336ac0  x18 0000007ab1924000  x19 0000000000003fee
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x20 0000000000003fee  x21 00000000ffffffff  x22 0000007aaf129a0c  x23 0000000000000000
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x24 0000007ab0809010  x25 0000007aaf0b8e28  x26 0000000000000000  x27 0000000000000000
+09-21 15:26:35.223 17215 17215 F DEBUG   :     x28 0000000000000000  x29 0000007fd3a6bd10
+09-21 15:26:35.224 17215 17215 F DEBUG   :     lr  0000007aab2cb998  sp  0000007fd3a6bc70  pc  0000007aab2cb9c4  pst 0000000000001000
+09-21 15:26:35.224 17215 17215 F DEBUG   : 13 total frames
+09-21 15:26:35.224 17215 17215 F DEBUG   : backtrace:
+09-21 15:26:35.224 17215 17215 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:26:35.224 17215 17215 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:26:35.224 17215 17215 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:26:35.224 17215 17215 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:26:35.224 17215 17215 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:26:35.224 17215 17215 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:26:35.224 17215 17215 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:26:35.224 17215 17215 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:26:35.224 17215 17215 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:26:35.224 17215 17215 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:26:35.224 17215 17215 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #06 pc 00000000003481b0  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #07 pc 0000000000402b80  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #08 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #09 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #10 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #11 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:26:35.225 17215 17215 F DEBUG   :       #12 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:30:46.180 17250 17250 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 17250 (python), pid 17250 (python)
+09-21 15:30:46.323 19822 19822 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:30:46.323 19822 19822 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:30:46.323 19822 19822 F DEBUG   : Revision: '0'
+09-21 15:30:46.323 19822 19822 F DEBUG   : ABI: 'arm64'
+09-21 15:30:46.323 19822 19822 F DEBUG   : Timestamp: 2025-09-21 15:30:46.287209207+0530
+09-21 15:30:46.323 19822 19822 F DEBUG   : Process uptime: 250s
+09-21 15:30:46.323 19822 19822 F DEBUG   : Cmdline: python resh.py
+09-21 15:30:46.323 19822 19822 F DEBUG   : pid: 17250, tid: 17250, name: python  >>> python <<<
+09-21 15:30:46.323 19822 19822 F DEBUG   : uid: 10247
+09-21 15:30:46.323 19822 19822 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:30:46.323 19822 19822 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:30:46.323 19822 19822 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007a94eb6820'
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x0  0000000000000000  x1  0000000000004362  x2  0000000000000006  x3  0000007fc0f1ded0
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x8  00000000000000f0  x9  0000007c14ec9418  x10 0000000000000001  x11 0000007c14f1b070
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x12 0000000068cfccce  x13 000000007fffffff  x14 000000000aba316a  x15 000009f2a16f6130
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x16 0000007c14f84fe8  x17 0000007c14f6eac0  x18 0000007c1a040000  x19 0000000000004362
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x20 0000000000004362  x21 00000000ffffffff  x22 0000000000000440  x23 0000007c17392950
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x24 0000007c17392d08  x25 0000007c17322e28  x26 0000000000000000  x27 0000000000000000
+09-21 15:30:46.323 19822 19822 F DEBUG   :     x28 0000000000000000  x29 0000007fc0f1df50
+09-21 15:30:46.323 19822 19822 F DEBUG   :     lr  0000007c14f03998  sp  0000007fc0f1deb0  pc  0000007c14f039c4  pst 0000000000001000
+09-21 15:30:46.323 19822 19822 F DEBUG   : 14 total frames
+09-21 15:30:46.323 19822 19822 F DEBUG   : backtrace:
+09-21 15:30:46.323 19822 19822 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:30:46.323 19822 19822 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:30:46.323 19822 19822 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:30:46.323 19822 19822 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:30:46.323 19822 19822 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:30:46.323 19822 19822 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #06 pc 00000000003ebdd8  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:30:46.323 19822 19822 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:37:34.985 19880 19880 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19880 (python), pid 19880 (python)
+09-21 15:37:35.136 23564 23564 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:37:35.136 23564 23564 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:37:35.136 23564 23564 F DEBUG   : Revision: '0'
+09-21 15:37:35.136 23564 23564 F DEBUG   : ABI: 'arm64'
+09-21 15:37:35.136 23564 23564 F DEBUG   : Timestamp: 2025-09-21 15:37:35.077840385+0530
+09-21 15:37:35.136 23564 23564 F DEBUG   : Process uptime: 408s
+09-21 15:37:35.136 23564 23564 F DEBUG   : Cmdline: python resh.py
+09-21 15:37:35.136 23564 23564 F DEBUG   : pid: 19880, tid: 19880, name: python  >>> python <<<
+09-21 15:37:35.136 23564 23564 F DEBUG   : uid: 10247
+09-21 15:37:35.136 23564 23564 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:37:35.136 23564 23564 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:37:35.136 23564 23564 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000075080898b0'
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x0  0000000000000000  x1  0000000000004da8  x2  0000000000000006  x3  0000007fcf772b60
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x8  00000000000000f0  x9  00000075aa264418  x10 0000000000000001  x11 00000075aa2b6070
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x12 0000000068cfce66  x13 000000007fffffff  x14 000000000abd4d04  x15 000009f3de346a4c
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x16 00000075aa31ffe8  x17 00000075aa309ac0  x18 00000075adb40000  x19 0000000000004da8
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x20 0000000000004da8  x21 00000000ffffffff  x22 0000000000000440  x23 00000075a86f1950
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x24 00000075a86f1d08  x25 00000075a8681e28  x26 0000000000000000  x27 0000000000000000
+09-21 15:37:35.137 23564 23564 F DEBUG   :     x28 0000000000000000  x29 0000007fcf772be0
+09-21 15:37:35.137 23564 23564 F DEBUG   :     lr  00000075aa29e998  sp  0000007fcf772b40  pc  00000075aa29e9c4  pst 0000000000001000
+09-21 15:37:35.137 23564 23564 F DEBUG   : 14 total frames
+09-21 15:37:35.137 23564 23564 F DEBUG   : backtrace:
+09-21 15:37:35.137 23564 23564 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:37:35.137 23564 23564 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:37:35.137 23564 23564 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:37:35.137 23564 23564 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:37:35.137 23564 23564 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:37:35.137 23564 23564 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #06 pc 00000000003ebe60  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:37:35.137 23564 23564 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:40:22.066 23687 23687 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 23687 (python), pid 23687 (python)
+09-21 15:40:22.182 24525 24525 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:40:22.182 24525 24525 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:40:22.182 24525 24525 F DEBUG   : Revision: '0'
+09-21 15:40:22.182 24525 24525 F DEBUG   : ABI: 'arm64'
+09-21 15:40:22.182 24525 24525 F DEBUG   : Timestamp: 2025-09-21 15:40:22.150456626+0530
+09-21 15:40:22.182 24525 24525 F DEBUG   : Process uptime: 167s
+09-21 15:40:22.182 24525 24525 F DEBUG   : Cmdline: python resh.py
+09-21 15:40:22.182 24525 24525 F DEBUG   : pid: 23687, tid: 23687, name: python  >>> python <<<
+09-21 15:40:22.182 24525 24525 F DEBUG   : uid: 10247
+09-21 15:40:22.182 24525 24525 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:40:22.182 24525 24525 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:40:22.182 24525 24525 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200006f174ba5b0'
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x0  0000000000000000  x1  0000000000005c87  x2  0000000000000006  x3  0000007fdc21ee00
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x8  00000000000000f0  x9  0000006fe8917418  x10 0000000000000001  x11 0000006fe8969070
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x12 0000000068cfcf0e  x13 000000007fffffff  x14 000000000abe92bc  x15 000009f45fab5558
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x16 0000006fe89d2fe8  x17 0000006fe89bcac0  x18 0000006fe9a90000  x19 0000000000005c87
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x20 0000000000005c87  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x24 0000006fe7b0fa38  x25 0000006fe7abbe28  x26 0000000000000000  x27 0000000000000000
+09-21 15:40:22.182 24525 24525 F DEBUG   :     x28 0000000000000000  x29 0000007fdc21ee80
+09-21 15:40:22.182 24525 24525 F DEBUG   :     lr  0000006fe8951998  sp  0000007fdc21ede0  pc  0000006fe89519c4  pst 0000000000001000
+09-21 15:40:22.182 24525 24525 F DEBUG   : 14 total frames
+09-21 15:40:22.182 24525 24525 F DEBUG   : backtrace:
+09-21 15:40:22.182 24525 24525 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:40:22.182 24525 24525 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:40:22.182 24525 24525 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:40:22.182 24525 24525 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:40:22.182 24525 24525 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:40:22.182 24525 24525 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:40:22.182 24525 24525 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:51:12.942 24562 24562 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 24562 (python), pid 24562 (python)
+09-21 15:51:13.040 29897 29897 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:51:13.040 29897 29897 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:51:13.040 29897 29897 F DEBUG   : Revision: '0'
+09-21 15:51:13.040 29897 29897 F DEBUG   : ABI: 'arm64'
+09-21 15:51:13.040 29897 29897 F DEBUG   : Timestamp: 2025-09-21 15:51:13.005524665+0530
+09-21 15:51:13.040 29897 29897 F DEBUG   : Process uptime: 651s
+09-21 15:51:13.040 29897 29897 F DEBUG   : Cmdline: python resh.py
+09-21 15:51:13.040 29897 29897 F DEBUG   : pid: 24562, tid: 24562, name: python  >>> python <<<
+09-21 15:51:13.040 29897 29897 F DEBUG   : uid: 10247
+09-21 15:51:13.040 29897 29897 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:51:13.040 29897 29897 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:51:13.040 29897 29897 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200006fad4c0460'
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x0  0000000000000000  x1  0000000000005ff2  x2  0000000000000006  x3  0000007fee36cab0
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x8  00000000000000f0  x9  0000006fbd4da418  x10 0000000000000001  x11 0000006fbd52c070
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x12 0000000068cfd198  x13 000000007fffffff  x14 000000000ac36abe  x15 000009f65801e60f
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x16 0000006fbd595fe8  x17 0000006fbd57fac0  x18 0000006fc2988000  x19 0000000000005ff2
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x20 0000000000005ff2  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x24 0000006fc0d1aa38  x25 0000006fc0cc6e28  x26 0000000000000000  x27 0000000000000000
+09-21 15:51:13.040 29897 29897 F DEBUG   :     x28 0000000000000000  x29 0000007fee36cb30
+09-21 15:51:13.040 29897 29897 F DEBUG   :     lr  0000006fbd514998  sp  0000007fee36ca90  pc  0000006fbd5149c4  pst 0000000000001000
+09-21 15:51:13.040 29897 29897 F DEBUG   : 14 total frames
+09-21 15:51:13.040 29897 29897 F DEBUG   : backtrace:
+09-21 15:51:13.040 29897 29897 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:51:13.040 29897 29897 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:51:13.040 29897 29897 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:51:13.040 29897 29897 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:51:13.040 29897 29897 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:51:13.040 29897 29897 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:51:13.040 29897 29897 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:57:12.610 29951 29951 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 29951 (python), pid 29951 (python)
+09-21 15:57:12.720   329   329 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 15:57:12.720   329   329 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 15:57:12.720   329   329 F DEBUG   : Revision: '0'
+09-21 15:57:12.720   329   329 F DEBUG   : ABI: 'arm64'
+09-21 15:57:12.720   329   329 F DEBUG   : Timestamp: 2025-09-21 15:57:12.689615763+0530
+09-21 15:57:12.720   329   329 F DEBUG   : Process uptime: 358s
+09-21 15:57:12.720   329   329 F DEBUG   : Cmdline: python resh.py
+09-21 15:57:12.720   329   329 F DEBUG   : pid: 29951, tid: 29951, name: python  >>> python <<<
+09-21 15:57:12.720   329   329 F DEBUG   : uid: 10247
+09-21 15:57:12.720   329   329 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 15:57:12.720   329   329 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 15:57:12.720   329   329 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007cbcafa280'
+09-21 15:57:12.720   329   329 F DEBUG   :     x0  0000000000000000  x1  00000000000074ff  x2  0000000000000006  x3  0000007ff19a8820
+09-21 15:57:12.720   329   329 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 15:57:12.720   329   329 F DEBUG   :     x8  00000000000000f0  x9  0000007dfcb0d418  x10 0000000000000001  x11 0000007dfcb5f070
+09-21 15:57:12.720   329   329 F DEBUG   :     x12 0000000068cfd300  x13 000000007fffffff  x14 000000000ac628a2  x15 000009f76eb26757
+09-21 15:57:12.720   329   329 F DEBUG   :     x16 0000007dfcbc8fe8  x17 0000007dfcbb2ac0  x18 0000007dfe424000  x19 00000000000074ff
+09-21 15:57:12.720   329   329 F DEBUG   :     x20 00000000000074ff  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 15:57:12.720   329   329 F DEBUG   :     x24 0000007dfd283a38  x25 0000007dfd22fe28  x26 0000000000000000  x27 0000000000000000
+09-21 15:57:12.720   329   329 F DEBUG   :     x28 0000000000000000  x29 0000007ff19a88a0
+09-21 15:57:12.720   329   329 F DEBUG   :     lr  0000007dfcb47998  sp  0000007ff19a8800  pc  0000007dfcb479c4  pst 0000000000001000
+09-21 15:57:12.720   329   329 F DEBUG   : 14 total frames
+09-21 15:57:12.720   329   329 F DEBUG   : backtrace:
+09-21 15:57:12.720   329   329 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 15:57:12.720   329   329 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 15:57:12.720   329   329 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 15:57:12.720   329   329 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 15:57:12.720   329   329 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 15:57:12.720   329   329 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:57:12.720   329   329 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:57:12.720   329   329 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:57:12.720   329   329 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:57:12.720   329   329 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:57:12.720   329   329 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 15:57:12.720   329   329 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 15:57:12.720   329   329 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 17:26:30.077  8512  8512 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 8512 (python), pid 8512 (python)
+09-21 17:26:30.180  9480  9480 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 17:26:30.180  9480  9480 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 17:26:30.180  9480  9480 F DEBUG   : Revision: '0'
+09-21 17:26:30.180  9480  9480 F DEBUG   : ABI: 'arm64'
+09-21 17:26:30.180  9480  9480 F DEBUG   : Timestamp: 2025-09-21 17:26:30.152233613+0530
+09-21 17:26:30.180  9480  9480 F DEBUG   : Process uptime: 85s
+09-21 17:26:30.180  9480  9480 F DEBUG   : Cmdline: python resh.py
+09-21 17:26:30.180  9480  9480 F DEBUG   : pid: 8512, tid: 8512, name: python  >>> python <<<
+09-21 17:26:30.180  9480  9480 F DEBUG   : uid: 10247
+09-21 17:26:30.180  9480  9480 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 17:26:30.180  9480  9480 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 17:26:30.180  9480  9480 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000074486863d0'
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x0  0000000000000000  x1  0000000000002140  x2  0000000000000006  x3  0000007fe174f320
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x8  00000000000000f0  x9  000000765c87a418  x10 0000000000000001  x11 000000765c8cc070
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x12 0000000068cfe7ee  x13 000000007fffffff  x14 000000000aecdafe  x15 00000a07a5fd28d4
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x16 000000765c935fe8  x17 000000765c91fac0  x18 000000765d690000  x19 0000000000002140
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x20 0000000000002140  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x24 0000007658d8fa38  x25 0000007658d3be28  x26 0000000000000000  x27 0000000000000000
+09-21 17:26:30.180  9480  9480 F DEBUG   :     x28 0000000000000000  x29 0000007fe174f3a0
+09-21 17:26:30.180  9480  9480 F DEBUG   :     lr  000000765c8b4998  sp  0000007fe174f300  pc  000000765c8b49c4  pst 0000000000001000
+09-21 17:26:30.180  9480  9480 F DEBUG   : 14 total frames
+09-21 17:26:30.180  9480  9480 F DEBUG   : backtrace:
+09-21 17:26:30.180  9480  9480 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 17:26:30.180  9480  9480 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 17:26:30.180  9480  9480 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 17:26:30.180  9480  9480 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 17:26:30.180  9480  9480 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 17:26:30.180  9480  9480 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 17:26:30.180  9480  9480 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 19:00:55.390  8695  8695 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 8695 (python), pid 8695 (python)
+09-21 19:00:55.526  9665  9665 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 19:00:55.526  9665  9665 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 19:00:55.526  9665  9665 F DEBUG   : Revision: '0'
+09-21 19:00:55.526  9665  9665 F DEBUG   : ABI: 'arm64'
+09-21 19:00:55.526  9665  9665 F DEBUG   : Timestamp: 2025-09-21 19:00:55.457097094+0530
+09-21 19:00:55.526  9665  9665 F DEBUG   : Process uptime: 121s
+09-21 19:00:55.526  9665  9665 F DEBUG   : Cmdline: python resh.py
+09-21 19:00:55.527  9665  9665 F DEBUG   : pid: 8695, tid: 8695, name: python  >>> python <<<
+09-21 19:00:55.527  9665  9665 F DEBUG   : uid: 10247
+09-21 19:00:55.527  9665  9665 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 19:00:55.527  9665  9665 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 19:00:55.527  9665  9665 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007b5a159130'
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x0  0000000000000000  x1  00000000000021f7  x2  0000000000000006  x3  0000007fc5b13230
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x8  00000000000000f0  x9  0000007cdcb05418  x10 0000000000000001  x11 0000007cdcb57070
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x12 0000000068cffe0f  x13 000000007fffffff  x14 000000000b0af862  x15 00000a18cbd0b740
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x16 0000007cdcbc0fe8  x17 0000007cdcbaaac0  x18 0000007cddae0000  x19 00000000000021f7
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x20 00000000000021f7  x21 00000000ffffffff  x22 0000007cda7c2a0c  x23 0000000000000000
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x24 0000007cdceb1010  x25 0000007cda751e28  x26 0000000000000000  x27 0000000000000000
+09-21 19:00:55.527  9665  9665 F DEBUG   :     x28 0000000000000000  x29 0000007fc5b132b0
+09-21 19:00:55.528  9665  9665 F DEBUG   :     lr  0000007cdcb3f998  sp  0000007fc5b13210  pc  0000007cdcb3f9c4  pst 0000000000001000
+09-21 19:00:55.528  9665  9665 F DEBUG   : 13 total frames
+09-21 19:00:55.528  9665  9665 F DEBUG   : backtrace:
+09-21 19:00:55.528  9665  9665 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 19:00:55.528  9665  9665 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 19:00:55.528  9665  9665 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 19:00:55.528  9665  9665 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 19:00:55.528  9665  9665 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 19:00:55.528  9665  9665 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #06 pc 00000000003481b0  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #07 pc 0000000000402b80  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #08 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #09 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #10 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #11 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 19:00:55.529  9665  9665 F DEBUG   :       #12 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 21:15:08.640 26974 26974 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 26974 (python), pid 26974 (python)
+09-21 21:15:08.913 31427 31427 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-21 21:15:08.914 31427 31427 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-21 21:15:08.914 31427 31427 F DEBUG   : Revision: '0'
+09-21 21:15:08.914 31427 31427 F DEBUG   : ABI: 'arm64'
+09-21 21:15:08.914 31427 31427 F DEBUG   : Timestamp: 2025-09-21 21:15:08.829064891+0530
+09-21 21:15:08.914 31427 31427 F DEBUG   : Process uptime: 386s
+09-21 21:15:08.914 31427 31427 F DEBUG   : Cmdline: python resh.py
+09-21 21:15:08.915 31427 31427 F DEBUG   : pid: 26974, tid: 26974, name: python  >>> python <<<
+09-21 21:15:08.915 31427 31427 F DEBUG   : uid: 10247
+09-21 21:15:08.915 31427 31427 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-21 21:15:08.915 31427 31427 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-21 21:15:08.915 31427 31427 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007e75e3e1f0'
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x0  0000000000000000  x1  000000000000695e  x2  0000000000000006  x3  0000007fea44b530
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x8  00000000000000f0  x9  0000007f65e52418  x10 0000000000000001  x11 0000007f65ea4070
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x12 0000000068d01d84  x13 000000007fffffff  x14 000000000b2fa64c  x15 00000a312bf4b6cc
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x16 0000007f65f0dfe8  x17 0000007f65ef7ac0  x18 0000007f6a928000  x19 000000000000695e
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x20 000000000000695e  x21 00000000ffffffff  x22 b400007e75e3e2b0  x23 000000000005d7d8
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x24 0000007f68ad5a38  x25 0000007f68a81e28  x26 0000000000000000  x27 0000000000000000
+09-21 21:15:08.916 31427 31427 F DEBUG   :     x28 0000000000000000  x29 0000007fea44b5b0
+09-21 21:15:08.916 31427 31427 F DEBUG   :     lr  0000007f65e8c998  sp  0000007fea44b510  pc  0000007f65e8c9c4  pst 0000000000001000
+09-21 21:15:08.917 31427 31427 F DEBUG   : 14 total frames
+09-21 21:15:08.917 31427 31427 F DEBUG   : backtrace:
+09-21 21:15:08.917 31427 31427 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-21 21:15:08.917 31427 31427 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-21 21:15:08.917 31427 31427 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-21 21:15:08.917 31427 31427 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-21 21:15:08.917 31427 31427 F DEBUG   :   NOTE: Unreadable libraries:
+09-21 21:15:08.917 31427 31427 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.917 31427 31427 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 21:15:08.917 31427 31427 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 21:15:08.917 31427 31427 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 21:15:08.917 31427 31427 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 21:15:08.917 31427 31427 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 21:15:08.917 31427 31427 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-21 21:15:08.917 31427 31427 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.918 31427 31427 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.918 31427 31427 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.918 31427 31427 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.918 31427 31427 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.918 31427 31427 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.918 31427 31427 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-21 21:15:08.918 31427 31427 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 16:34:40.220 32484 32484 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 32484 (python), pid 32484 (python)
+09-23 16:34:40.394  6761  6761 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 16:34:40.394  6761  6761 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 16:34:40.394  6761  6761 F DEBUG   : Revision: '0'
+09-23 16:34:40.394  6761  6761 F DEBUG   : ABI: 'arm64'
+09-23 16:34:40.394  6761  6761 F DEBUG   : Timestamp: 2025-09-23 16:34:40.343156117+0530
+09-23 16:34:40.394  6761  6761 F DEBUG   : Process uptime: 958s
+09-23 16:34:40.394  6761  6761 F DEBUG   : Cmdline: python resh.py
+09-23 16:34:40.394  6761  6761 F DEBUG   : pid: 32484, tid: 32484, name: python  >>> python <<<
+09-23 16:34:40.394  6761  6761 F DEBUG   : uid: 10247
+09-23 16:34:40.394  6761  6761 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 16:34:40.394  6761  6761 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 16:34:40.394  6761  6761 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000075ec05d130'
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x0  0000000000000000  x1  0000000000007ee4  x2  0000000000000006  x3  0000007fef0e5730
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x8  00000000000000f0  x9  0000007663691418  x10 0000000000000001  x11 00000076636e3070
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x12 0000000068d27ec8  x13 000000007fffffff  x14 000000000c7f61ac  x15 00000c0944283c04
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x16 000000766374cfe8  x17 0000007663736ac0  x18 0000007667ec4000  x19 0000000000007ee4
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x20 0000000000007ee4  x21 00000000ffffffff  x22 b4000075ec05d850  x23 000000000005d7d8
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x24 000000765c6b3a38  x25 000000765c65fe28  x26 0000000000000000  x27 0000000000000000
+09-23 16:34:40.394  6761  6761 F DEBUG   :     x28 0000000000000000  x29 0000007fef0e57b0
+09-23 16:34:40.394  6761  6761 F DEBUG   :     lr  00000076636cb998  sp  0000007fef0e5710  pc  00000076636cb9c4  pst 0000000000001000
+09-23 16:34:40.394  6761  6761 F DEBUG   : 14 total frames
+09-23 16:34:40.394  6761  6761 F DEBUG   : backtrace:
+09-23 16:34:40.394  6761  6761 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 16:34:40.394  6761  6761 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 16:34:40.394  6761  6761 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 16:34:40.394  6761  6761 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 16:34:40.394  6761  6761 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 16:34:40.394  6761  6761 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 16:34:40.394  6761  6761 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 18:57:58.870  8569  8569 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 8569 (python), pid 8569 (python)
+09-23 18:57:58.987 17739 17739 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 18:57:58.987 17739 17739 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 18:57:58.987 17739 17739 F DEBUG   : Revision: '0'
+09-23 18:57:58.987 17739 17739 F DEBUG   : ABI: 'arm64'
+09-23 18:57:58.987 17739 17739 F DEBUG   : Timestamp: 2025-09-23 18:57:58.944665489+0530
+09-23 18:57:58.987 17739 17739 F DEBUG   : Process uptime: 911s
+09-23 18:57:58.987 17739 17739 F DEBUG   : Cmdline: python resh.py
+09-23 18:57:58.987 17739 17739 F DEBUG   : pid: 8569, tid: 8569, name: python  >>> python <<<
+09-23 18:57:58.987 17739 17739 F DEBUG   : uid: 10247
+09-23 18:57:58.987 17739 17739 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 18:57:58.987 17739 17739 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 18:57:58.987 17739 17739 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007a06ab0820'
+09-23 18:57:58.987 17739 17739 F DEBUG   :     x0  0000000000000000  x1  0000000000002179  x2  0000000000000006  x3  0000007fd1e81c10
+09-23 18:57:58.987 17739 17739 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 18:57:58.988 17739 17739 F DEBUG   :     x8  00000000000000f0  x9  0000007ac810e418  x10 0000000000000001  x11 0000007ac8160070
+09-23 18:57:58.988 17739 17739 F DEBUG   :     x12 0000000068d2a05e  x13 000000007fffffff  x14 000000000cb7c022  x15 00000c234ae93198
+09-23 18:57:58.988 17739 17739 F DEBUG   :     x16 0000007ac81c9fe8  x17 0000007ac81b3ac0  x18 0000007acaea8000  x19 0000000000002179
+09-23 18:57:58.988 17739 17739 F DEBUG   :     x20 0000000000002179  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-23 18:57:58.988 17739 17739 F DEBUG   :     x24 0000007ac7100a38  x25 0000007ac70ace28  x26 0000000000000000  x27 0000000000000000
+09-23 18:57:58.988 17739 17739 F DEBUG   :     x28 0000000000000000  x29 0000007fd1e81c90
+09-23 18:57:58.988 17739 17739 F DEBUG   :     lr  0000007ac8148998  sp  0000007fd1e81bf0  pc  0000007ac81489c4  pst 0000000000001000
+09-23 18:57:58.988 17739 17739 F DEBUG   : 14 total frames
+09-23 18:57:58.988 17739 17739 F DEBUG   : backtrace:
+09-23 18:57:58.988 17739 17739 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 18:57:58.988 17739 17739 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 18:57:58.988 17739 17739 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 18:57:58.988 17739 17739 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 18:57:58.988 17739 17739 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 18:57:58.988 17739 17739 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.988 17739 17739 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 18:57:58.989 17739 17739 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 19:41:24.371 17796 17796 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 17796 (python), pid 17796 (python)
+09-23 19:41:24.497  6292  6292 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 19:41:24.498  6292  6292 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 19:41:24.498  6292  6292 F DEBUG   : Revision: '0'
+09-23 19:41:24.498  6292  6292 F DEBUG   : ABI: 'arm64'
+09-23 19:41:24.498  6292  6292 F DEBUG   : Timestamp: 2025-09-23 19:41:24.427816716+0530
+09-23 19:41:24.498  6292  6292 F DEBUG   : Process uptime: 2605s
+09-23 19:41:24.498  6292  6292 F DEBUG   : Cmdline: python resh.py
+09-23 19:41:24.498  6292  6292 F DEBUG   : pid: 17796, tid: 17796, name: python  >>> python <<<
+09-23 19:41:24.498  6292  6292 F DEBUG   : uid: 10247
+09-23 19:41:24.498  6292  6292 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 19:41:24.498  6292  6292 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 19:41:24.499  6292  6292 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007472aff3a0'
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x0  0000000000000000  x1  0000000000004584  x2  0000000000000006  x3  0000007fecfc5f20
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x8  00000000000000f0  x9  00000074d48ed418  x10 0000000000000001  x11 00000074d493f070
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x12 0000000068d2aa8c  x13 000000007fffffff  x14 000000000ccab368  x15 00000c2b2dcf59f7
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x16 00000074d49a8fe8  x17 00000074d4992ac0  x18 00000074d4f20000  x19 0000000000004584
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x20 0000000000004584  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x24 00000074d31b1a38  x25 00000074d315de28  x26 0000000000000000  x27 0000000000000000
+09-23 19:41:24.499  6292  6292 F DEBUG   :     x28 0000000000000000  x29 0000007fecfc5fa0
+09-23 19:41:24.500  6292  6292 F DEBUG   :     lr  00000074d4927998  sp  0000007fecfc5f00  pc  00000074d49279c4  pst 0000000000001000
+09-23 19:41:24.500  6292  6292 F DEBUG   : 14 total frames
+09-23 19:41:24.500  6292  6292 F DEBUG   : backtrace:
+09-23 19:41:24.500  6292  6292 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 19:41:24.500  6292  6292 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 19:41:24.500  6292  6292 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 19:41:24.500  6292  6292 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 19:41:24.500  6292  6292 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 19:41:24.500  6292  6292 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.500  6292  6292 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 19:41:24.500  6292  6292 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 19:41:24.500  6292  6292 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 19:41:24.500  6292  6292 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 19:41:24.500  6292  6292 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 19:41:24.501  6292  6292 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:08:24.342 13651 13651 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 13651 (python), pid 13651 (python)
+09-23 20:08:24.405 15134 15134 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 20:08:24.405 15134 15134 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 20:08:24.405 15134 15134 F DEBUG   : Revision: '0'
+09-23 20:08:24.405 15134 15134 F DEBUG   : ABI: 'arm64'
+09-23 20:08:24.405 15134 15134 F DEBUG   : Timestamp: 2025-09-23 20:08:24.376944120+0530
+09-23 20:08:24.405 15134 15134 F DEBUG   : Process uptime: 252s
+09-23 20:08:24.405 15134 15134 F DEBUG   : Cmdline: python resh.py
+09-23 20:08:24.405 15134 15134 F DEBUG   : pid: 13651, tid: 13651, name: python  >>> python <<<
+09-23 20:08:24.405 15134 15134 F DEBUG   : uid: 10247
+09-23 20:08:24.405 15134 15134 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 20:08:24.405 15134 15134 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 20:08:24.405 15134 15134 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x20000777f6c4580'
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x0  0000000000000000  x1  0000000000003553  x2  0000000000000006  x3  0000007fe6f20ec0
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x8  00000000000000f0  x9  000000791f6d8418  x10 0000000000000001  x11 000000791f72a070
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x12 0000000068d2b0e0  x13 000000007fffffff  x14 000000000cd70776  x15 00000c30150fdd14
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x16 000000791f793fe8  x17 000000791f77dac0  x18 0000007926350000  x19 0000000000003553
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x20 0000000000003553  x21 00000000ffffffff  x22 0000000000000440  x23 0000007923d54950
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x24 0000007923d54d08  x25 0000007923ce4e28  x26 0000000000000000  x27 0000000000000000
+09-23 20:08:24.405 15134 15134 F DEBUG   :     x28 0000000000000000  x29 0000007fe6f20f40
+09-23 20:08:24.405 15134 15134 F DEBUG   :     lr  000000791f712998  sp  0000007fe6f20ea0  pc  000000791f7129c4  pst 0000000000001000
+09-23 20:08:24.405 15134 15134 F DEBUG   : 14 total frames
+09-23 20:08:24.405 15134 15134 F DEBUG   : backtrace:
+09-23 20:08:24.405 15134 15134 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 20:08:24.405 15134 15134 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 20:08:24.405 15134 15134 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 20:08:24.405 15134 15134 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 20:08:24.405 15134 15134 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 20:08:24.405 15134 15134 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #06 pc 00000000003ebe48  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:08:24.405 15134 15134 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:16:39.405 15282 15282 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 15282 (python), pid 15282 (python)
+09-23 20:16:39.530 17973 17973 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 20:16:39.530 17973 17973 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 20:16:39.530 17973 17973 F DEBUG   : Revision: '0'
+09-23 20:16:39.530 17973 17973 F DEBUG   : ABI: 'arm64'
+09-23 20:16:39.530 17973 17973 F DEBUG   : Timestamp: 2025-09-23 20:16:39.498293073+0530
+09-23 20:16:39.530 17973 17973 F DEBUG   : Process uptime: 495s
+09-23 20:16:39.530 17973 17973 F DEBUG   : Cmdline: python resh.py
+09-23 20:16:39.530 17973 17973 F DEBUG   : pid: 15282, tid: 15282, name: python  >>> python <<<
+09-23 20:16:39.530 17973 17973 F DEBUG   : uid: 10247
+09-23 20:16:39.530 17973 17973 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 20:16:39.530 17973 17973 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 20:16:39.530 17973 17973 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007c67064220'
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x0  0000000000000000  x1  0000000000003bb2  x2  0000000000000006  x3  0000007fe0dbe860
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x8  00000000000000f0  x9  0000007c9ac72418  x10 0000000000000001  x11 0000007c9acc4070
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x12 0000000068d2b2cf  x13 000000007fffffff  x14 000000000cdacc2e  x15 00000c3194a97de3
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x16 0000007c9ad2dfe8  x17 0000007c9ad17ac0  x18 0000007c9c154000  x19 0000000000003bb2
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x20 0000000000003bb2  x21 00000000ffffffff  x22 0000000000000440  x23 0000007c976cf950
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x24 0000007c976cfd08  x25 0000007c9765fe28  x26 0000000000000000  x27 0000000000000000
+09-23 20:16:39.530 17973 17973 F DEBUG   :     x28 0000000000000000  x29 0000007fe0dbe8e0
+09-23 20:16:39.530 17973 17973 F DEBUG   :     lr  0000007c9acac998  sp  0000007fe0dbe840  pc  0000007c9acac9c4  pst 0000000000001000
+09-23 20:16:39.530 17973 17973 F DEBUG   : 14 total frames
+09-23 20:16:39.530 17973 17973 F DEBUG   : backtrace:
+09-23 20:16:39.530 17973 17973 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 20:16:39.530 17973 17973 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 20:16:39.530 17973 17973 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 20:16:39.530 17973 17973 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 20:16:39.530 17973 17973 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 20:16:39.530 17973 17973 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #06 pc 00000000003ebdd8  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.530 17973 17973 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:16:39.531 17973 17973 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:39:37.963 21790 21790 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 21790 (python), pid 21790 (python)
+09-23 20:39:38.020 23417 23417 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 20:39:38.020 23417 23417 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 20:39:38.020 23417 23417 F DEBUG   : Revision: '0'
+09-23 20:39:38.020 23417 23417 F DEBUG   : ABI: 'arm64'
+09-23 20:39:38.020 23417 23417 F DEBUG   : Timestamp: 2025-09-23 20:39:37.996607078+0530
+09-23 20:39:38.020 23417 23417 F DEBUG   : Process uptime: 505s
+09-23 20:39:38.020 23417 23417 F DEBUG   : Cmdline: python resh.py
+09-23 20:39:38.020 23417 23417 F DEBUG   : pid: 21790, tid: 21790, name: python  >>> python <<<
+09-23 20:39:38.020 23417 23417 F DEBUG   : uid: 10247
+09-23 20:39:38.020 23417 23417 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 20:39:38.020 23417 23417 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 20:39:38.020 23417 23417 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x20000796ec6f490'
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x0  0000000000000000  x1  000000000000551e  x2  0000000000000006  x3  0000007fdad5c4a0
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x8  00000000000000f0  x9  0000007a10b1a418  x10 0000000000000001  x11 0000007a10b6c070
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x12 0000000068d2b831  x13 000000007fffffff  x14 000000000ce54c1a  x15 00000c35c0db22eb
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x16 0000007a10bd5fe8  x17 0000007a10bbfac0  x18 0000007a113e8000  x19 000000000000551e
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x20 000000000000551e  x21 00000000ffffffff  x22 b40000796ec7f8d0  x23 000000000005d7d8
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x24 0000007a0f2bda38  x25 0000007a0f269e28  x26 0000000000000000  x27 0000000000000000
+09-23 20:39:38.020 23417 23417 F DEBUG   :     x28 0000000000000000  x29 0000007fdad5c520
+09-23 20:39:38.020 23417 23417 F DEBUG   :     lr  0000007a10b54998  sp  0000007fdad5c480  pc  0000007a10b549c4  pst 0000000000001000
+09-23 20:39:38.020 23417 23417 F DEBUG   : 14 total frames
+09-23 20:39:38.020 23417 23417 F DEBUG   : backtrace:
+09-23 20:39:38.020 23417 23417 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 20:39:38.020 23417 23417 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 20:39:38.020 23417 23417 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 20:39:38.020 23417 23417 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 20:39:38.020 23417 23417 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 20:39:38.020 23417 23417 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:39:38.020 23417 23417 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:41:40.010 23476 23476 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 23476 (python), pid 23476 (python)
+09-23 20:41:40.082 24793 24793 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 20:41:40.082 24793 24793 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 20:41:40.082 24793 24793 F DEBUG   : Revision: '0'
+09-23 20:41:40.082 24793 24793 F DEBUG   : ABI: 'arm64'
+09-23 20:41:40.082 24793 24793 F DEBUG   : Timestamp: 2025-09-23 20:41:40.060618777+0530
+09-23 20:41:40.082 24793 24793 F DEBUG   : Process uptime: 122s
+09-23 20:41:40.082 24793 24793 F DEBUG   : Cmdline: python resh.py
+09-23 20:41:40.082 24793 24793 F DEBUG   : pid: 23476, tid: 23476, name: python  >>> python <<<
+09-23 20:41:40.082 24793 24793 F DEBUG   : uid: 10247
+09-23 20:41:40.082 24793 24793 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 20:41:40.082 24793 24793 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 20:41:40.082 24793 24793 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007ce4adc3d0'
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x0  0000000000000000  x1  0000000000005bb4  x2  0000000000000006  x3  0000007fcac937f0
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x8  00000000000000f0  x9  0000007de80fe418  x10 0000000000000001  x11 0000007de8150070
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x12 0000000068d2b8ac  x13 000000007fffffff  x14 000000000ce63a00  x15 00000c361f6ce8e3
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x16 0000007de81b9fe8  x17 0000007de81a3ac0  x18 0000007de8fc8000  x19 0000000000005bb4
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x20 0000000000005bb4  x21 00000000ffffffff  x22 0000000000000440  x23 0000007de514a950
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x24 0000007de514ad08  x25 0000007de50dae28  x26 0000000000000000  x27 0000000000000000
+09-23 20:41:40.082 24793 24793 F DEBUG   :     x28 0000000000000000  x29 0000007fcac93870
+09-23 20:41:40.082 24793 24793 F DEBUG   :     lr  0000007de8138998  sp  0000007fcac937d0  pc  0000007de81389c4  pst 0000000000001000
+09-23 20:41:40.082 24793 24793 F DEBUG   : 14 total frames
+09-23 20:41:40.082 24793 24793 F DEBUG   : backtrace:
+09-23 20:41:40.082 24793 24793 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 20:41:40.082 24793 24793 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 20:41:40.082 24793 24793 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 20:41:40.082 24793 24793 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 20:41:40.082 24793 24793 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 20:41:40.082 24793 24793 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #06 pc 00000000003ebdd8  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #07 pc 00000000004066c4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #08 pc 0000000000402acc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 20:41:40.082 24793 24793 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:00:30.650 27773 27773 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27773 (python), pid 27773 (python)
+09-23 21:00:30.777 29368 29368 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 21:00:30.777 29368 29368 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 21:00:30.777 29368 29368 F DEBUG   : Revision: '0'
+09-23 21:00:30.777 29368 29368 F DEBUG   : ABI: 'arm64'
+09-23 21:00:30.777 29368 29368 F DEBUG   : Timestamp: 2025-09-23 21:00:30.749332614+0530
+09-23 21:00:30.777 29368 29368 F DEBUG   : Process uptime: 241s
+09-23 21:00:30.777 29368 29368 F DEBUG   : Cmdline: python resh.py
+09-23 21:00:30.777 29368 29368 F DEBUG   : pid: 27773, tid: 27773, name: python  >>> python <<<
+09-23 21:00:30.777 29368 29368 F DEBUG   : uid: 10247
+09-23 21:00:30.777 29368 29368 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 21:00:30.777 29368 29368 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 21:00:30.778 29368 29368 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000074a1a923d0'
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x0  0000000000000000  x1  0000000000006c7d  x2  0000000000000006  x3  0000007feebc3460
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x8  00000000000000f0  x9  0000007616084418  x10 0000000000000001  x11 00000076160d6070
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x12 0000000068d2bd16  x13 000000007fffffff  x14 000000000ceeceb2  x15 00000c398b8374bb
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x16 000000761613ffe8  x17 0000007616129ac0  x18 0000007616c68000  x19 0000000000006c7d
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x20 0000000000006c7d  x21 00000000ffffffff  x22 b4000074a1a97680  x23 000000000005d7d8
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x24 00000076120dca38  x25 0000007612088e28  x26 0000000000000000  x27 0000000000000000
+09-23 21:00:30.778 29368 29368 F DEBUG   :     x28 0000000000000000  x29 0000007feebc34e0
+09-23 21:00:30.778 29368 29368 F DEBUG   :     lr  00000076160be998  sp  0000007feebc3440  pc  00000076160be9c4  pst 0000000000001000
+09-23 21:00:30.778 29368 29368 F DEBUG   : 14 total frames
+09-23 21:00:30.778 29368 29368 F DEBUG   : backtrace:
+09-23 21:00:30.778 29368 29368 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 21:00:30.778 29368 29368 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 21:00:30.778 29368 29368 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 21:00:30.778 29368 29368 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 21:00:30.778 29368 29368 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 21:00:30.778 29368 29368 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:00:30.778 29368 29368 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:08:52.512 29715 29715 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 29715 (python), pid 29715 (python)
+09-23 21:08:52.638 32064 32064 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-23 21:08:52.638 32064 32064 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-23 21:08:52.638 32064 32064 F DEBUG   : Revision: '0'
+09-23 21:08:52.638 32064 32064 F DEBUG   : ABI: 'arm64'
+09-23 21:08:52.638 32064 32064 F DEBUG   : Timestamp: 2025-09-23 21:08:52.588306490+0530
+09-23 21:08:52.638 32064 32064 F DEBUG   : Process uptime: 261s
+09-23 21:08:52.639 32064 32064 F DEBUG   : Cmdline: python resh.py
+09-23 21:08:52.639 32064 32064 F DEBUG   : pid: 29715, tid: 29715, name: python  >>> python <<<
+09-23 21:08:52.639 32064 32064 F DEBUG   : uid: 10247
+09-23 21:08:52.639 32064 32064 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-23 21:08:52.639 32064 32064 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-23 21:08:52.639 32064 32064 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x20000726345c7f0'
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x0  0000000000000000  x1  0000000000007413  x2  0000000000000006  x3  0000007ff98d2a50
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x8  00000000000000f0  x9  00000073e76d9418  x10 0000000000000001  x11 00000073e772b070
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x12 0000000068d2bf0c  x13 000000007fffffff  x14 000000000cf29e14  x15 00000c3b1062fd28
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x16 00000073e7794fe8  x17 00000073e777eac0  x18 00000073e8124000  x19 0000000000007413
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x20 0000000000007413  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x24 00000073e3bafa38  x25 00000073e3b5be28  x26 0000000000000000  x27 0000000000000000
+09-23 21:08:52.639 32064 32064 F DEBUG   :     x28 0000000000000000  x29 0000007ff98d2ad0
+09-23 21:08:52.639 32064 32064 F DEBUG   :     lr  00000073e7713998  sp  0000007ff98d2a30  pc  00000073e77139c4  pst 0000000000001000
+09-23 21:08:52.639 32064 32064 F DEBUG   : 14 total frames
+09-23 21:08:52.639 32064 32064 F DEBUG   : backtrace:
+09-23 21:08:52.639 32064 32064 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-23 21:08:52.639 32064 32064 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-23 21:08:52.639 32064 32064 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-23 21:08:52.639 32064 32064 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-23 21:08:52.639 32064 32064 F DEBUG   :   NOTE: Unreadable libraries:
+09-23 21:08:52.639 32064 32064 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-23 21:08:52.639 32064 32064 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:07:28.057  3657  3657 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 3657 (python), pid 3657 (python)
+09-24 07:07:28.163  7613  7613 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-24 07:07:28.163  7613  7613 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-24 07:07:28.163  7613  7613 F DEBUG   : Revision: '0'
+09-24 07:07:28.163  7613  7613 F DEBUG   : ABI: 'arm64'
+09-24 07:07:28.163  7613  7613 F DEBUG   : Timestamp: 2025-09-24 07:07:28.117424369+0530
+09-24 07:07:28.163  7613  7613 F DEBUG   : Process uptime: 737s
+09-24 07:07:28.163  7613  7613 F DEBUG   : Cmdline: python resh.py
+09-24 07:07:28.163  7613  7613 F DEBUG   : pid: 3657, tid: 3657, name: python  >>> python <<<
+09-24 07:07:28.163  7613  7613 F DEBUG   : uid: 10247
+09-24 07:07:28.163  7613  7613 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-24 07:07:28.163  7613  7613 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-24 07:07:28.163  7613  7613 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200006f84f16370'
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x0  0000000000000000  x1  0000000000000e49  x2  0000000000000006  x3  0000007fd0752e10
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x8  00000000000000f0  x9  0000007106f08418  x10 0000000000000001  x11 0000007106f5a070
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x12 0000000068d34b58  x13 000000007fffffff  x14 000000000d2eddaa  x15 00000ca7c5eb5f44
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x16 0000007106fc3fe8  x17 0000007106fadac0  x18 00000071081ac000  x19 0000000000000e49
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x20 0000000000000e49  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x24 0000007105568a38  x25 0000007105514e28  x26 0000000000000000  x27 0000000000000000
+09-24 07:07:28.163  7613  7613 F DEBUG   :     x28 0000000000000000  x29 0000007fd0752e90
+09-24 07:07:28.163  7613  7613 F DEBUG   :     lr  0000007106f42998  sp  0000007fd0752df0  pc  0000007106f429c4  pst 0000000000001000
+09-24 07:07:28.163  7613  7613 F DEBUG   : 14 total frames
+09-24 07:07:28.163  7613  7613 F DEBUG   : backtrace:
+09-24 07:07:28.163  7613  7613 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-24 07:07:28.163  7613  7613 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-24 07:07:28.163  7613  7613 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-24 07:07:28.163  7613  7613 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-24 07:07:28.163  7613  7613 F DEBUG   :   NOTE: Unreadable libraries:
+09-24 07:07:28.163  7613  7613 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:07:28.163  7613  7613 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:12:24.660  7667  7667 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 7667 (python), pid 7667 (python)
+09-24 07:12:24.752  9828  9828 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-24 07:12:24.752  9828  9828 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-24 07:12:24.752  9828  9828 F DEBUG   : Revision: '0'
+09-24 07:12:24.752  9828  9828 F DEBUG   : ABI: 'arm64'
+09-24 07:12:24.752  9828  9828 F DEBUG   : Timestamp: 2025-09-24 07:12:24.723005002+0530
+09-24 07:12:24.752  9828  9828 F DEBUG   : Process uptime: 297s
+09-24 07:12:24.752  9828  9828 F DEBUG   : Cmdline: python resh.py
+09-24 07:12:24.752  9828  9828 F DEBUG   : pid: 7667, tid: 7667, name: python  >>> python <<<
+09-24 07:12:24.752  9828  9828 F DEBUG   : uid: 10247
+09-24 07:12:24.752  9828  9828 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-24 07:12:24.752  9828  9828 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-24 07:12:24.752  9828  9828 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007609a89580'
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x0  0000000000000000  x1  0000000000001df3  x2  0000000000000006  x3  0000007fe203d6a0
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x8  00000000000000f0  x9  0000007739aa6418  x10 0000000000000001  x11 0000007739af8070
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x12 0000000068d34c80  x13 000000007fffffff  x14 000000000d31202e  x15 00000ca8abbedd24
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x16 0000007739b61fe8  x17 0000007739b4bac0  x18 0000007740624000  x19 0000000000001df3
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x20 0000000000001df3  x21 00000000ffffffff  x22 0000000000000000  x23 000000000005d7d8
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x24 000000773c174a38  x25 000000773c120e28  x26 0000000000000000  x27 0000000000000000
+09-24 07:12:24.752  9828  9828 F DEBUG   :     x28 0000000000000000  x29 0000007fe203d720
+09-24 07:12:24.752  9828  9828 F DEBUG   :     lr  0000007739ae0998  sp  0000007fe203d680  pc  0000007739ae09c4  pst 0000000000001000
+09-24 07:12:24.752  9828  9828 F DEBUG   : 14 total frames
+09-24 07:12:24.752  9828  9828 F DEBUG   : backtrace:
+09-24 07:12:24.752  9828  9828 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-24 07:12:24.752  9828  9828 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-24 07:12:24.752  9828  9828 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-24 07:12:24.752  9828  9828 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-24 07:12:24.752  9828  9828 F DEBUG   :   NOTE: Unreadable libraries:
+09-24 07:12:24.752  9828  9828 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 07:12:24.752  9828  9828 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 11:03:21.966 22131 22131 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 22131 (python), pid 22131 (python)
+09-24 11:03:22.040 26478 26478 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-24 11:03:22.040 26478 26478 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-24 11:03:22.040 26478 26478 F DEBUG   : Revision: '0'
+09-24 11:03:22.040 26478 26478 F DEBUG   : ABI: 'arm64'
+09-24 11:03:22.040 26478 26478 F DEBUG   : Timestamp: 2025-09-24 11:03:22.006431765+0530
+09-24 11:03:22.040 26478 26478 F DEBUG   : Process uptime: 313s
+09-24 11:03:22.040 26478 26478 F DEBUG   : Cmdline: python resh.py
+09-24 11:03:22.040 26478 26478 F DEBUG   : pid: 22131, tid: 22131, name: python  >>> python <<<
+09-24 11:03:22.040 26478 26478 F DEBUG   : uid: 10247
+09-24 11:03:22.040 26478 26478 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-24 11:03:22.040 26478 26478 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-24 11:03:22.040 26478 26478 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x200007033f037c0'
+09-24 11:03:22.040 26478 26478 F DEBUG   :     x0  0000000000000000  x1  0000000000005673  x2  0000000000000006  x3  0000007ff0943c30
+09-24 11:03:22.040 26478 26478 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-24 11:03:22.041 26478 26478 F DEBUG   :     x8  00000000000000f0  x9  0000007123f1e418  x10 0000000000000001  x11 0000007123f70070
+09-24 11:03:22.041 26478 26478 F DEBUG   :     x12 0000000068d382a1  x13 000000007fffffff  x14 000000000d3e7ede  x15 00000cd29d390c2c
+09-24 11:03:22.041 26478 26478 F DEBUG   :     x16 0000007123fd9fe8  x17 0000007123fc3ac0  x18 000000712aa80000  x19 0000000000005673
+09-24 11:03:22.041 26478 26478 F DEBUG   :     x20 0000000000005673  x21 00000000ffffffff  x22 b400007033f040f0  x23 000000000005d7d8
+09-24 11:03:22.041 26478 26478 F DEBUG   :     x24 0000007125d5aa38  x25 0000007125d06e28  x26 0000000000000000  x27 0000000000000000
+09-24 11:03:22.041 26478 26478 F DEBUG   :     x28 0000000000000000  x29 0000007ff0943cb0
+09-24 11:03:22.041 26478 26478 F DEBUG   :     lr  0000007123f58998  sp  0000007ff0943c10  pc  0000007123f589c4  pst 0000000000001000
+09-24 11:03:22.041 26478 26478 F DEBUG   : 14 total frames
+09-24 11:03:22.041 26478 26478 F DEBUG   : backtrace:
+09-24 11:03:22.041 26478 26478 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-24 11:03:22.041 26478 26478 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-24 11:03:22.041 26478 26478 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-24 11:03:22.041 26478 26478 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-24 11:03:22.041 26478 26478 F DEBUG   :   NOTE: Unreadable libraries:
+09-24 11:03:22.041 26478 26478 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.041 26478 26478 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #06 pc 00000000003e4e04  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #07 pc 0000000000347be4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #08 pc 0000000000402b58  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #09 pc 0000000000401938  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #10 pc 000000000042e1f4  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #11 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #12 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 11:03:22.042 26478 26478 F DEBUG   :       #13 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 16:35:59.275  2002  2002 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 2002 (python), pid 2002 (python)
+09-24 16:35:59.385  6924  6924 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-24 16:35:59.385  6924  6924 F DEBUG   : Build fingerprint: 'Nothing/GalagaIND/Galaga:15/AP3A.240905.015.A2/2509032153:user/release-keys'
+09-24 16:35:59.385  6924  6924 F DEBUG   : Revision: '0'
+09-24 16:35:59.385  6924  6924 F DEBUG   : ABI: 'arm64'
+09-24 16:35:59.385  6924  6924 F DEBUG   : Timestamp: 2025-09-24 16:35:59.357605046+0530
+09-24 16:35:59.385  6924  6924 F DEBUG   : Process uptime: 421s
+09-24 16:35:59.385  6924  6924 F DEBUG   : Cmdline: python resh.py
+09-24 16:35:59.385  6924  6924 F DEBUG   : pid: 2002, tid: 2002, name: python  >>> python <<<
+09-24 16:35:59.385  6924  6924 F DEBUG   : uid: 10247
+09-24 16:35:59.385  6924  6924 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-24 16:35:59.385  6924  6924 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-24 16:35:59.385  6924  6924 F DEBUG   : Abort message: 'Scudo ERROR: corrupted chunk header at address 0x2000078cc8908e0'
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x0  0000000000000000  x1  00000000000007d2  x2  0000000000000006  x3  0000007fe85c11b0
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x4  6064671f6a6d7467  x5  6064671f6a6d7467  x6  6064671f6a6d7467  x7  7f7f7f7f7f7f7f7f
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x8  00000000000000f0  x9  0000007adc90c418  x10 0000000000000001  x11 0000007adc95e070
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x12 0000000068d3d097  x13 000000007fffffff  x14 000000000d6da160  x15 00000d0f05595e3b
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x16 0000007adc9c7fe8  x17 0000007adc9b1ac0  x18 0000007adeba8000  x19 00000000000007d2
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x20 00000000000007d2  x21 00000000ffffffff  x22 0000007add1b4a0c  x23 0000000000012788
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x24 0000007ade58c010  x25 0000007add143e28  x26 0000000000000000  x27 0000000000000000
+09-24 16:35:59.385  6924  6924 F DEBUG   :     x28 0000000000000000  x29 0000007fe85c1230
+09-24 16:35:59.385  6924  6924 F DEBUG   :     lr  0000007adc946998  sp  0000007fe85c1190  pc  0000007adc9469c4  pst 0000000000001000
+09-24 16:35:59.385  6924  6924 F DEBUG   : 11 total frames
+09-24 16:35:59.385  6924  6924 F DEBUG   : backtrace:
+09-24 16:35:59.385  6924  6924 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+09-24 16:35:59.385  6924  6924 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+09-24 16:35:59.385  6924  6924 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+09-24 16:35:59.385  6924  6924 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+09-24 16:35:59.385  6924  6924 F DEBUG   :   NOTE: Unreadable libraries:
+09-24 16:35:59.385  6924  6924 F DEBUG   :   NOTE:   /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 16:35:59.385  6924  6924 F DEBUG   :       #00 pc 000000000005d9c4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+164) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 16:35:59.385  6924  6924 F DEBUG   :       #01 pc 00000000000490b8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 16:35:59.385  6924  6924 F DEBUG   :       #02 pc 0000000000049d7c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 16:35:59.385  6924  6924 F DEBUG   :       #03 pc 0000000000049cec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::ScopedErrorReport::~ScopedErrorReport()+12) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 16:35:59.385  6924  6924 F DEBUG   :       #04 pc 0000000000049e50  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportHeaderCorruption(void*)+96) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 16:35:59.385  6924  6924 F DEBUG   :       #05 pc 000000000004b8a8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)+280) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+09-24 16:35:59.386  6924  6924 F DEBUG   :       #06 pc 00000000003ebc38  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 16:35:59.386  6924  6924 F DEBUG   :       #07 pc 000000000042e210  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 16:35:59.386  6924  6924 F DEBUG   :       #08 pc 000000000042e9bc  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 16:35:59.386  6924  6924 F DEBUG   :       #09 pc 000000000042ea68  /data/data/com.termux/files/usr/lib/libpython3.12.so.1.0
+09-24 16:35:59.386  6924  6924 F DEBUG   :       #10 pc 0000000000057144  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+116) (BuildId: 6b5f6c2b322cc7e413534fa5f2520a62)
+--------- beginning of system
+10-18 15:53:13.672  9129  9129 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+10-18 15:54:08.600  9129  9129 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+10-18 15:54:41.963  9129  9129 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+--------- beginning of main
+10-18 15:54:46.924  9129  9157 D BufferPoolAccessor2.0: bufferpool2 0x740448b258 : 0(0 size) total buffers - 0(0 size) used buffers - 1/7 (recycle/alloc) - 6/24 (fetch/transfer)
+10-18 15:54:46.925  9129  9157 D BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+10-18 15:54:52.502  9129  9129 V VRI[TermuxActivity]: [ANR Warning]Input routeing takes more than 6000ms since 2025-10-18 14:44:49.172, this = com.mediatek.view.impl.ViewDebugManagerImpl@b2da92a
+10-18 15:54:52.502  9129  9129 V VRI[TermuxActivity]: Input event delivered to android.view.ViewRootImpl$ViewPostImeInputStage@5dd05f at 2025-10-18 15:54:52.501
+10-18 15:54:52.502  9129  9129 V VRI[TermuxActivity]: Input event delivered to android.view.ViewRootImpl$SyntheticInputStage@5e8daac at 2025-10-18 15:54:52.501
+10-18 15:54:52.502  9129  9129 V VRI[TermuxActivity]: Input event delivered to android.view.ViewRootImpl$NativePostImeInputStage@66910fe at 2025-10-18 15:54:52.501
+10-18 15:54:52.502  9129  9129 V VRI[TermuxActivity]: Input event delivered to android.view.ViewRootImpl$EarlyPostImeInputStage@21284b9 at 2025-10-18 15:54:52.501
+10-18 15:54:56.318  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:03.558  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:06.898  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:07.412  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:08.334  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:08.794  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:09.185  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:09.655  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:10.078  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:14.810  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:15.112  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:16.074  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:16.605  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:16.988  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:17.420  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:17.875  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:18.362  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:20.182  9129  9129 E ViewDragHelper: Ignoring pointerId=0 because ACTION_DOWN was not received for this pointer before ACTION_MOVE. It likely happened because  ViewDragHelper did not receive all the events in the event stream.
+10-18 15:55:20.182  9129  9129 E ViewDragHelper: Ignoring pointerId=0 because ACTION_DOWN was not received for this pointer before ACTION_MOVE. It likely happened because  ViewDragHelper did not receive all the events in the event stream.
+10-18 15:55:20.182  9129  9129 E ViewDragHelper: Ignoring pointerId=0 because ACTION_DOWN was not received for this pointer before ACTION_MOVE. It likely happened because  ViewDragHelper did not receive all the events in the event stream.
+10-18 15:55:20.182  9129  9129 E ViewDragHelper: Ignoring pointerId=0 because ACTION_DOWN was not received for this pointer before ACTION_MOVE. It likely happened because  ViewDragHelper did not receive all the events in the event stream.
+10-18 15:55:20.283  9129  9129 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@c2668c2
+10-18 15:55:22.379  9129  9129 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@7c2ab0c
+10-18 15:55:22.389  9129  9129 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@db4b8d1
+10-18 15:55:22.660  9129  9129 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@3b5cf40
+10-18 15:55:23.177  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:23.602  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:24.016  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:24.450  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:24.836  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:25.243  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:25.653  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:26.094  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:26.450  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:26.758  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:27.084  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:27.427  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:27.732  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:28.039  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:28.562  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:28.939  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:29.506  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:30.013  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:30.648  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:31.166  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:31.431  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:31.693  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:32.136  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:32.560  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:33.035  9129  9129 I ScrollIdentify: on fling
+10-18 15:55:39.488  9129  9129 I ImeTracker: com.nothing.launcher:55e60ac7: onCancelled at PHASE_CLIENT_ANIMATION_CANCEL
+10-18 15:55:39.488  9129  9129 I ImeTracker: com.termux:1305ed2e: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED fromUser false
+10-18 15:55:39.488  9129  9129 I ImeTracker: com.termux:1305ed2e: onFailed at PHASE_CLIENT_VIEW_SERVED
+10-18 15:56:15.747  9129 17370 I CCodec  : setting up 'default' as default (vendor) store
+10-18 15:56:15.756  9129 17370 I CCodec  : Created component [c2.android.vorbis.decoder]
+10-18 15:56:15.765  9129 17370 I CCodecConfig: query failed after returning 8 values (BAD_INDEX)
+10-18 15:56:15.773  9129 17370 W Codec2Client: query -- param skipped: index = 1107298332.
+10-18 15:56:15.774  9129 17370 I CCodecConfig: query failed after returning 8 values (BAD_INDEX)
+10-18 15:56:15.783  9129 17370 W Codec2Client: query -- param skipped: index = 1342179345.
+10-18 15:56:15.783  9129 17370 W Codec2Client: query -- param skipped: index = 2415921170.
+10-18 15:56:15.811  9129 17370 I CCodecBufferChannel: [c2.android.vorbis.decoder#194] Created output block pool with allocatorID 16 => poolID 61016 - OK
+10-18 15:56:15.893  9129 17370 I hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+10-18 15:56:16.012  9129  9129 I ImeTracker: com.termux:68226361: onShown
+10-18 15:56:16.014  9129  9129 I ImeTracker: com.termux:66bb550: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+10-18 15:56:16.016  9129  9129 I ImeTracker: com.termux:dfde6ba2: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+10-18 15:56:16.034  9129  9129 I ImeTracker: com.termux:66bb550: onCancelled at PHASE_CLIENT_APPLY_ANIMATION

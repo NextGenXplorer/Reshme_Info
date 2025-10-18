@@ -1,0 +1,142 @@
+--------- beginning of main
+10-18 15:58:06.392 D/VRI[TermuxActivity]( 9129): visibilityChanged oldVisibility=true newVisibility=false
+10-18 15:58:06.410 D/BLASTBufferQueue( 9129): [VRI[TermuxActivity]#167](f:0,a:4) destructor()
+10-18 15:58:06.410 D/BufferQueueConsumer( 9129): [VRI[TermuxActivity]#167(BLAST Consumer)167](id:23a9000000a7,api:0,p:-1,c:9129) disconnect
+10-18 15:58:06.417 D/SoundPool( 9129): native_release called
+10-18 15:58:06.417 D/SoundPool( 9129): native_release end
+10-18 15:58:06.418 W/RemoteInputConnectionImpl( 9129): requestCursorUpdates on inactive InputConnection
+10-18 15:58:06.419 D/InsetsController( 9129): hide(ime(), fromIme=true)
+10-18 15:58:06.436 I/ImeTracker( 9129): com.nothing.launcher:b2730ae8: onCancelled at PHASE_CLIENT_ANIMATION_CANCEL
+10-18 15:58:06.437 I/ImeTracker( 9129): com.termux:428c31ef: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED fromUser false
+10-18 15:58:06.437 I/ImeTracker( 9129): com.termux:428c31ef: onFailed at PHASE_CLIENT_VIEW_SERVED
+10-18 15:58:14.910 D/BufferPoolAccessor2.0( 9129): bufferpool2 0x74044517a8 : 0(0 size) total buffers - 0(0 size) used buffers - 2/7 (recycle/alloc) - 5/24 (fetch/transfer)
+10-18 15:58:14.911 D/BufferPoolAccessor2.0( 9129): Destruction - bufferpool2 0x74044517a8 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 24, 79% unfetched
+10-18 15:58:19.912 D/BufferPoolAccessor2.0( 9129): evictor expired: 1, evicted: 0
+10-18 15:58:39.901 D/ActivityThread( 9129): handleResumeActivity#3 r.window=com.android.internal.policy.PhoneWindow@d3c5cd1a.mFinished = falsewillBeVisible = true
+10-18 15:58:39.909 D/MediaCodec( 9129): CreateByType: pid -1(9129)
+10-18 15:58:39.909 D/MediaCodec( 9129): CreateByType: mime audio/vorbis, encoder 0 pid -1
+10-18 15:58:39.909 D/MediaCodecList( 9129): processName: com.termux , mime: audio/vorbis
+10-18 15:58:39.910 D/MediaCodecList( 9129): codecHandlesFormat: no format, so no extra checks
+10-18 15:58:39.910 D/MediaCodec( 9129): processName: com.termux
+10-18 15:58:39.913 D/CCodecBufferChannel( 9129): mBufferCountDebug=0 mIsUserLoad=1
+10-18 15:58:39.913 D/MBrainDateManager( 9129): MBrainDataManager Constructor caller
+10-18 15:58:39.913 D/MBrainManager( 9129): mMBrainSupport 0, return NULL
+10-18 15:58:39.913 D/MBrainDateManager( 9129): mMBrainManager = nullptr
+10-18 15:58:39.913 D/CCodecBufferChannel( 9129): new MBrainDataManager() fail
+10-18 15:58:39.913 D/MBrainDateManager( 9129): MBrainDataManager Constructor clear
+10-18 15:58:39.913 D/MediaCodec( 9129): [0x745449d6e0] init: CCodec 0x74044493b0, CCodecBufferChannel 0x75b44a7ac0
+10-18 15:58:39.913 D/MediaCodec( 9129): [0x745449d6e0] setState: 1
+10-18 15:58:39.914 D/CCodec  ( 9129): allocate(c2.android.vorbis.decoder)
+10-18 15:58:39.917 I/CCodec  ( 9129): setting up 'default' as default (vendor) store
+10-18 15:58:39.922 I/CCodec  ( 9129): Created component [c2.android.vorbis.decoder]
+10-18 15:58:39.922 D/CCodecBufferChannel( 9129): [0x75b44a7ac0] setComponent: mName c2.android.vorbis.decoder#670, mPipelineWatcher 0x75b44a7fa8
+10-18 15:58:39.922 D/CCodecBufferChannel( 9129): PipelineWatcher debug info [c2.android.vorbis.decoder#670] enable=0
+10-18 15:58:39.923 D/CCodecConfig( 9129): read media type: audio/vorbis
+10-18 15:58:39.924 D/BufferQueueConsumer( 9129): [](id:23a9000000a8,api:0,p:-1,c:9129) connect: controlledByApp=false
+10-18 15:58:39.924 D/BLASTBufferQueue( 9129): [VRI[TermuxActivity]#168](f:0,a:0) constructor()
+10-18 15:58:39.924 D/BLASTBufferQueue( 9129): [VRI[TermuxActivity]#168](f:0,a:0) update width=1080 height=2392 format=-1 mTransformHint=0
+10-18 15:58:39.928 D/ReflectedParamUpdater( 9129): extent() != 1 for single value type: algo.buffers.max-count.values
+10-18 15:58:39.929 D/ReflectedParamUpdater( 9129): extent() != 1 for single value type: output.subscribed-indices.values
+10-18 15:58:39.929 D/ReflectedParamUpdater( 9129): extent() != 1 for single value type: input.buffers.allocator-ids.values
+10-18 15:58:39.930 D/ReflectedParamUpdater( 9129): extent() != 1 for single value type: output.buffers.allocator-ids.values
+10-18 15:58:39.932 D/ReflectedParamUpdater( 9129): extent() != 1 for single value type: algo.buffers.allocator-ids.values
+10-18 15:58:39.937 D/ReflectedParamUpdater( 9129): extent() != 1 for single value type: output.buffers.pool-ids.values
+10-18 15:58:39.941 D/ReflectedParamUpdater( 9129): extent() != 1 for single value type: algo.buffers.pool-ids.values
+10-18 15:58:39.944 I/CCodecConfig( 9129): query failed after returning 8 values (BAD_INDEX)
+10-18 15:58:39.944 D/CCodecConfig( 9129): c2 config diff is Dict {
+10-18 15:58:39.944 D/CCodecConfig( 9129):   c2::u32 coded.bitrate.value = 64000
+10-18 15:58:39.944 D/CCodecConfig( 9129):   c2::u32 input.buffers.max-size.value = 32768
+10-18 15:58:39.944 D/CCodecConfig( 9129):   c2::u32 input.delay.value = 0
+10-18 15:58:39.944 D/CCodecConfig( 9129):   string input.media-type.value = "audio/vorbis"
+10-18 15:58:39.944 D/CCodecConfig( 9129):   c2::u32 output.large-frame.max-size = 0
+10-18 15:58:39.944 D/CCodecConfig( 9129):   c2::u32 output.large-frame.threshold-size = 0
+10-18 15:58:39.944 D/CCodecConfig( 9129):   string output.media-type.value = "audio/raw"
+10-18 15:58:39.944 D/CCodecConfig( 9129):   c2::u32 raw.channel-count.value = 1
+10-18 15:58:39.944 D/CCodecConfig( 9129):   c2::u32 raw.sample-rate.value = 48000
+10-18 15:58:39.944 D/CCodecConfig( 9129): }
+10-18 15:58:39.944 D/MediaCodec( 9129): [0x745449d6e0] setState: 2
+10-18 15:58:39.945 D/BLASTBufferQueue( 9129): [VRI[TermuxActivity]#168](f:0,a:1) acquireNextBufferLocked size=1080x2392 mFrameNumber=1 applyTransaction=true mTimestamp=1478213332499569(auto) mPendingTransactions.size=0 graphicBufferId=39208756446361 transform=0
+10-18 15:58:39.951 D/MediaCodec( 9129): [0x745449d6e0] [c2.android.vorbis.decoder] configure
+10-18 15:58:39.952 D/MediaCodec( 9129): [0x745449d6e0] setState: 3
+10-18 15:58:39.952 D/CCodec  ( 9129): [c2.android.vorbis.decoder] buffers are bound to CCodec for this session
+10-18 15:58:39.952 D/CCodecConfig( 9129): no c2 equivalents for durationUs
+10-18 15:58:39.952 D/CCodecConfig( 9129): no c2 equivalents for track-id
+10-18 15:58:39.952 D/CCodecConfig( 9129): no c2 equivalents for csd-1
+10-18 15:58:39.952 D/CCodecConfig( 9129): no c2 equivalents for flags
+10-18 15:58:39.952 D/CCodecConfig( 9129): c2 config diff is   c2::u32 coded.bitrate.value = 96000
+10-18 15:58:39.952 D/CCodecConfig( 9129):   c2::u32 raw.sample-rate.value = 44100
+10-18 15:58:39.953 W/Codec2Client( 9129): query -- param skipped: index = 1107298332.
+10-18 15:58:39.953 D/CCodec  ( 9129): encoding statistics level = 0
+10-18 15:58:39.953 D/CCodec  ( 9129): setup formats input: AMessage(what = 0x00000000) = {
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t bitrate = 96000
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t channel-count = 1
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t max-input-size = 32768
+10-18 15:58:39.953 D/CCodec  ( 9129):   string mime = "audio/vorbis"
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t sample-rate = 44100
+10-18 15:58:39.953 D/CCodec  ( 9129): }
+10-18 15:58:39.953 D/CCodec  ( 9129): setup formats output: AMessage(what = 0x00000000) = {
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t buffer-batch-max-output-size = 0
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t buffer-batch-threshold-output-size = 0
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t channel-count = 1
+10-18 15:58:39.953 D/CCodec  ( 9129):   string mime = "audio/raw"
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t sample-rate = 44100
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t channel-mask = 1
+10-18 15:58:39.953 D/CCodec  ( 9129):   int32_t android._config-pcm-encoding = 2
+10-18 15:58:39.953 D/CCodec  ( 9129): }
+10-18 15:58:39.953 I/CCodecConfig( 9129): query failed after returning 8 values (BAD_INDEX)
+10-18 15:58:39.953 D/MediaCodec( 9129): [0x745449d6e0] setState: 4
+10-18 15:58:39.953 D/MediaCodec( 9129): [0x745449d6e0] setState: 5
+10-18 15:58:39.956 W/Codec2Client( 9129): query -- param skipped: index = 1342179345.
+10-18 15:58:39.956 W/Codec2Client( 9129): query -- param skipped: index = 2415921170.
+10-18 15:58:39.957 D/CCodecBufferChannel( 9129): [c2.android.vorbis.decoder#670] Created input block pool with allocatorID 16 => poolID 82 - OK (0)
+10-18 15:58:39.960 I/CCodecBufferChannel( 9129): [c2.android.vorbis.decoder#670] Created output block pool with allocatorID 16 => poolID 61026 - OK
+10-18 15:58:39.960 D/CCodecBufferChannel( 9129): [c2.android.vorbis.decoder#670] Configured output block pool ids 61026 => OK
+10-18 15:58:39.960 D/CCodecBufferChannel( 9129): [0x75b44a7ac0] [c2.android.vorbis.decoder#670] start: output->outputDelay 0, output->numSlots 4
+10-18 15:58:39.961 D/CCodecBuffers( 9129): [c2.android.vorbis.decoder#670:1D-Output.Impl[N]] converted 0 buffers to array mode of 4
+10-18 15:58:39.963 D/MediaCodec( 9129): [0x745449d6e0] setState: 6
+10-18 15:58:39.963 D/CCodecBufferChannel( 9129): The csd Sample queue
+--------- beginning of system
+10-18 15:58:39.965 D/NtViewRootImpl( 9129): mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+10-18 15:58:39.966 D/CCodecBufferChannel( 9129): The csd Sample queue
+10-18 15:58:39.968 D/CCodecBuffers( 9129): [c2.android.vorbis.decoder#670:1D-Input.Impl[N]] converted 4 buffers to array mode of 4
+10-18 15:58:39.977 D/PipelineWatcher( 9129): [0x75b44a7fa8] pipelineFull: too many frames in pipeline (4)
+10-18 15:58:40.009 D/CCodecBufferChannel( 9129): [c2.android.vorbis.decoder#670] input EOS
+10-18 15:58:40.017 D/MediaCodec( 9129): [0x745449d6e0] [c2.android.vorbis.decoder] stop
+10-18 15:58:40.017 D/MediaCodec( 9129): [0x745449d6e0] setState: 9
+10-18 15:58:40.017 D/CCodecBufferChannel( 9129): [c2.android.vorbis.decoder#670] MediaCodec discarded an unknown buffer
+10-18 15:58:40.017 D/CCodecBufferChannel( 9129): [c2.android.vorbis.decoder#670] MediaCodec discarded an unknown buffer
+10-18 15:58:40.017 D/CCodecBufferChannel( 9129): [c2.android.vorbis.decoder#670] MediaCodec discarded an unknown buffer
+10-18 15:58:40.018 D/MediaCodec( 9129): [0x745449d6e0] [c2.android.vorbis.decoder] kWhatStopCompleted
+10-18 15:58:40.019 D/MediaCodec( 9129): [0x745449d6e0] setState: 2
+10-18 15:58:40.025 D/MediaCodec( 9129): [0x745449d6e0] [c2.android.vorbis.decoder] release
+10-18 15:58:40.026 D/MediaCodec( 9129): [0x745449d6e0] setState: 10
+10-18 15:58:40.028 I/hw-BpHwBinder( 9129): onLastStrongRef automatically unlinking death recipients
+10-18 15:58:40.031 D/MediaCodec( 9129): [0x745449d6e0] [c2.android.vorbis.decoder] kWhatReleaseCompleted
+10-18 15:58:40.031 D/MediaCodec( 9129): [0x745449d6e0] setState: 0
+10-18 15:58:40.040 D/InsetsController( 9129): show(ime(), fromIme=true)
+10-18 15:58:40.059 I/com.termux( 9129): Background concurrent mark compact GC freed 20MB AllocSpace bytes, 5(228KB) LOS objects, 75% free, 9037KB/35MB, paused 3.564ms,2.832ms total 123.568ms
+10-18 15:58:40.064 I/ImeTracker( 9129): com.termux:7b7cbdb5: onShown
+10-18 15:58:40.090 D/SoundPool( 9129): native_release called
+10-18 15:58:40.090 D/SoundPool( 9129): native_release end
+10-18 15:58:40.090 D/SoundPool( 9129): native_release called
+10-18 15:58:40.090 D/SoundPool( 9129): native_release end
+10-18 15:58:40.090 D/SoundPool( 9129): native_release called
+10-18 15:58:40.090 D/SoundPool( 9129): native_release end
+10-18 15:58:40.093 D/SoundPool( 9129): native_release called
+10-18 15:58:40.093 D/SoundPool( 9129): native_release end
+10-18 15:58:40.094 D/SoundPool( 9129): native_release called
+10-18 15:58:40.094 D/SoundPool( 9129): native_release end
+10-18 15:58:40.094 D/SoundPool( 9129): native_release called
+10-18 15:58:40.094 D/SoundPool( 9129): native_release end
+10-18 15:58:40.096 D/SoundPool( 9129): native_release called
+10-18 15:58:40.096 D/SoundPool( 9129): native_release end
+10-18 15:58:40.097 D/SoundPool( 9129): native_release called
+10-18 15:58:40.097 D/SoundPool( 9129): native_release end
+10-18 15:58:40.097 D/SoundPool( 9129): native_release called
+10-18 15:58:40.097 D/SoundPool( 9129): native_release end
+10-18 15:58:40.097 D/SoundPool( 9129): native_release called
+10-18 15:58:40.097 D/SoundPool( 9129): native_release end
+10-18 15:58:40.201 I/ImeTracker( 9129): com.termux:3f05fa79: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+10-18 15:58:40.201 D/InputMethodManager( 9129): showSoftInput() view=com.termux.view.TerminalView{32a2268 VFED.V.L. .F...... 0,0-1066,1061 #7f080191 app:id/terminal_view aid=1073741825} flags=0 reason=SHOW_SOFT_INPUT
+10-18 15:58:40.204 D/InsetsController( 9129): show(ime(), fromIme=true)
+10-18 15:58:40.205 I/ImeTracker( 9129): com.termux:3f05fa79: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
