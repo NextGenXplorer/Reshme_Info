@@ -18,6 +18,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
+import AdBanner from '../components/AdBanner';
 
 export default function StatsScreen() {
   const { t } = useTranslation();
@@ -419,6 +420,9 @@ export default function StatsScreen() {
           })
         )}
       </ScrollView>
+
+      {/* AdMob Banner Ad */}
+      <AdBanner />
     </SafeAreaView>
   );
 }

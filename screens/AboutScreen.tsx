@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import AdBanner from '../components/AdBanner';
 
 const { width } = Dimensions.get('window');
 
@@ -247,6 +248,9 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
           </Text>
         </View>
       </ScrollView>
+
+      {/* AdMob Banner Ad */}
+      <AdBanner />
     </SafeAreaView>
   );
 }

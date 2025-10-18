@@ -10,6 +10,8 @@ import './i18n';
 import * as Notifications from 'expo-notifications';
 import { db } from './firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
+import { useInterstitialAd } from './hooks/useInterstitialAd';
+import MobileAds from 'react-native-google-mobile-ads';
 
 // Import screen components
 import HomeScreen from './screens/HomeScreen';
@@ -106,6 +108,22 @@ const AppContent = () => {
   const [notification, setNotification] = useState<Notifications.Notification | false>(false);
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
+  const [previousRoute, setPreviousRoute] = useState<string>('Home');
+
+  // Initialize Google Mobile Ads
+  useEffect(() => {
+    MobileAds()
+      .initialize()
+      .then(adapterStatuses => {
+        console.log('AdMob initialized:', adapterStatuses);
+      })
+      .catch(error => {
+        console.error('AdMob initialization error:', error);
+      });
+  }, []);
+
+  // Interstitial ad hook
+  const { showAd, isLoaded } = useInterstitialAd();
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
@@ -151,8 +169,24 @@ const AppContent = () => {
     );
   }
 
+  // Handle navigation state changes to show interstitial ads
+  const handleNavigationStateChange = (state: any) => {
+    if (!state) return;
+
+    const currentRoute = state.routes[state.index]?.name;
+
+    // Show interstitial ad occasionally when switching tabs (not every time to avoid annoyance)
+    // Show ad 30% of the time when changing tabs
+    if (currentRoute && currentRoute !== previousRoute && isLoaded && Math.random() < 0.3) {
+      console.log(`Tab changed from ${previousRoute} to ${currentRoute}, showing interstitial ad`);
+      showAd();
+    }
+
+    setPreviousRoute(currentRoute);
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer onStateChange={handleNavigationStateChange}>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 
         <Tab.Navigator

@@ -46,6 +46,13 @@ module.exports = {
           color: "#3B82F6",
           sounds: []
         }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          androidAppId: "ca-app-pub-3940256099942544~3347511713", // Google Test AdMob App ID
+          // For production, replace with your actual AdMob App ID from AdMob console
+        }
       ]
     ],
     web: {

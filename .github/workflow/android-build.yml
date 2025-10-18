@@ -1,0 +1,89 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Firebase Environment Variables
+      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
+      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+      EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
+      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+      EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
+
+      # Admin Credentials
+      EXPO_PUBLIC_ADMIN_USERNAME_1: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_1 }}
+      EXPO_PUBLIC_ADMIN_PASSWORD_1: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_1 }}
+      EXPO_PUBLIC_ADMIN_ROLE_1: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_1 }}
+      EXPO_PUBLIC_ADMIN_MARKET_1: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_1 }}
+
+      EXPO_PUBLIC_ADMIN_USERNAME_2: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_2 }}
+      EXPO_PUBLIC_ADMIN_PASSWORD_2: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_2 }}
+      EXPO_PUBLIC_ADMIN_ROLE_2: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_2 }}
+      EXPO_PUBLIC_ADMIN_MARKET_2: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_2 }}
+
+      EXPO_PUBLIC_ADMIN_USERNAME_3: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_3 }}
+      EXPO_PUBLIC_ADMIN_PASSWORD_3: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_3 }}
+      EXPO_PUBLIC_ADMIN_ROLE_3: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_3 }}
+      EXPO_PUBLIC_ADMIN_MARKET_3: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_3 }}
+
+      # Backend URL
+      EXPO_PUBLIC_BACKEND_URL: ${{ secrets.EXPO_PUBLIC_BACKEND_URL }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Install new Expo CLI
+      - run: npm install -g expo
+
+      # Install dependencies
+      - run: npm install
+
+      # Create .env file dynamically
+      - run: |
+          echo "EXPO_PUBLIC_FIREBASE_API_KEY=\"$EXPO_PUBLIC_FIREBASE_API_KEY\"" >> .env
+          echo "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=\"$EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN\"" >> .env
+          echo "EXPO_PUBLIC_FIREBASE_PROJECT_ID=\"$EXPO_PUBLIC_FIREBASE_PROJECT_ID\"" >> .env
+          echo "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=\"$EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET\"" >> .env
+          echo "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=\"$EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID\"" >> .env
+          echo "EXPO_PUBLIC_FIREBASE_APP_ID=\"$EXPO_PUBLIC_FIREBASE_APP_ID\"" >> .env
+
+          echo "EXPO_PUBLIC_ADMIN_USERNAME_1=\"$EXPO_PUBLIC_ADMIN_USERNAME_1\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_PASSWORD_1=\"$EXPO_PUBLIC_ADMIN_PASSWORD_1\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_ROLE_1=\"$EXPO_PUBLIC_ADMIN_ROLE_1\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_MARKET_1=\"$EXPO_PUBLIC_ADMIN_MARKET_1\"" >> .env
+
+          echo "EXPO_PUBLIC_ADMIN_USERNAME_2=\"$EXPO_PUBLIC_ADMIN_USERNAME_2\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_PASSWORD_2=\"$EXPO_PUBLIC_ADMIN_PASSWORD_2\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_ROLE_2=\"$EXPO_PUBLIC_ADMIN_ROLE_2\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_MARKET_2=\"$EXPO_PUBLIC_ADMIN_MARKET_2\"" >> .env
+
+          echo "EXPO_PUBLIC_ADMIN_USERNAME_3=\"$EXPO_PUBLIC_ADMIN_USERNAME_3\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_PASSWORD_3=\"$EXPO_PUBLIC_ADMIN_PASSWORD_3\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_ROLE_3=\"$EXPO_PUBLIC_ADMIN_ROLE_3\"" >> .env
+          echo "EXPO_PUBLIC_ADMIN_MARKET_3=\"$EXPO_PUBLIC_ADMIN_MARKET_3\"" >> .env
+
+          echo "EXPO_PUBLIC_BACKEND_URL=\"$EXPO_PUBLIC_BACKEND_URL\"" >> .env
+
+      # Run prebuild (Android only)
+      - run: expo prebuild --platform android
+
+      # Build APK
+      - run: cd android && ./gradlew assembleRelease
+
+      # Upload APK artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
