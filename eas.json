@@ -7,12 +7,14 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "node": "18",
       "android": {
         "buildType": "apk"
       }
     },
     "preview": {
       "distribution": "internal",
+      "node": "18",
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease",
@@ -21,6 +23,7 @@
     },
     "production": {
       "autoIncrement": true,
+      "node": "18",
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease",
