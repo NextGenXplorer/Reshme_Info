@@ -8,86 +8,55 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Firebase Environment Variables
-      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
-      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-      EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-      EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
-
-      # Admin Credentials
-      EXPO_PUBLIC_ADMIN_USERNAME_1: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_1 }}
-      EXPO_PUBLIC_ADMIN_PASSWORD_1: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_1 }}
-      EXPO_PUBLIC_ADMIN_ROLE_1: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_1 }}
-      EXPO_PUBLIC_ADMIN_MARKET_1: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_1 }}
-
-      EXPO_PUBLIC_ADMIN_USERNAME_2: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_2 }}
-      EXPO_PUBLIC_ADMIN_PASSWORD_2: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_2 }}
-      EXPO_PUBLIC_ADMIN_ROLE_2: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_2 }}
-      EXPO_PUBLIC_ADMIN_MARKET_2: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_2 }}
-
-      EXPO_PUBLIC_ADMIN_USERNAME_3: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_3 }}
-      EXPO_PUBLIC_ADMIN_PASSWORD_3: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_3 }}
-      EXPO_PUBLIC_ADMIN_ROLE_3: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_3 }}
-      EXPO_PUBLIC_ADMIN_MARKET_3: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_3 }}
-
-      # Backend URL
-      EXPO_PUBLIC_BACKEND_URL: ${{ secrets.EXPO_PUBLIC_BACKEND_URL }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Set up JDK for Android build
-      - uses: actions/setup-java@v3
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
-      # Install new Expo CLI
-      - run: npm install -g expo
+      - name: Install Dependencies
+        run: npm install
 
-      # Install dependencies
-      - run: npm install
+      - name: Create .env file with secrets
+        run: |
+          cat > .env <<EOF
+          EXPO_PUBLIC_FIREBASE_API_KEY=${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
+          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          EXPO_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
+          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          EXPO_PUBLIC_FIREBASE_APP_ID=${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
+          EXPO_PUBLIC_ADMIN_USERNAME_1=${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_1 }}
+          EXPO_PUBLIC_ADMIN_PASSWORD_1=${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_1 }}
+          EXPO_PUBLIC_ADMIN_ROLE_1=${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_1 }}
+          EXPO_PUBLIC_ADMIN_MARKET_1=${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_1 }}
+          EXPO_PUBLIC_ADMIN_USERNAME_2=${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_2 }}
+          EXPO_PUBLIC_ADMIN_PASSWORD_2=${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_2 }}
+          EXPO_PUBLIC_ADMIN_ROLE_2=${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_2 }}
+          EXPO_PUBLIC_ADMIN_MARKET_2=${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_2 }}
+          EXPO_PUBLIC_ADMIN_USERNAME_3=${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_3 }}
+          EXPO_PUBLIC_ADMIN_PASSWORD_3=${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_3 }}
+          EXPO_PUBLIC_ADMIN_ROLE_3=${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_3 }}
+          EXPO_PUBLIC_ADMIN_MARKET_3=${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_3 }}
+          EXPO_PUBLIC_BACKEND_URL=${{ secrets.EXPO_PUBLIC_BACKEND_URL }}
+          EOF
+          echo "✅ .env file created successfully"
 
-      # Create .env file dynamically
-      - run: |
-          echo "EXPO_PUBLIC_FIREBASE_API_KEY=\"$EXPO_PUBLIC_FIREBASE_API_KEY\"" >> .env
-          echo "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=\"$EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN\"" >> .env
-          echo "EXPO_PUBLIC_FIREBASE_PROJECT_ID=\"$EXPO_PUBLIC_FIREBASE_PROJECT_ID\"" >> .env
-          echo "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=\"$EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET\"" >> .env
-          echo "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=\"$EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID\"" >> .env
-          echo "EXPO_PUBLIC_FIREBASE_APP_ID=\"$EXPO_PUBLIC_FIREBASE_APP_ID\"" >> .env
+      - name: Build APK with EAS (Local)
+        run: eas build --platform android --profile production --local --non-interactive --output app-release.apk
 
-          echo "EXPO_PUBLIC_ADMIN_USERNAME_1=\"$EXPO_PUBLIC_ADMIN_USERNAME_1\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_PASSWORD_1=\"$EXPO_PUBLIC_ADMIN_PASSWORD_1\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_ROLE_1=\"$EXPO_PUBLIC_ADMIN_ROLE_1\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_MARKET_1=\"$EXPO_PUBLIC_ADMIN_MARKET_1\"" >> .env
-
-          echo "EXPO_PUBLIC_ADMIN_USERNAME_2=\"$EXPO_PUBLIC_ADMIN_USERNAME_2\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_PASSWORD_2=\"$EXPO_PUBLIC_ADMIN_PASSWORD_2\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_ROLE_2=\"$EXPO_PUBLIC_ADMIN_ROLE_2\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_MARKET_2=\"$EXPO_PUBLIC_ADMIN_MARKET_2\"" >> .env
-
-          echo "EXPO_PUBLIC_ADMIN_USERNAME_3=\"$EXPO_PUBLIC_ADMIN_USERNAME_3\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_PASSWORD_3=\"$EXPO_PUBLIC_ADMIN_PASSWORD_3\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_ROLE_3=\"$EXPO_PUBLIC_ADMIN_ROLE_3\"" >> .env
-          echo "EXPO_PUBLIC_ADMIN_MARKET_3=\"$EXPO_PUBLIC_ADMIN_MARKET_3\"" >> .env
-
-          echo "EXPO_PUBLIC_BACKEND_URL=\"$EXPO_PUBLIC_BACKEND_URL\"" >> .env
-
-      # Build APK using expo run:android (properly loads env vars)
-      - name: Build Android Release APK
-        run: npx expo run:android --variant release --no-bundler
-
-      # Upload APK artifact
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: app-release.apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-
+          path: app-release.apk
