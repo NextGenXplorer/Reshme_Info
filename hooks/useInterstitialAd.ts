@@ -5,11 +5,6 @@ import { InterstitialAd, AdEventType, TestIds } from 'react-native-google-mobile
  * useInterstitialAd Hook
  *
  * Manages interstitial ad loading and display.
- * Uses Google's test ad unit ID for testing.
- *
- * For production:
- * 1. Create interstitial ad unit in AdMob console
- * 2. Replace TEST_AD_UNIT_ID with your actual ad unit ID
  *
  * Usage:
  * const { showAd, isLoaded } = useInterstitialAd();
@@ -20,11 +15,11 @@ import { InterstitialAd, AdEventType, TestIds } from 'react-native-google-mobile
  * }
  */
 
-// TEST AD UNIT ID - Replace with production ID when ready
-const TEST_AD_UNIT_ID = TestIds.INTERSTITIAL;
+// Production Interstitial Ad Unit ID
+const PRODUCTION_AD_UNIT_ID = 'ca-app-pub-5029120740748641/4128035622';
 
-// For production, use your actual ad unit ID:
-// const PRODUCTION_AD_UNIT_ID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
+// Use test ID in development, production ID in production
+const AD_UNIT_ID = __DEV__ ? TestIds.INTERSTITIAL : PRODUCTION_AD_UNIT_ID;
 
 interface UseInterstitialAdOptions {
   adUnitId?: string;
@@ -35,7 +30,7 @@ export function useInterstitialAd(options?: UseInterstitialAdOptions) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const adUnitId = options?.adUnitId || TEST_AD_UNIT_ID;
+  const adUnitId = options?.adUnitId || AD_UNIT_ID;
 
   useEffect(() => {
     // Create and load the interstitial ad

@@ -7,21 +7,16 @@ import { BackHandler } from 'react-native';
  *
  * Shows a rewarded interstitial ad when user presses back button to exit.
  * Rewarded interstitials are longer and can't be skipped immediately.
- * Uses Google's test ad unit ID for testing.
- *
- * For production:
- * 1. Create rewarded interstitial ad unit in AdMob console
- * 2. Replace TEST_AD_UNIT_ID with your actual ad unit ID
  *
  * Usage:
  * useExitAd(); // Just call in App.tsx or main component
  */
 
-// TEST AD UNIT ID - Replace with production ID when ready
-const TEST_AD_UNIT_ID = TestIds.REWARDED_INTERSTITIAL;
+// Production Rewarded Interstitial Ad Unit ID
+const PRODUCTION_AD_UNIT_ID = 'ca-app-pub-5029120740748641/4463077544';
 
-// For production, use your actual ad unit ID:
-// const PRODUCTION_AD_UNIT_ID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
+// Use test ID in development, production ID in production
+const AD_UNIT_ID = __DEV__ ? TestIds.REWARDED_INTERSTITIAL : PRODUCTION_AD_UNIT_ID;
 
 interface UseExitAdOptions {
   adUnitId?: string;
@@ -34,7 +29,7 @@ export function useExitAd(options?: UseExitAdOptions) {
   const [isShowing, setIsShowing] = useState(false);
   const exitAttempts = useRef(0);
 
-  const adUnitId = options?.adUnitId || TEST_AD_UNIT_ID;
+  const adUnitId = options?.adUnitId || AD_UNIT_ID;
   const enabled = options?.enabled !== false; // Default to enabled
 
   useEffect(() => {

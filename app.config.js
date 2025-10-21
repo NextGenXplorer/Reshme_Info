@@ -51,8 +51,7 @@ module.exports = {
       [
         "react-native-google-mobile-ads",
         {
-          androidAppId: "ca-app-pub-3940256099942544~3347511713", // Google Test AdMob App ID
-          // For production, replace with your actual AdMob App ID from AdMob console
+          androidAppId: "ca-app-pub-5029120740748641~7524355155", // Production AdMob App ID
         }
       ]
     ],
