@@ -1,0 +1,97 @@
+name: Fingerprint Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - develop
+
+env:
+  NODE_VERSION: '18.18.0'
+
+jobs:
+  fingerprint:
+    name: Check Native Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 100
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 🚀 Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          expo-cache: true
+          packager: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Generate fingerprint
+        id: fingerprint
+        uses: expo/expo-github-action/fingerprint@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          packager: npm
+          working-directory: ${{ github.workspace }}
+          fingerprint-version: latest
+          fingerprint-installation-cache: true
+          fingerprint-db-cache-key: fingerprint-db-${{ github.run_id }}
+
+      - name: 📊 Fingerprint results
+        if: always()
+        run: |
+          echo "### 🔍 Fingerprint Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Previous Commit**: ${{ steps.fingerprint.outputs.previous-git-commit }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Current Commit**: ${{ steps.fingerprint.outputs.current-git-commit }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "${{ steps.fingerprint.outputs.fingerprint-diff }}" ]; then
+            echo "⚠️ **Native changes detected** - New build required" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Changes:**" >> $GITHUB_STEP_SUMMARY
+            echo '${{ steps.fingerprint.outputs.fingerprint-diff }}' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **No native changes** - OTA update sufficient" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 💬 Comment on PR
+        if: steps.fingerprint.outputs.fingerprint-diff != ''
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const diff = `${{ steps.fingerprint.outputs.fingerprint-diff }}`;
+            const body = `## ⚠️ Native Changes Detected
+
+            This PR includes changes that affect the native project. A new build is required.
+
+            ### Fingerprint Diff
+            \`\`\`json
+            ${diff}
+            \`\`\`
+
+            **Action Required**: Create a new build with \`eas build\` before testing.
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

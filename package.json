@@ -3,7 +3,6 @@
   "license": "0BSD",
   "version": "1.0.0",
   "main": "index.ts",
-  "packageManager": "npm@10.9.2",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -38,6 +37,9 @@
     "@types/react": "~19.1.0",
     "dotenv": "^17.2.2",
     "typescript": "~5.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "private": true
 }

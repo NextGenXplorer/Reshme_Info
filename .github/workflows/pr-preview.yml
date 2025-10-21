@@ -1,40 +1,27 @@
-name: Production Build - Android APK
+name: PR Preview - EAS Update
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/workflows/**'
-  workflow_dispatch:
-    inputs:
-      profile:
-        description: 'Build profile to use'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - preview
-          - development
+      - develop
 
 env:
   NODE_VERSION: '18.18.0'
-  EXPO_CACHE: true
 
 jobs:
-  build:
-    name: EAS Build - Android
+  preview:
+    name: Create EAS Update Preview
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    permissions:
+      contents: read
+      pull-requests: write
+    timeout-minutes: 30
 
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
@@ -47,7 +34,7 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-          expo-cache: ${{ env.EXPO_CACHE }}
+          expo-cache: true
           packager: npm
 
       - name: 📦 Install dependencies
@@ -76,29 +63,14 @@ jobs:
           EXPO_PUBLIC_ADMIN_MARKET_3=${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_3 }}
           EXPO_PUBLIC_BACKEND_URL=${{ secrets.EXPO_PUBLIC_BACKEND_URL }}
           EOF
-          echo "✅ .env file created successfully"
 
-      - name: 📱 Build Android APK with EAS
-        run: |
-          PROFILE="${{ github.event.inputs.profile || 'production' }}"
-          echo "🚀 Building APK with profile: $PROFILE"
-          eas build --platform android --profile $PROFILE --local --non-interactive --output app-release.apk
-
-      - name: 📤 Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: 🔄 Create EAS Update preview
+        uses: expo/expo-github-action/preview@v8
         with:
-          name: app-release-${{ github.run_number }}
-          path: app-release.apk
-          retention-days: 30
-          compression-level: 0
+          command: eas update --auto --branch pr-${{ github.event.pull_request.number }}
 
-      - name: 📊 Build summary
-        if: success()
-        run: |
-          echo "### ✅ Build Successful" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Profile**: ${{ github.event.inputs.profile || 'production' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build Number**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📦 Download artifact from the Actions tab" >> $GITHUB_STEP_SUMMARY
+      - name: 💬 Comment on PR
+        uses: expo/expo-github-action/preview-comment@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-id: 'eas-update-preview'
