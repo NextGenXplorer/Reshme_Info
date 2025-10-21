@@ -49,34 +49,17 @@ jobs:
       # Install dependencies
       - run: npm install
 
-      # Create .env file dynamically BEFORE prebuild
-      - name: Create .env file
+      # Verify environment variables are available
+      - name: Verify environment variables
         run: |
-          cat > .env << EOF
-          EXPO_PUBLIC_FIREBASE_API_KEY="$EXPO_PUBLIC_FIREBASE_API_KEY"
-          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN="$EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN"
-          EXPO_PUBLIC_FIREBASE_PROJECT_ID="$EXPO_PUBLIC_FIREBASE_PROJECT_ID"
-          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET="$EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET"
-          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="$EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
-          EXPO_PUBLIC_FIREBASE_APP_ID="$EXPO_PUBLIC_FIREBASE_APP_ID"
-          EXPO_PUBLIC_ADMIN_USERNAME_1="$EXPO_PUBLIC_ADMIN_USERNAME_1"
-          EXPO_PUBLIC_ADMIN_PASSWORD_1="$EXPO_PUBLIC_ADMIN_PASSWORD_1"
-          EXPO_PUBLIC_ADMIN_ROLE_1="$EXPO_PUBLIC_ADMIN_ROLE_1"
-          EXPO_PUBLIC_ADMIN_MARKET_1="$EXPO_PUBLIC_ADMIN_MARKET_1"
-          EXPO_PUBLIC_ADMIN_USERNAME_2="$EXPO_PUBLIC_ADMIN_USERNAME_2"
-          EXPO_PUBLIC_ADMIN_PASSWORD_2="$EXPO_PUBLIC_ADMIN_PASSWORD_2"
-          EXPO_PUBLIC_ADMIN_ROLE_2="$EXPO_PUBLIC_ADMIN_ROLE_2"
-          EXPO_PUBLIC_ADMIN_MARKET_2="$EXPO_PUBLIC_ADMIN_MARKET_2"
-          EXPO_PUBLIC_ADMIN_USERNAME_3="$EXPO_PUBLIC_ADMIN_USERNAME_3"
-          EXPO_PUBLIC_ADMIN_PASSWORD_3="$EXPO_PUBLIC_ADMIN_PASSWORD_3"
-          EXPO_PUBLIC_ADMIN_ROLE_3="$EXPO_PUBLIC_ADMIN_ROLE_3"
-          EXPO_PUBLIC_ADMIN_MARKET_3="$EXPO_PUBLIC_ADMIN_MARKET_3"
-          EXPO_PUBLIC_BACKEND_URL="$EXPO_PUBLIC_BACKEND_URL"
-          EOF
-          echo "✅ .env file created"
-          cat .env
+          echo "🔍 Checking environment variables..."
+          echo "Firebase API Key: ${EXPO_PUBLIC_FIREBASE_API_KEY:0:20}..."
+          echo "Project ID: $EXPO_PUBLIC_FIREBASE_PROJECT_ID"
+          echo "Admin Username 1: $EXPO_PUBLIC_ADMIN_USERNAME_1"
+          echo "✅ Environment variables are set"
 
-      # Run prebuild (Android only) - .env will be read by app.config.js
+      # Run prebuild (Android only)
+      # app.config.js will read from process.env directly (no .env file needed)
       - name: Run Expo prebuild
         run: expo prebuild --platform android --clean
 

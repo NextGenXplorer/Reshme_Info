@@ -1,4 +1,5 @@
-// Load environment variables from .env file
+// Load environment variables from .env file (for local development)
+// In CI/CD, environment variables are set directly in the shell
 require('dotenv').config();
 
 module.exports = {
