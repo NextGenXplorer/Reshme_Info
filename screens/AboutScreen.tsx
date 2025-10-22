@@ -22,25 +22,11 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
 
   const teamMembers = [
     {
-      name: t('team_member_mithun_name'),
-      role: t('team_member_mithun_role'),
-      description: t('team_member_mithun_description'),
-      icon: 'person-circle',
+      name: t('team_nextgenx_name'),
+      role: t('team_nextgenx_role'),
+      description: t('team_nextgenx_description'),
+      imageUrl: 'https://avatars.githubusercontent.com/u/223625668?s=400&u=3760cffbf5cec0e95bc14deac3725202dfa2eb8e&v=4',
       color: '#3B82F6',
-    },
-    {
-      name: t('team_member_manvanth_name'),
-      role: t('team_member_manvanth_role'),
-      description: t('team_member_manvanth_description'),
-      icon: 'code-slash',
-      color: '#10B981',
-    },
-    {
-      name: t('team_member_prashant_name'),
-      role: t('team_member_prashant_role'),
-      description: t('team_member_prashant_description'),
-      icon: 'search',
-      color: '#8B5CF6',
     },
   ];
 
@@ -100,9 +86,16 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
 
   const TeamCard = ({ member }: { member: any }) => (
     <View style={styles.teamCard}>
-      <View style={[styles.teamIcon, { backgroundColor: `${member.color}15` }]}>
-        <Ionicons name={member.icon as any} size={32} color={member.color} />
-      </View>
+      {member.imageUrl ? (
+        <Image
+          source={{ uri: member.imageUrl }}
+          style={styles.teamImage}
+        />
+      ) : (
+        <View style={[styles.teamIcon, { backgroundColor: `${member.color}15` }]}>
+          <Ionicons name={member.icon as any} size={32} color={member.color} />
+        </View>
+      )}
       <View style={styles.teamInfo}>
         <Text style={styles.teamName}>{member.name}</Text>
         <Text style={styles.teamRole}>{member.role}</Text>
@@ -211,8 +204,8 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
 
           <ContactCard
             icon="shield-checkmark-outline"
-            title="Admin Panel"
-            subtitle="Access the admin dashboard"
+            title={t('adminPanel')}
+            subtitle={t('adminPanelSubtitle')}
             onPress={() => setShowAdminPanel(true)}
             color="#8B5CF6"
           />
@@ -272,7 +265,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: 120,
     height: 120,
-    borderRadius: 24,
+    borderRadius: 60,
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
@@ -379,6 +372,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 16,
+  },
+  teamImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     marginRight: 16,
   },
   teamInfo: {

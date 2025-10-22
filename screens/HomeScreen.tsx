@@ -259,21 +259,39 @@ export default function HomeScreen() {
       // Build the speech text based on current language
       const breedText = t(`breed_${item.breed}` as any, item.breed);
       const marketText = t(`market_${item.market}` as any, item.market);
-      const gradeText = t('grade');
-      const maximumText = t('maximum');
-      const averageText = t('average');
-      const minimumText = t('minimum');
-      const lotText = t('lot');
-      const priceText = currentLang === 'kn' ? 'ರೂಪಾಯಿ' : 'rupees';
 
-      // Add longer pauses using multiple periods for natural speech
-      const speechText = `${breedText}... ${gradeText} ${item.quality}... ${marketText}... ${lotText} ${item.lotNumber}... ${maximumText}... ${item.maxPrice} ${priceText}... ${averageText}... ${item.avgPrice} ${priceText}... ${minimumText}... ${item.minPrice} ${priceText}.`;
+      // Form natural sentences based on language
+      let speechText = '';
 
-      // Speak the text with slower rate for better clarity
+      if (currentLang === 'kn') {
+        // Kannada sentence formation
+        speechText = t('tts_price_kannada', {
+          breed: breedText,
+          grade: item.quality,
+          market: marketText,
+          lot: item.lotNumber,
+          maxPrice: item.maxPrice,
+          avgPrice: item.avgPrice,
+          minPrice: item.minPrice
+        });
+      } else {
+        // English sentence formation
+        speechText = t('tts_price_english', {
+          breed: breedText,
+          grade: item.quality,
+          market: marketText,
+          lot: item.lotNumber,
+          maxPrice: item.maxPrice,
+          avgPrice: item.avgPrice,
+          minPrice: item.minPrice
+        });
+      }
+
+      // Speak the text with natural rate
       await Speech.speak(speechText, {
         language: langCode,
         pitch: 1.0,
-        rate: 0.65, // Even slower rate for better clarity and pauses
+        rate: 0.75, // Natural speaking rate
         onDone: () => setPlayingId(null),
         onStopped: () => setPlayingId(null),
         onError: () => setPlayingId(null),

@@ -1,5 +1,5 @@
 {
-"cocoonPrices": "ಕೋಕೂನ್ ಬೆಲೆಗಳು",
+"cocoonPrices": "ಗೂಡಿನ ಬೆಲೆ",
 "liveMarketRates": "ಪ್ರತಿ ಕೆಜಿಗೆ ಲೈವ್ ಮಾರುಕಟ್ಟೆ ದರಗಳು",
 "filterByBreed": "ತಳಿ ಮೂಲಕ ಫಿಲ್ಟರ್ ಮಾಡಿ",
 "filterByMarket": "ಮಾರುಕಟ್ಟೆ ಮೂಲಕ ಫಿಲ್ಟರ್ ಮಾಡಿ",
@@ -10,7 +10,7 @@
 "avg": "ಸರಾಸರಿ",
 "updated": "ನವೀಕರಿಸಲಾಗಿದೆ",
 "grade": "ದರ್ಜೆ",
-"loading": "ಕೋಕೂನ್ ಬೆಲೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+"loading": "ಗೂಡಿನ ಬೆಲೆಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
 "fetchingPrices": "ಇತ್ತೀಚಿನ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
 "priceDetails": "ಬೆಲೆ ವಿವರಗಳು (₹/ಕೆಜಿ)",
 "type": "ಪ್ರಕಾರ",
@@ -119,6 +119,11 @@
   "team_member_prashant_name": "ಪ್ರಶಾಂತ್ ಆರ್",
 "team_member_prashant_role": "ಸಹ ಸಂಸ್ಥಾಪಕ, ಮಾರ್ಕೆಟಿಂಗ್ ಮತ್ತು ಸಂಶೋಧನಾ ಮುಖ್ಯಸ್ಥ",
   "team_member_prashant_description": "ಮಾರುಕಟ್ಟೆ ಪ್ರಚಾರ ಮತ್ತು ಸಂಶೋಧನಾ ಉಪಕ್ರಮಗಳನ್ನು ನಡೆಸುವುದು",
+  "team_nextgenx_name": "ನೆಕ್ಸ್ಟ್ಜೆನ್ಎಕ್ಸ್",
+  "team_nextgenx_role": "ಅಭಿವೃದ್ಧಿ ತಂಡ",
+  "team_nextgenx_description": "ಭವಿಷ್ಯಕ್ಕಾಗಿ ನವೀನ ಪರಿಹಾರಗಳನ್ನು ನಿರ್ಮಿಸುವುದು",
+  "adminPanel": "ನಿರ್ವಾಹಕ ಫಲಕ",
+  "adminPanelSubtitle": "ನಿರ್ವಾಹಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಅನ್ನು ಪ್ರವೇಶಿಸಿ",
   "marketCenters": "ಮಾರುಕಟ್ಟೆ ಕೇಂದ್ರಗಳು",
   "silkCocoonTradingHubs": "ರೇಷ್ಮೆ ಗೂಡು ವ್ಯಾಪಾರ ಕೇಂದ್ರಗಳು",
   "markets": "ಮಾರುಕಟ್ಟೆಗಳು",
@@ -232,5 +237,7 @@
   "manageNotifications": "ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
   "sendCustomNotification": "ಕಸ್ಟಮ್ ಅಧಿಸೂಚನೆ ಕಳುಹಿಸಿ",
   "noDataToSpeak": "ಓದಲು ಯಾವುದೇ ಬೆಲೆ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ",
-  "speechError": "ಬೆಲೆಗಳನ್ನು ಓದಲು ವಿಫಲವಾಗಿದೆ"
+  "speechError": "ಬೆಲೆಗಳನ್ನು ಓದಲು ವಿಫಲವಾಗಿದೆ",
+  "tts_price_english": "Here is the cocoon price information for {{breed}}, grade {{grade}}, from {{market}} market, lot number {{lot}}. The maximum price is {{maxPrice}} rupees per kilogram. The average price is {{avgPrice}} rupees per kilogram. The minimum price is {{minPrice}} rupees per kilogram.",
+  "tts_price_kannada": "ಇದು, {{market}} ಮಾರುಕಟ್ಟೆಯಿಂದ, {{breed}} ತಳಿಯ, {{grade}} ದರ್ಜೆಯ, ಲಾಟ್ ಸಂಖ್ಯೆ {{lot}} ರೇಷ್ಮೆಗೂಡಿನ ಬೆಲೆ ಮಾಹಿತಿ. ಗರಿಷ್ಠ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{maxPrice}} ರೂಪಾಯಿಗಳು. ಸರಾಸರಿ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{avgPrice}} ರೂಪಾಯಿಗಳು. ಕನಿಷ್ಠ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{minPrice}} ರೂಪಾಯಿಗಳು."
 }
