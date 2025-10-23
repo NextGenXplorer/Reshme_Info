@@ -26,6 +26,7 @@ interface AdminDashboardScreenProps {
   onAddPrice: () => void;
   onEditPrice: (price: CocoonPrice) => void;
   onManageNotifications: () => void;
+  onAIExtract: () => void;
 }
 
 interface DashboardStats {
@@ -41,6 +42,7 @@ export default function AdminDashboardScreen({
   onAddPrice,
   onEditPrice,
   onManageNotifications,
+  onAIExtract,
 }: AdminDashboardScreenProps) {
   const { t } = useTranslation();
   const [prices, setPrices] = useState<CocoonPrice[]>([]);
@@ -302,12 +304,16 @@ export default function AdminDashboardScreen({
 
         <View style={styles.priceBody}>
           <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Average Price:</Text>
-            <Text style={styles.priceValue}>₹{item.avgPrice}/kg</Text>
+            <Text style={styles.priceLabel}>Maximum Price:</Text>
+            <Text style={styles.priceValue}>₹{item.maxPrice}/kg</Text>
           </View>
           <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Price Range:</Text>
-            <Text style={styles.priceRange}>₹{item.minPrice} - ₹{item.maxPrice}</Text>
+            <Text style={styles.priceLabel}>Average Price:</Text>
+            <Text style={[styles.priceValue, styles.priceHighlight]}>₹{item.avgPrice}/kg</Text>
+          </View>
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Minimum Price:</Text>
+            <Text style={styles.priceValue}>₹{item.minPrice}/kg</Text>
           </View>
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Last Updated:</Text>
@@ -410,23 +416,58 @@ export default function AdminDashboardScreen({
         <View style={styles.actionsContainer}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionsGrid}>
-            <TouchableOpacity style={styles.actionCard} onPress={onAddPrice}>
-              <Ionicons name="add-circle-outline" size={32} color="#3B82F6" />
-              <Text style={styles.actionCardTitle}>Add New Price</Text>
-              <Text style={styles.actionCardSubtitle}>Update market prices</Text>
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={onAIExtract}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="sparkles" size={28} color="#F59E0B" />
+              </View>
+              <Text style={styles.actionCardTitle}>AI Data Extract</Text>
+              <Text style={styles.actionCardSubtitle}>Extract from text</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionCard} onPress={() => handleRefresh()}>
-              <Ionicons name="refresh-outline" size={32} color="#10B981" />
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={onAddPrice}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#DBEAFE' }]}>
+                <Ionicons name="add-circle" size={28} color="#3B82F6" />
+              </View>
+              <Text style={styles.actionCardTitle}>Add New Price</Text>
+              <Text style={styles.actionCardSubtitle}>Manual entry</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => handleRefresh()}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#D1FAE5' }]}>
+                <Ionicons name="refresh" size={28} color="#10B981" />
+              </View>
               <Text style={styles.actionCardTitle}>Refresh Data</Text>
               <Text style={styles.actionCardSubtitle}>Sync latest prices</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionCard} onPress={onManageNotifications}>
-              <Ionicons name="notifications-outline" size={32} color="#8B5CF6" />
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={onManageNotifications}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#EDE9FE' }]}>
+                <Ionicons name="notifications" size={28} color="#8B5CF6" />
+              </View>
               <Text style={styles.actionCardTitle}>{t('sendNotification')}</Text>
               <Text style={styles.actionCardSubtitle}>{t('sendCustomNotification')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionCard} onPress={cleanupExpiredData}>
-              <Ionicons name="trash-outline" size={32} color="#EF4444" />
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={cleanupExpiredData}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#FEE2E2' }]}>
+                <Ionicons name="trash" size={28} color="#EF4444" />
+              </View>
               <Text style={styles.actionCardTitle}>Clean Up Old Data</Text>
               <Text style={styles.actionCardSubtitle}>Delete expired entries</Text>
             </TouchableOpacity>
@@ -569,32 +610,46 @@ const styles = StyleSheet.create({
   },
   actionsGrid: {
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: 16,
   },
   actionCard: {
-    flex: 1,
+    width: (width - 56) / 2, // 2 columns with proper spacing
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: 16,
+    padding: 24,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 140,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  actionIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   actionCardTitle: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#111827',
-    marginTop: 12,
-    marginBottom: 4,
+    marginTop: 16,
+    marginBottom: 6,
     textAlign: 'center',
+    lineHeight: 20,
   },
   actionCardSubtitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#6B7280',
     textAlign: 'center',
+    lineHeight: 18,
   },
 
   // Recent Entries
@@ -713,6 +768,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#111827',
+  },
+  priceHighlight: {
+    color: '#3B82F6',
   },
   priceRange: {
     fontSize: 14,

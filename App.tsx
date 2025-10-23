@@ -5,11 +5,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { SafeAreaView, TouchableOpacity, View, StyleSheet, Platform, Alert } from 'react-native';
+import { SafeAreaView, TouchableOpacity, View, StyleSheet, Platform, Alert, ActivityIndicator } from 'react-native';
 import './i18n';
 import * as Notifications from 'expo-notifications';
 import { db } from './firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useInterstitialAd } from './hooks/useInterstitialAd';
 import { useExitAd } from './hooks/useExitAd';
 import MobileAds from 'react-native-google-mobile-ads';
@@ -20,6 +21,7 @@ import MarketScreen from './screens/MarketScreen';
 import StatsScreen from './screens/StatsScreen';
 import AboutScreen from './screens/AboutScreen';
 import AdminNavigator from './screens/AdminNavigator';
+import LanguageSelectionScreen from './screens/LanguageSelectionScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -101,6 +103,8 @@ async function registerForPushNotificationsAsync(): Promise<string | undefined> 
   }
 }
 
+const FIRST_LAUNCH_KEY = '@reshme_first_launch_completed';
+
 const AppContent = () => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -110,6 +114,27 @@ const AppContent = () => {
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
   const [previousRoute, setPreviousRoute] = useState<string>('Home');
+  const [showLanguageSelection, setShowLanguageSelection] = useState(false);
+  const [isCheckingFirstLaunch, setIsCheckingFirstLaunch] = useState(true);
+
+  // Check if this is the first launch
+  useEffect(() => {
+    const checkFirstLaunch = async () => {
+      try {
+        const hasCompletedFirstLaunch = await AsyncStorage.getItem(FIRST_LAUNCH_KEY);
+        if (!hasCompletedFirstLaunch) {
+          setShowLanguageSelection(true);
+        }
+      } catch (error) {
+        console.error('Error checking first launch:', error);
+        // On error, skip language selection to avoid blocking the app
+      } finally {
+        setIsCheckingFirstLaunch(false);
+      }
+    };
+
+    checkFirstLaunch();
+  }, []);
 
   // Initialize Google Mobile Ads
   useEffect(() => {
@@ -163,6 +188,26 @@ const AppContent = () => {
       }
     };
   }, []);
+
+  // Show loading spinner while checking first launch
+  if (isCheckingFirstLaunch) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#10B981" />
+        <StatusBar style="dark" />
+      </SafeAreaView>
+    );
+  }
+
+  // Show language selection screen on first launch
+  if (showLanguageSelection) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+        <LanguageSelectionScreen onComplete={() => setShowLanguageSelection(false)} />
+        <StatusBar style="dark" />
+      </SafeAreaView>
+    );
+  }
 
   if (showAdminPanel) {
     return (

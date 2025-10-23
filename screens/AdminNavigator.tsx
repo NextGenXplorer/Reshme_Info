@@ -6,8 +6,9 @@ import AdminLoginScreen from './AdminLoginScreen';
 import AdminDashboardScreen from './AdminDashboardScreen';
 import AdminPriceFormScreen from './AdminPriceFormScreen';
 import AdminNotificationScreen from './AdminNotificationScreen';
+import AdminAIExtractScreen from './AdminAIExtractScreen';
 
-type AdminScreen = 'login' | 'dashboard' | 'add_price' | 'edit_price' | 'notifications';
+type AdminScreen = 'login' | 'dashboard' | 'add_price' | 'edit_price' | 'notifications' | 'ai_extract';
 
 interface AdminNavigatorProps {
   onExit: () => void;
@@ -60,6 +61,7 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
         return true;
 
       case 'notifications':
+      case 'ai_extract':
         setCurrentScreen('dashboard');
         return true;
 
@@ -116,6 +118,10 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
     setCurrentScreen('notifications');
   };
 
+  const handleAIExtract = () => {
+    setCurrentScreen('ai_extract');
+  };
+
   const handleBackToDashboard = () => {
     setCurrentScreen('dashboard');
   };
@@ -152,12 +158,21 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
           onAddPrice={handleAddPrice}
           onEditPrice={handleEditPrice}
           onManageNotifications={handleManageNotifications}
+          onAIExtract={handleAIExtract}
         />
       ) : null;
 
     case 'notifications':
       return currentUser ? (
         <AdminNotificationScreen
+          user={currentUser}
+          onBack={handleBackToDashboard}
+        />
+      ) : null;
+
+    case 'ai_extract':
+      return currentUser ? (
+        <AdminAIExtractScreen
           user={currentUser}
           onBack={handleBackToDashboard}
         />

@@ -4,13 +4,14 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
   Dimensions,
   TouchableOpacity,
   FlatList,
   SafeAreaView,
   Platform,
   Alert,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -28,10 +29,17 @@ const { width } = Dimensions.get('window');
 interface FilterOptions {
   breed: 'All' | 'CB' | 'BV';
   market: string;
-  dateFrom: Date | null;
-  dateTo: Date | null;
+  dateRange: 'today' | 'yesterday' | 'week' | 'all';
   sortBy: 'market' | 'avgPrice' | 'maxPrice' | 'minPrice' | 'date';
   sortOrder: 'asc' | 'desc';
+}
+
+interface BreedPriceData {
+  breed: string;
+  avgPrice: number;
+  maxPrice: number;
+  minPrice: number;
+  count: number;
 }
 
 interface MarketSummary {
@@ -41,8 +49,10 @@ interface MarketSummary {
   minPrice: number;
   lotNumbers: string[];
   breeds: string[];
+  breedPrices: BreedPriceData[];
   lastUpdated: Date;
   totalListings: number;
+  qualities: string[];
 }
 
 export default function MarketScreen() {
@@ -51,6 +61,7 @@ export default function MarketScreen() {
   const [marketSummaries, setMarketSummaries] = useState<MarketSummary[]>([]);
   const [filteredSummaries, setFilteredSummaries] = useState<MarketSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState<'from' | 'to' | null>(null);
   const [isOffline, setIsOffline] = useState(false);
@@ -59,8 +70,7 @@ export default function MarketScreen() {
   const [filters, setFilters] = useState<FilterOptions>({
     breed: 'All',
     market: 'All',
-    dateFrom: null,
-    dateTo: null,
+    dateRange: 'today',
     sortBy: 'market',
     sortOrder: 'asc',
   });
@@ -68,19 +78,54 @@ export default function MarketScreen() {
   const uniqueMarkets = ['All', ...Array.from(new Set(prices.map(p => p.market)))];
 
   useEffect(() => {
-    fetchMarketData(filters.dateFrom, filters.dateTo);
-  }, [filters.dateFrom, filters.dateTo]);
+    fetchMarketData();
+  }, []);
 
   useEffect(() => {
     generateMarketSummaries();
-  }, [prices]);
+  }, [prices, filters.dateRange]);
 
   useEffect(() => {
     applyFilters();
   }, [filters, marketSummaries]);
 
-  const fetchMarketData = async (dateFrom?: Date, dateTo?: Date) => {
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchMarketData();
+    setRefreshing(false);
+  };
+
+  const getDateRangeFilter = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (filters.dateRange) {
+      case 'today':
+        const todayEnd = new Date(today);
+        todayEnd.setHours(23, 59, 59, 999);
+        return { start: today, end: todayEnd };
+
+      case 'yesterday':
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayEnd = new Date(yesterday);
+        yesterdayEnd.setHours(23, 59, 59, 999);
+        return { start: yesterday, end: yesterdayEnd };
+
+      case 'week':
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return { start: weekAgo, end: now };
+
+      case 'all':
+      default:
+        return null;
+    }
+  };
+
+  const fetchMarketData = async () => {
     try {
+      setLoading(true);
       // Check internet connectivity first
       const netState = await NetInfo.fetch();
 
@@ -100,23 +145,16 @@ export default function MarketScreen() {
 
       setIsOffline(false);
 
-      let q;
-      if (dateFrom && dateTo) {
-        const startOfDay = new Date(dateFrom);
-        startOfDay.setHours(0, 0, 0, 0);
+      // Fetch all recent data (last 30 days for caching)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const endOfDay = new Date(dateTo);
-        endOfDay.setHours(23, 59, 59, 999);
+      const q = query(
+        collection(db, COLLECTIONS.COCOON_PRICES),
+        where('lastUpdated', '>=', Timestamp.fromDate(thirtyDaysAgo)),
+        orderBy('lastUpdated', 'desc')
+      );
 
-        q = query(
-          collection(db, COLLECTIONS.COCOON_PRICES),
-          where('lastUpdated', '>=', Timestamp.fromDate(startOfDay)),
-          where('lastUpdated', '<=', Timestamp.fromDate(endOfDay)),
-          orderBy('lastUpdated', 'desc')
-        );
-      } else {
-        q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
-      }
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
       const now = new Date();
@@ -161,9 +199,20 @@ export default function MarketScreen() {
   };
 
   const generateMarketSummaries = () => {
+    // Filter prices by date range first
+    const dateFilter = getDateRangeFilter();
+    let filteredPrices = prices;
+
+    if (dateFilter) {
+      filteredPrices = prices.filter(price => {
+        const priceDate = price.lastUpdated;
+        return priceDate >= dateFilter.start && priceDate <= dateFilter.end;
+      });
+    }
+
     const marketGroups: { [key: string]: CocoonPrice[] } = {};
-    
-    prices.forEach(price => {
+
+    filteredPrices.forEach(price => {
       if (!marketGroups[price.market]) {
         marketGroups[price.market] = [];
       }
@@ -179,14 +228,40 @@ export default function MarketScreen() {
       if (marketPrices.length === 0) {
         return null;
       }
-      
+
+      // Calculate breed-specific prices
+      const breedGroups: { [key: string]: CocoonPrice[] } = {};
+      marketPrices.forEach(price => {
+        if (!breedGroups[price.breed]) {
+          breedGroups[price.breed] = [];
+        }
+        breedGroups[price.breed].push(price);
+      });
+
+      const breedPrices: BreedPriceData[] = Object.keys(breedGroups).map(breed => {
+        const breedPricesList = breedGroups[breed];
+        const breedAvg = breedPricesList.map(p => p.avgPrice).filter(p => p != null);
+        const breedMax = breedPricesList.map(p => p.maxPrice).filter(p => p != null);
+        const breedMin = breedPricesList.map(p => p.minPrice).filter(p => p != null);
+
+        return {
+          breed,
+          avgPrice: breedAvg.length > 0 ? Math.round(breedAvg.reduce((sum, p) => sum + p, 0) / breedAvg.length) : 0,
+          maxPrice: breedMax.length > 0 ? Math.max(...breedMax) : 0,
+          minPrice: breedMin.length > 0 ? Math.min(...breedMin) : 0,
+          count: breedPricesList.length,
+        };
+      });
+
       return {
         market: marketName,
         avgPrice: avgPrices.length > 0 ? Math.round(avgPrices.reduce((sum, price) => sum + price, 0) / avgPrices.length) : 0,
         maxPrice: maxPrices.length > 0 ? Math.max(...maxPrices) : 0,
         minPrice: minPrices.length > 0 ? Math.min(...minPrices) : 0,
-        lotNumbers: [...new Set(marketPrices.map(p => p.lotNumber))],
+        lotNumbers: [...new Set(marketPrices.map(p => p.lotNumber?.toString() || ''))].filter(Boolean),
         breeds: [...new Set(marketPrices.map(p => p.breed))],
+        breedPrices,
+        qualities: [...new Set(marketPrices.map(p => p.quality))],
         lastUpdated: new Date(Math.max(...marketPrices.map(p => p.lastUpdated.getTime()))),
         totalListings: marketPrices.length,
       };
@@ -207,7 +282,6 @@ export default function MarketScreen() {
     if (filters.market !== 'All') {
       filtered = filtered.filter(summary => summary.market === filters.market);
     }
-
 
     // Sort
     filtered.sort((a, b) => {
@@ -245,35 +319,24 @@ export default function MarketScreen() {
     setFilters({
       breed: 'All',
       market: 'All',
-      dateFrom: null,
-      dateTo: null,
+      dateRange: 'today',
       sortBy: 'market',
       sortOrder: 'asc',
     });
   };
 
-  const onDateChange = (event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || (showDatePicker === 'from' ? filters.dateFrom : filters.dateTo);
-    setShowDatePicker(null);
-
-    if (currentDate) {
-      const isFrom = showDatePicker === 'from';
-      const newFilters = { ...filters };
-
-      if (isFrom) {
-        newFilters.dateFrom = currentDate;
-      } else {
-        newFilters.dateTo = currentDate;
-      }
-
-      if (newFilters.dateFrom && newFilters.dateTo && newFilters.dateFrom > newFilters.dateTo) {
-        // Swap dates if from is after to
-        const temp = newFilters.dateFrom;
-        newFilters.dateFrom = newFilters.dateTo;
-        newFilters.dateTo = temp;
-      }
-
-      setFilters(newFilters);
+  const getDateRangeLabel = () => {
+    switch (filters.dateRange) {
+      case 'today':
+        return t('today');
+      case 'yesterday':
+        return t('yesterday');
+      case 'week':
+        return t('last7Days');
+      case 'all':
+        return t('allTime');
+      default:
+        return t('today');
     }
   };
 
@@ -281,6 +344,7 @@ export default function MarketScreen() {
     <TouchableOpacity
       style={[styles.filterChip, isActive && styles.filterChipActive]}
       onPress={onPress}
+      activeOpacity={0.7}
     >
       <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
         {label}
@@ -288,52 +352,88 @@ export default function MarketScreen() {
     </TouchableOpacity>
   );
 
+  const renderBreedPrice = (breedData: BreedPriceData) => (
+    <View key={breedData.breed} style={styles.breedPriceRow}>
+      <View style={[styles.breedPriceBadge, {
+        backgroundColor: breedData.breed === 'CB' ? '#3B82F615' : '#10B98115'
+      }]}>
+        <Text style={[styles.breedPriceText, {
+          color: breedData.breed === 'CB' ? '#3B82F6' : '#10B981'
+        }]}>
+          {t(`breed_${breedData.breed}` as any, breedData.breed)}
+        </Text>
+      </View>
+      <View style={styles.breedPriceDetails}>
+        <Text style={styles.breedPriceValue}>₹{breedData.avgPrice}</Text>
+        <Text style={styles.breedPriceRange}>
+          ₹{breedData.minPrice} - ₹{breedData.maxPrice}
+        </Text>
+      </View>
+      <Text style={styles.breedCount}>{breedData.count} {t('listings')}</Text>
+    </View>
+  );
+
   const renderMarketCard = ({ item }: { item: MarketSummary }) => (
     <View style={styles.marketCard}>
       {/* Header */}
       <View style={styles.marketCardHeader}>
         <View style={styles.marketInfo}>
-          <Text style={styles.marketNameText}>{t(`market_${item.market}` as any, item.market)}</Text>
-          <Text style={styles.listingsText}>{item.totalListings} {t('listings')}</Text>
-        </View>
-        <View style={styles.breedContainer}>
-          {item.breeds.map(breed => (
-            <View
-              key={breed}
-              style={[styles.breedBadge, { backgroundColor: breed === 'CB' ? '#3B82F615' : '#10B98115' }]}
-            >
-              <Text style={[styles.breedText, { color: breed === 'CB' ? '#3B82F6' : '#10B981' }]}>
-                {t(`breed_${breed}` as any, breed)}
-              </Text>
-            </View>
-          ))}
+          <View style={styles.marketTitleRow}>
+            <Ionicons name="location" size={20} color="#3B82F6" />
+            <Text style={styles.marketNameText}>{t(`market_${item.market}` as any, item.market)}</Text>
+          </View>
+          <Text style={styles.listingsText}>
+            {item.totalListings} {item.totalListings === 1 ? t('listing') : t('listings')} • {item.qualities.join(', ')}
+          </Text>
         </View>
       </View>
 
-      {/* Prices Row */}
-      <View style={styles.pricesRow}>
-        <View style={styles.priceItem}>
+      {/* Overall Prices */}
+      <View style={styles.overallPricesCard}>
+        <View style={styles.priceColumn}>
+          <View style={styles.priceIconContainer}>
+            <Ionicons name="trending-up" size={16} color="#10B981" />
+          </View>
+          <Text style={styles.priceCardLabel}>{t('maxPriceLabel')}</Text>
           <Text style={styles.maxPriceText}>₹{item.maxPrice}</Text>
-          <Text style={styles.priceLabel}>{t('maxPriceLabel')}</Text>
         </View>
-        <View style={styles.priceItem}>
-          <Text style={styles.minPriceText}>₹{item.minPrice}</Text>
-          <Text style={styles.priceLabel}>{t('minPriceLabel')}</Text>
-        </View>
-        <View style={styles.priceItem}>
+        <View style={styles.priceDivider} />
+        <View style={styles.priceColumn}>
+          <View style={[styles.priceIconContainer, { backgroundColor: '#3B82F615' }]}>
+            <Ionicons name="analytics" size={16} color="#3B82F6" />
+          </View>
+          <Text style={styles.priceCardLabel}>{t('avgPriceLabel')}</Text>
           <Text style={styles.avgPriceText}>₹{item.avgPrice}</Text>
-          <Text style={styles.priceLabel}>{t('avgPriceLabel')}</Text>
+        </View>
+        <View style={styles.priceDivider} />
+        <View style={styles.priceColumn}>
+          <View style={[styles.priceIconContainer, { backgroundColor: '#EF444415' }]}>
+            <Ionicons name="trending-down" size={16} color="#EF4444" />
+          </View>
+          <Text style={styles.priceCardLabel}>{t('minPriceLabel')}</Text>
+          <Text style={styles.minPriceText}>₹{item.minPrice}</Text>
         </View>
       </View>
+
+      {/* Breed-Specific Prices */}
+      {item.breedPrices.length > 0 && (
+        <View style={styles.breedPricesSection}>
+          <Text style={styles.breedPricesTitle}>{t('breedPrices') || 'Breed-wise Prices'}</Text>
+          {item.breedPrices.map(renderBreedPrice)}
+        </View>
+      )}
 
       {/* Lot Numbers */}
-      <View style={styles.lotSection}>
-        <Text style={styles.lotLabel}>{t('lotNumbersLabel')}</Text>
-        <Text style={styles.lotText}>
-          {item.lotNumbers.slice(0, 3).join(', ')}
-          {item.lotNumbers.length > 3 && ` +${item.lotNumbers.length - 3} more`}
-        </Text>
-      </View>
+      {item.lotNumbers.length > 0 && (
+        <View style={styles.lotSection}>
+          <Ionicons name="cube-outline" size={14} color="#6B7280" />
+          <Text style={styles.lotLabel}>{t('lotNumbersLabel')}:</Text>
+          <Text style={styles.lotText}>
+            {item.lotNumbers.slice(0, 3).join(', ')}
+            {item.lotNumbers.length > 3 && ` +${item.lotNumbers.length - 3}`}
+          </Text>
+        </View>
+      )}
 
       {/* Updated Time */}
       <View style={styles.updateSection}>
@@ -342,7 +442,8 @@ export default function MarketScreen() {
           {t('updatedLabel')} {item.lastUpdated.toLocaleDateString('en-IN', {
             day: '2-digit',
             month: 'short',
-            year: '2-digit'
+            hour: '2-digit',
+            minute: '2-digit'
           })}
         </Text>
       </View>
@@ -355,48 +456,73 @@ export default function MarketScreen() {
     const overallAvgPrice = marketSummaries.length > 0
       ? Math.round(marketSummaries.reduce((sum, market) => sum + market.avgPrice, 0) / marketSummaries.length)
       : 0;
-    const highestPrice = marketSummaries.length > 0 
+    const highestPrice = marketSummaries.length > 0
       ? Math.max(...marketSummaries.map(m => m.maxPrice))
       : 0;
 
     return (
       <View style={styles.overviewCard}>
-        <Text style={styles.overviewTitle}>{t('marketOverview') || 'Market Overview'}</Text>
+        <Text style={styles.overviewTitle}>{t('marketOverview')}</Text>
         <View style={styles.overviewStats}>
           <View style={styles.overviewStat}>
+            <View style={[styles.overviewIcon, { backgroundColor: '#3B82F615' }]}>
+              <Ionicons name="business" size={20} color="#3B82F6" />
+            </View>
             <Text style={styles.overviewNumber}>{totalMarkets}</Text>
-            <Text style={styles.overviewLabel}>{t('activeMarkets') || 'Markets'}</Text>
+            <Text style={styles.overviewLabel}>{t('activeMarkets')}</Text>
           </View>
-          <View style={styles.overviewDivider} />
           <View style={styles.overviewStat}>
+            <View style={[styles.overviewIcon, { backgroundColor: '#10B98115' }]}>
+              <Ionicons name="receipt" size={20} color="#10B981" />
+            </View>
             <Text style={styles.overviewNumber}>{totalListings}</Text>
-            <Text style={styles.overviewLabel}>{t('totalListings') || 'Listings'}</Text>
+            <Text style={styles.overviewLabel}>{t('totalListings')}</Text>
           </View>
-          <View style={styles.overviewDivider} />
           <View style={styles.overviewStat}>
+            <View style={[styles.overviewIcon, { backgroundColor: '#F59E0B15' }]}>
+              <Ionicons name="analytics" size={20} color="#F59E0B" />
+            </View>
             <Text style={styles.overviewNumber}>₹{overallAvgPrice}</Text>
-            <Text style={styles.overviewLabel}>{t('avgPrice') || 'Avg Price'}</Text>
+            <Text style={styles.overviewLabel}>{t('avg')}</Text>
           </View>
-          <View style={styles.overviewDivider} />
           <View style={styles.overviewStat}>
+            <View style={[styles.overviewIcon, { backgroundColor: '#10B98115' }]}>
+              <Ionicons name="trending-up" size={20} color="#10B981" />
+            </View>
             <Text style={styles.overviewNumber}>₹{highestPrice}</Text>
-            <Text style={styles.overviewLabel}>{t('highestPrice') || 'Highest'}</Text>
+            <Text style={styles.overviewLabel}>{t('highestPrice')}</Text>
           </View>
         </View>
       </View>
     );
   };
 
-  if (loading) {
+  const EmptyState = () => (
+    <View style={styles.emptyState}>
+      <View style={styles.emptyIconContainer}>
+        <Ionicons name="calendar-outline" size={64} color="#D1D5DB" />
+      </View>
+      <Text style={styles.emptyTitle}>{t('noMarketsFound')}</Text>
+      <Text style={styles.emptySubtitle}>
+        {t('noDataForDateRange', { dateRange: getDateRangeLabel().toLowerCase() })}
+      </Text>
+      <TouchableOpacity style={styles.clearFiltersButton} onPress={() => updateFilter('dateRange', 'all')}>
+        <Text style={styles.clearFiltersButtonText}>{t('viewAllData')}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  if (loading && !refreshing) {
     return (
       <SafeAreaView style={styles.container}>
         <Header
-          title={t('marketCenters') || 'Market Centers'}
-          subtitle={t('silkCocoonTradingHubs') || 'Silk cocoon trading hubs'}
+          title={t('marketCenters')}
+          subtitle={t('silkCocoonTradingHubs')}
           rightComponent={<LanguageSwitcher />}
         />
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>{t('loadingMarketData') || 'Loading market data...'}</Text>
+          <ActivityIndicator size="large" color="#3B82F6" />
+          <Text style={styles.loadingText}>{t('loadingMarketData')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -405,8 +531,8 @@ export default function MarketScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Header
-        title={t('marketCenters') || 'Market Centers'}
-        subtitle={t('silkCocoonTradingHubs') || 'Silk cocoon trading hubs'}
+        title={t('marketCenters')}
+        subtitle={t('silkCocoonTradingHubs')}
         rightComponent={<LanguageSwitcher />}
       />
 
@@ -417,34 +543,90 @@ export default function MarketScreen() {
             <View style={styles.offlineBannerText}>
               <Text style={styles.offlineBannerTitle}>{t('offlineMode')}</Text>
               <Text style={styles.offlineBannerSubtitle}>
-                {t('dataFromCache')} • {t('lastUpdated')}: {cacheTimestamp}
+                {t('dataFromCache')} • {cacheTimestamp}
               </Text>
             </View>
           </View>
         </View>
       )}
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={['#3B82F6']}
+            tintColor="#3B82F6"
+          />
+        }
+      >
         <OverviewCard />
 
-        {/* Filter Controls */}
-        <View style={styles.filterContainer}>
-          <View style={styles.filterHeader}>
-            <Text style={styles.filterTitle}>{t('marketData')}</Text>
-            <TouchableOpacity
-              style={styles.filterToggle}
-              onPress={() => setShowFilters(!showFilters)}
-            >
-              <Ionicons name={showFilters ? "chevron-up-circle" : "chevron-down-circle"} size={24} color="#3B82F6" />
-              <Text style={styles.filterToggleText}>{showFilters ? t('hideFilters') : t('showFilters')}</Text>
-            </TouchableOpacity>
+        {/* Date Range Filter - Always Visible */}
+        <View style={styles.dateRangeContainer}>
+          <View style={styles.dateRangeHeader}>
+            <Ionicons name="calendar" size={18} color="#3B82F6" />
+            <Text style={styles.dateRangeTitle}>{t('showingDataFor')}:</Text>
           </View>
+          <View style={styles.dateRangeChips}>
+            {[
+              { key: 'today', label: t('today'), icon: 'today' },
+              { key: 'yesterday', label: t('yesterday'), icon: 'time' },
+              { key: 'week', label: t('last7Days'), icon: 'calendar' },
+              { key: 'all', label: t('allTime'), icon: 'infinite' }
+            ].map(range => (
+              <TouchableOpacity
+                key={range.key}
+                style={[
+                  styles.dateRangeChip,
+                  filters.dateRange === range.key && styles.dateRangeChipActive
+                ]}
+                onPress={() => updateFilter('dateRange', range.key)}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name={range.icon as any}
+                  size={16}
+                  color={filters.dateRange === range.key ? '#FFFFFF' : '#6B7280'}
+                />
+                <Text style={[
+                  styles.dateRangeChipText,
+                  filters.dateRange === range.key && styles.dateRangeChipTextActive
+                ]}>
+                  {range.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Compact Filter Section */}
+        <View style={styles.filterContainer}>
+          <TouchableOpacity
+            style={styles.filterToggleButton}
+            onPress={() => setShowFilters(!showFilters)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.filterToggleLeft}>
+              <Ionicons name="filter" size={20} color="#3B82F6" />
+              <Text style={styles.filterToggleText}>
+                {t('moreFilters')}
+              </Text>
+            </View>
+            <Ionicons
+              name={showFilters ? "chevron-up" : "chevron-down"}
+              size={20}
+              color="#3B82F6"
+            />
+          </TouchableOpacity>
 
           {showFilters && (
             <View style={styles.filterContent}>
-              {/* Breed Filter */}
-              <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>{t('breeds')}</Text>
+              {/* Breed Filters */}
+              <View style={styles.quickFilters}>
+                <Text style={styles.filterSectionLabel}>{t('breeds')}:</Text>
                 <View style={styles.filterChipsContainer}>
                   {['All', 'CB', 'BV'].map(breed => (
                     <FilterChip
@@ -457,116 +639,61 @@ export default function MarketScreen() {
                 </View>
               </View>
 
-              {/* Market Filter */}
-              <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>{t('market')}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View style={styles.filterChipsContainer}>
-                    {uniqueMarkets.map(market => (
-                      <FilterChip
-                        key={market}
-                        label={t(`market_${market}` as any, market)}
-                        isActive={filters.market === market}
-                        onPress={() => updateFilter('market', market)}
-                      />
-                    ))}
-                  </View>
-                </ScrollView>
-              </View>
-
-              {/* Date Filter */}
-              <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>{t('dateRange')}</Text>
-                <View style={styles.dateFilterContainer}>
-                  <TouchableOpacity
-                    style={styles.dateButton}
-                    onPress={() => setShowDatePicker('from')}
-                  >
-                    <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                    <Text style={styles.dateButtonText}>
-                      {filters.dateFrom ? filters.dateFrom.toLocaleDateString() : t('fromDate')}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.dateButton}
-                    onPress={() => setShowDatePicker('to')}
-                  >
-                    <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                    <Text style={styles.dateButtonText}>
-                      {filters.dateTo ? filters.dateTo.toLocaleDateString() : t('toDate')}
-                    </Text>
-                  </TouchableOpacity>
+              {/* Market Filters */}
+              {uniqueMarkets.length > 1 && (
+                <View style={styles.quickFilters}>
+                  <Text style={styles.filterSectionLabel}>{t('markets')}:</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <View style={styles.filterChipsContainer}>
+                      {uniqueMarkets.map(market => (
+                        <FilterChip
+                          key={market}
+                          label={t(`market_${market}` as any, market)}
+                          isActive={filters.market === market}
+                          onPress={() => updateFilter('market', market)}
+                        />
+                      ))}
+                    </View>
+                  </ScrollView>
                 </View>
-              </View>
+              )}
 
-              {/* Sort Options */}
-              <View style={styles.filterSection}>
-                <Text style={styles.filterLabel}>{t('sortBy')}</Text>
-                <View style={styles.sortContainer}>
-                  <View style={styles.filterChipsContainer}>
-                    {[
-                      { key: 'market', label: t('sort_market') },
-                      { key: 'avgPrice', label: t('sort_avgPrice') },
-                      { key: 'maxPrice', label: t('sort_maxPrice') },
-                      { key: 'minPrice', label: t('sort_minPrice') },
-                      { key: 'date', label: t('sort_date') }
-                    ].map(sort => (
-                      <FilterChip
-                        key={sort.key}
-                        label={sort.label}
-                        isActive={filters.sortBy === sort.key}
-                        onPress={() => updateFilter('sortBy', sort.key)}
-                      />
-                    ))}
-                  </View>
-                  <TouchableOpacity
-                    style={styles.sortOrderButton}
-                    onPress={() => updateFilter('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                  >
-                    <Ionicons
-                      name={filters.sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
-                      size={16}
-                      color="#3B82F6"
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
-                <Text style={styles.clearFiltersText}>{t('clearAllFilters')}</Text>
-              </TouchableOpacity>
+              {(filters.breed !== 'All' || filters.market !== 'All') && (
+                <TouchableOpacity
+                  style={styles.clearFiltersTextButton}
+                  onPress={clearFilters}
+                >
+                  <Text style={styles.clearFiltersText}>{t('clearAllFilters')}</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
 
         {/* Results Count */}
-        <View style={styles.resultsContainer}>
-          <Text style={styles.resultsText}>
-            {t('marketsFound', { count: filteredSummaries.length })}
-          </Text>
-        </View>
-
-        {/* Market Data Cards */}
-        <View style={styles.marketCardsContainer}>
-          <FlatList
-            data={filteredSummaries}
-            renderItem={renderMarketCard}
-            keyExtractor={(item) => item.market}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
-          />
-        </View>
-
-        {/* Date Picker */}
-        {showDatePicker && (
-          <DateTimePicker
-            value={showDatePicker === 'from' ? filters.dateFrom || new Date() : filters.dateTo || new Date()}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={onDateChange}
-          />
+        {filteredSummaries.length > 0 && (
+          <View style={styles.resultsContainer}>
+            <Text style={styles.resultsText}>
+              {filteredSummaries.length} {filteredSummaries.length === 1 ? t('market') : t('markets')} {t('found')}
+            </Text>
+          </View>
         )}
+
+        {/* Market Data Cards or Empty State */}
+        {filteredSummaries.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <View style={styles.marketCardsContainer}>
+            {filteredSummaries.map(item => (
+              <View key={item.market}>
+                {renderMarketCard({ item })}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Bottom Spacing */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -575,7 +702,7 @@ export default function MarketScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9FAFB',
   },
 
   // Loading
@@ -583,6 +710,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 16,
   },
   loadingText: {
     fontSize: 16,
@@ -593,21 +721,21 @@ const styles = StyleSheet.create({
   // Content
   content: {
     flex: 1,
-    paddingHorizontal: 20,
   },
 
   // Overview Card
   overviewCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
+    padding: 24,
+    marginHorizontal: 20,
     marginTop: 20,
-    marginBottom: 24,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -615,77 +743,126 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   overviewStats: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 12,
   },
   overviewStat: {
     flex: 1,
     alignItems: 'center',
+    gap: 8,
+  },
+  overviewIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   overviewNumber: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    color: '#3B82F6',
-    marginBottom: 4,
+    color: '#111827',
   },
   overviewLabel: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#6B7280',
     textAlign: 'center',
   },
-  overviewDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#E5E7EB',
-    marginHorizontal: 8,
-  },
 
-  // Filter Styles
-  filterContainer: {
+  // Date Range Filter
+  dateRangeContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginBottom: 16,
   },
-  filterHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  filterTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  filterToggle: {
+  dateRangeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginBottom: 12,
+  },
+  dateRangeTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  dateRangeChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  dateRangeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  dateRangeChipActive: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
+  },
+  dateRangeChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  dateRangeChipTextActive: {
+    color: '#FFFFFF',
+  },
+
+  // Compact Filter Section
+  filterSectionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 4,
+  },
+  filterContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+  },
+  filterToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  filterToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   filterToggleText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: '#3B82F6',
   },
   filterContent: {
-    gap: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 12,
   },
-  filterSection: {
-    gap: 8,
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+  quickFilters: {
+    gap: 12,
   },
   filterChipsContainer: {
     flexDirection: 'row',
@@ -705,48 +882,16 @@ const styles = StyleSheet.create({
     borderColor: '#3B82F6',
   },
   filterChipText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: '#6B7280',
   },
   filterChipTextActive: {
     color: '#FFFFFF',
   },
-  dateFilterContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  dateButton: {
-    flex: 1,
-    flexDirection: 'row',
+  clearFiltersTextButton: {
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  dateButtonText: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  sortContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  sortOrderButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  clearFiltersButton: {
-    alignItems: 'center',
-    paddingVertical: 12,
-    marginTop: 8,
+    paddingVertical: 8,
   },
   clearFiltersText: {
     fontSize: 14,
@@ -757,10 +902,7 @@ const styles = StyleSheet.create({
   // Results
   resultsContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   resultsText: {
     fontSize: 14,
@@ -768,116 +910,157 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Market Cards Container
+  // Market Cards
   marketCardsContainer: {
-    marginBottom: 40,
+    paddingHorizontal: 20,
+    gap: 16,
   },
-  cardSeparator: {
-    height: 12,
-  },
-
-  // Market Card Styles
   marketCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
-    marginHorizontal: 4,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
+    gap: 16,
   },
   marketCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
   },
   marketInfo: {
     flex: 1,
+    gap: 6,
+  },
+  marketTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   marketNameText: {
     fontSize: 20,
     color: '#111827',
     fontWeight: '700',
-    marginBottom: 4,
   },
   listingsText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#6B7280',
     fontWeight: '500',
   },
-  breedContainer: {
+
+  // Overall Prices Card
+  overallPricesCard: {
     flexDirection: 'row',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    gap: 12,
+  },
+  priceColumn: {
+    flex: 1,
+    alignItems: 'center',
     gap: 6,
   },
-  breedBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  priceIconContainer: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-  },
-  breedText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-
-  // Prices Row
-  pricesRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingHorizontal: 8,
-  },
-  priceItem: {
+    backgroundColor: '#10B98115',
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'center',
   },
-  maxPriceText: {
-    fontSize: 20,
-    color: '#10B981',
-    fontWeight: '800',
-    marginBottom: 4,
+  priceDivider: {
+    width: 1,
+    backgroundColor: '#E5E7EB',
   },
-  minPriceText: {
-    fontSize: 20,
-    color: '#EF4444',
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  avgPriceText: {
-    fontSize: 20,
-    color: '#3B82F6',
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  priceLabel: {
-    fontSize: 12,
+  priceCardLabel: {
+    fontSize: 11,
     color: '#6B7280',
     fontWeight: '600',
     textAlign: 'center',
+  },
+  maxPriceText: {
+    fontSize: 18,
+    color: '#10B981',
+    fontWeight: '800',
+  },
+  minPriceText: {
+    fontSize: 18,
+    color: '#EF4444',
+    fontWeight: '800',
+  },
+  avgPriceText: {
+    fontSize: 18,
+    color: '#3B82F6',
+    fontWeight: '800',
+  },
+
+  // Breed Prices Section
+  breedPricesSection: {
+    gap: 10,
+  },
+  breedPricesTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  breedPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 10,
+    padding: 12,
+    gap: 12,
+  },
+  breedPriceBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  breedPriceText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  breedPriceDetails: {
+    flex: 1,
+  },
+  breedPriceValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#111827',
+  },
+  breedPriceRange: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  breedCount: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '600',
   },
 
   // Lot Section
   lotSection: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 6,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
   },
   lotLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#6B7280',
     fontWeight: '600',
-    marginRight: 8,
   },
   lotText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#111827',
     fontWeight: '500',
     flex: 1,
@@ -893,6 +1076,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     fontWeight: '500',
+  },
+
+  // Empty State
+  emptyState: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 48,
+    marginHorizontal: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  emptyIconContainer: {
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  clearFiltersButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  clearFiltersButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 
   // Offline Banner
@@ -921,5 +1143,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#B45309',
     fontWeight: '500',
+  },
+
+  // Bottom Spacing
+  bottomSpacing: {
+    height: 40,
   },
 });
