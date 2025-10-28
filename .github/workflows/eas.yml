@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+          cache: npm
 
       - name: 🧰 Setup EAS CLI
         uses: expo/expo-github-action@v8
@@ -27,7 +27,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: yarn install
+        run: npm ci
 
       - name: 🧩 Setup Android SDK
         uses: android-actions/setup-android@v3
