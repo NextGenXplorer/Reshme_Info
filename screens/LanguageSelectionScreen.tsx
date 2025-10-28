@@ -7,10 +7,15 @@ import {
   Image,
   ActivityIndicator,
   StatusBar,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import i18n, { saveLanguagePreference } from '../i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const isSmallScreen = SCREEN_HEIGHT < 700;
 
 const FIRST_LAUNCH_KEY = '@reshme_first_launch_completed';
 
@@ -53,25 +58,57 @@ export default function LanguageSelectionScreen({ onComplete }: LanguageSelectio
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Logo/Brand Section */}
-      <View style={styles.headerSection}>
-        <View style={styles.logoContainer}>
-          <Ionicons name="leaf" size={60} color="#10B981" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Logo/Brand Section */}
+        <View style={styles.headerSection}>
+          <View style={[
+            styles.logoContainer,
+            isSmallScreen && styles.logoContainerSmall
+          ]}>
+            <Ionicons
+              name="leaf"
+              size={isSmallScreen ? 40 : 60}
+              color="#10B981"
+            />
+          </View>
+          <Text style={[
+            styles.appName,
+            isSmallScreen && styles.appNameSmall
+          ]}>
+            Reshme Info
+          </Text>
+          <Text style={[
+            styles.subtitle,
+            isSmallScreen && styles.subtitleSmall
+          ]}>
+            Cocoon Market Price Information
+          </Text>
         </View>
-        <Text style={styles.appName}>Reshme Info</Text>
-        <Text style={styles.subtitle}>Cocoon Market Price Information</Text>
-      </View>
 
-      {/* Language Selection Section */}
-      <View style={styles.selectionSection}>
-        <Text style={styles.title}>Choose Your Language</Text>
-        <Text style={styles.subtitle2}>ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ</Text>
+        {/* Language Selection Section */}
+        <View style={styles.selectionSection}>
+          <Text style={[
+            styles.title,
+            isSmallScreen && styles.titleSmall
+          ]}>
+            Choose Your Language
+          </Text>
+          <Text style={[
+            styles.subtitle2,
+            isSmallScreen && styles.subtitle2Small
+          ]}>
+            ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ
+          </Text>
 
-        <View style={styles.languageOptions}>
+          <View style={styles.languageOptions}>
           {/* English Option */}
           <TouchableOpacity
             style={[
               styles.languageCard,
+              isSmallScreen && styles.languageCardSmall,
               selectedLanguage === 'en' && styles.languageCardSelected,
             ]}
             onPress={() => handleLanguageSelect('en')}
@@ -79,10 +116,25 @@ export default function LanguageSelectionScreen({ onComplete }: LanguageSelectio
             activeOpacity={0.7}
           >
             <View style={styles.languageIcon}>
-              <Text style={styles.languageEmoji}>🇬🇧</Text>
+              <Text style={[
+                styles.languageEmoji,
+                isSmallScreen && styles.languageEmojiSmall
+              ]}>
+                🇬🇧
+              </Text>
             </View>
-            <Text style={styles.languageName}>English</Text>
-            <Text style={styles.languageNative}>English</Text>
+            <Text style={[
+              styles.languageName,
+              isSmallScreen && styles.languageNameSmall
+            ]}>
+              English
+            </Text>
+            <Text style={[
+              styles.languageNative,
+              isSmallScreen && styles.languageNativeSmall
+            ]}>
+              English
+            </Text>
             {selectedLanguage === 'en' && loading && (
               <ActivityIndicator color="#10B981" size="small" style={styles.loader} />
             )}
@@ -95,6 +147,7 @@ export default function LanguageSelectionScreen({ onComplete }: LanguageSelectio
           <TouchableOpacity
             style={[
               styles.languageCard,
+              isSmallScreen && styles.languageCardSmall,
               selectedLanguage === 'kn' && styles.languageCardSelected,
             ]}
             onPress={() => handleLanguageSelect('kn')}
@@ -102,10 +155,25 @@ export default function LanguageSelectionScreen({ onComplete }: LanguageSelectio
             activeOpacity={0.7}
           >
             <View style={styles.languageIcon}>
-              <Text style={styles.languageEmoji}>🇮🇳</Text>
+              <Text style={[
+                styles.languageEmoji,
+                isSmallScreen && styles.languageEmojiSmall
+              ]}>
+                🇮🇳
+              </Text>
             </View>
-            <Text style={styles.languageName}>Kannada</Text>
-            <Text style={styles.languageNative}>ಕನ್ನಡ</Text>
+            <Text style={[
+              styles.languageName,
+              isSmallScreen && styles.languageNameSmall
+            ]}>
+              Kannada
+            </Text>
+            <Text style={[
+              styles.languageNative,
+              isSmallScreen && styles.languageNativeSmall
+            ]}>
+              ಕನ್ನಡ
+            </Text>
             {selectedLanguage === 'kn' && loading && (
               <ActivityIndicator color="#10B981" size="small" style={styles.loader} />
             )}
@@ -123,10 +191,11 @@ export default function LanguageSelectionScreen({ onComplete }: LanguageSelectio
         </Text>
       </View>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Karnataka Cocoon Market Information System</Text>
-      </View>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Karnataka Cocoon Market Information System</Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -135,11 +204,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'space-between',
+    paddingBottom: 20,
   },
   headerSection: {
     alignItems: 'center',
-    paddingTop: 60,
+    paddingTop: isSmallScreen ? 30 : 60,
     paddingHorizontal: 20,
   },
   logoContainer: {
@@ -153,21 +226,35 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#10B981',
   },
+  logoContainerSmall: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 12,
+    borderWidth: 2,
+  },
   appName: {
     fontSize: 32,
     fontWeight: '700',
     color: '#111827',
     marginBottom: 8,
   },
+  appNameSmall: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
   subtitle: {
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
   },
+  subtitleSmall: {
+    fontSize: 13,
+  },
   selectionSection: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: isSmallScreen ? 20 : 40,
   },
   title: {
     fontSize: 24,
@@ -176,6 +263,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
+  titleSmall: {
+    fontSize: 18,
+    marginBottom: 6,
+  },
   subtitle2: {
     fontSize: 20,
     fontWeight: '600',
@@ -183,9 +274,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 32,
   },
+  subtitle2Small: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
   languageOptions: {
-    gap: 16,
-    marginBottom: 24,
+    gap: isSmallScreen ? 12 : 16,
+    marginBottom: isSmallScreen ? 16 : 24,
   },
   languageCard: {
     backgroundColor: '#F9FAFB',
@@ -197,6 +292,10 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     position: 'relative',
   },
+  languageCardSmall: {
+    padding: 16,
+    borderRadius: 12,
+  },
   languageCardSelected: {
     backgroundColor: '#F0FDF4',
     borderColor: '#10B981',
@@ -207,10 +306,13 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   languageIcon: {
-    marginRight: 16,
+    marginRight: isSmallScreen ? 12 : 16,
   },
   languageEmoji: {
     fontSize: 48,
+  },
+  languageEmojiSmall: {
+    fontSize: 36,
   },
   languageName: {
     fontSize: 22,
@@ -218,11 +320,17 @@ const styles = StyleSheet.create({
     color: '#111827',
     flex: 1,
   },
+  languageNameSmall: {
+    fontSize: 18,
+  },
   languageNative: {
     fontSize: 18,
     color: '#6B7280',
     fontWeight: '500',
     marginRight: 8,
+  },
+  languageNativeSmall: {
+    fontSize: 15,
   },
   loader: {
     position: 'absolute',
@@ -246,11 +354,12 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: isSmallScreen ? 20 : 40,
+    paddingTop: isSmallScreen ? 10 : 0,
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 12,
+    fontSize: isSmallScreen ? 11 : 12,
     color: '#9CA3AF',
     textAlign: 'center',
   },

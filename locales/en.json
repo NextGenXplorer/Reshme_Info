@@ -245,7 +245,7 @@
   "noDataToSpeak": "No price data available to read",
   "speechError": "Failed to read prices",
   "tts_price_english": "Here is the cocoon price information for {{breed}}, grade {{grade}}, from {{market}} market, lot number {{lot}}. The maximum price is {{maxPrice}} rupees per kilogram. The average price is {{avgPrice}} rupees per kilogram. The minimum price is {{minPrice}} rupees per kilogram.",
-  "tts_price_kannada": "ಇದು, {{market}} ಮಾರುಕಟ್ಟೆಯಿಂದ, {{breed}} ತಳಿಯ, {{grade}} ದರ್ಜೆಯ, ಲಾಟ್ ಸಂಖ್ಯೆ {{lot}} ರೇಷ್ಮೆಗೂಡಿನ ಬೆಲೆ ಮಾಹಿತಿ. ಗರಿಷ್ಠ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{maxPrice}} ರೂಪಾಯಿಗಳು. ಸರಾಸರಿ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{avgPrice}} ರೂಪಾಯಿಗಳು. ಕನಿಷ್ಠ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{minPrice}} ರೂಪಾಯಿಗಳು.",
+  "tts_price_kannada": "ಇದು, {{market}} ಮಾರುಕಟ್ಟೆಯಿಂದ, {{breed}} ತಳಿಯ, {{grade}} ದರ್ಜೆಯ ರೇಷ್ಮೆಗೂಡಿನ ಬೆಲೆ ಮಾಹಿತಿ.ಒಟ್ಟು ಲಾಟ್ ಸಂಖ್ಯೆ {{lot}}ಗಳು. ಗರಿಷ್ಠ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{maxPrice}} ರೂಪಾಯಿಗಳು. ಸರಾಸರಿ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{avgPrice}} ರೂಪಾಯಿಗಳು. ಕನಿಷ್ಠ ಬೆಲೆ ಪ್ರತಿ ಕಿಲೋಗ್ರಾಂಗೆ {{minPrice}} ರೂಪಾಯಿಗಳು.",
   "showingDataFor": "Showing data for",
   "last7Days": "Last 7 Days",
   "allTime": "All Time",
