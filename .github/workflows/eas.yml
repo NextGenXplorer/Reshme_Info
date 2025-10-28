@@ -56,4 +56,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: expo-android-aab
-          path: build/**/*.aab
+          path: /home/runner/work/Reshme_Info/Reshme_Info/*.aab
