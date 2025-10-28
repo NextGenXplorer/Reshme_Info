@@ -27,7 +27,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: 🧩 Setup Android SDK
         uses: android-actions/setup-android@v3
