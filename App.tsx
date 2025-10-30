@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -15,6 +15,19 @@ import { useInterstitialAd } from './hooks/useInterstitialAd';
 import { useExitAd } from './hooks/useExitAd';
 import MobileAds from 'react-native-google-mobile-ads';
 
+// Create context for notifications navigation
+const NotificationsContext = createContext<{
+  openNotifications: () => void;
+} | null>(null);
+
+export const useNotifications = () => {
+  const context = useContext(NotificationsContext);
+  if (!context) {
+    throw new Error('useNotifications must be used within NotificationsProvider');
+  }
+  return context;
+};
+
 // Import screen components
 import HomeScreen from './screens/HomeScreen';
 import MarketScreen from './screens/MarketScreen';
@@ -22,8 +35,13 @@ import StatsScreen from './screens/StatsScreen';
 import AboutScreen from './screens/AboutScreen';
 import AdminNavigator from './screens/AdminNavigator';
 import LanguageSelectionScreen from './screens/LanguageSelectionScreen';
+import NotificationsScreen from './screens/NotificationsScreen';
+import SwipeableScreen from './components/SwipeableScreen';
 
 const Tab = createBottomTabNavigator();
+
+// Tab screen order for swipe navigation
+const TAB_SCREENS = ['Home', 'Market', 'Stats', 'About'];
 
 // Configure notification handler for foreground notifications
 Notifications.setNotificationHandler({
@@ -109,6 +127,7 @@ const AppContent = () => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showNotificationsScreen, setShowNotificationsScreen] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState<Notifications.Notification | false>(false);
   const notificationListener = useRef<Notifications.Subscription>();
@@ -181,42 +200,13 @@ const AppContent = () => {
 
     return () => {
       if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
+        notificationListener.current.remove();
       }
       if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
+        responseListener.current.remove();
       }
     };
   }, []);
-
-  // Show loading spinner while checking first launch
-  if (isCheckingFirstLaunch) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#10B981" />
-        <StatusBar style="dark" />
-      </SafeAreaView>
-    );
-  }
-
-  // Show language selection screen on first launch
-  if (showLanguageSelection) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-        <LanguageSelectionScreen onComplete={() => setShowLanguageSelection(false)} />
-        <StatusBar style="dark" />
-      </SafeAreaView>
-    );
-  }
-
-  if (showAdminPanel) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-        <AdminNavigator onExit={() => setShowAdminPanel(false)} />
-        <StatusBar style="dark" />
-      </SafeAreaView>
-    );
-  }
 
   // Handle navigation state changes to show interstitial ads
   const handleNavigationStateChange = (state: any) => {
@@ -235,10 +225,33 @@ const AppContent = () => {
   };
 
   return (
-    <NavigationContainer onStateChange={handleNavigationStateChange}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+    <NotificationsContext.Provider value={{ openNotifications: () => setShowNotificationsScreen(true) }}>
+      {/* Show loading spinner while checking first launch */}
+      {isCheckingFirstLaunch ? (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#10B981" />
+          <StatusBar style="dark" />
+        </SafeAreaView>
+      ) : showLanguageSelection ? (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+          <LanguageSelectionScreen onComplete={() => setShowLanguageSelection(false)} />
+          <StatusBar style="dark" />
+        </SafeAreaView>
+      ) : showNotificationsScreen ? (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+          <NotificationsScreen onBack={() => setShowNotificationsScreen(false)} />
+          <StatusBar style="dark" />
+        </SafeAreaView>
+      ) : showAdminPanel ? (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+          <AdminNavigator onExit={() => setShowAdminPanel(false)} />
+          <StatusBar style="dark" />
+        </SafeAreaView>
+      ) : (
+        <NavigationContainer onStateChange={handleNavigationStateChange}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 
-        <Tab.Navigator
+          <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
               let iconName: string = 'home';
@@ -280,37 +293,58 @@ const AppContent = () => {
         >
           <Tab.Screen
             name="Home"
-            component={HomeScreen}
             options={{
               tabBarLabel: t('home'),
             }}
-          />
+          >
+            {() => (
+              <SwipeableScreen currentIndex={0} screens={TAB_SCREENS}>
+                <HomeScreen />
+              </SwipeableScreen>
+            )}
+          </Tab.Screen>
           <Tab.Screen
             name="Market"
-            component={MarketScreen}
             options={{
               tabBarLabel: t('market'),
             }}
-          />
+          >
+            {() => (
+              <SwipeableScreen currentIndex={1} screens={TAB_SCREENS}>
+                <MarketScreen />
+              </SwipeableScreen>
+            )}
+          </Tab.Screen>
           <Tab.Screen
             name="Stats"
-            component={StatsScreen}
             options={{
               tabBarLabel: t('stats'),
             }}
-          />
+          >
+            {() => (
+              <SwipeableScreen currentIndex={2} screens={TAB_SCREENS}>
+                <StatsScreen />
+              </SwipeableScreen>
+            )}
+          </Tab.Screen>
           <Tab.Screen
             name="About"
             options={{
               tabBarLabel: t('about'),
             }}
           >
-            {() => <AboutScreen setShowAdminPanel={setShowAdminPanel} />}
+            {() => (
+              <SwipeableScreen currentIndex={3} screens={TAB_SCREENS}>
+                <AboutScreen setShowAdminPanel={setShowAdminPanel} />
+              </SwipeableScreen>
+            )}
           </Tab.Screen>
         </Tab.Navigator>
         <StatusBar style="dark" />
       </SafeAreaView>
     </NavigationContainer>
+      )}
+    </NotificationsContext.Provider>
   );
 };
 

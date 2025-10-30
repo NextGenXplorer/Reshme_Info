@@ -23,7 +23,6 @@ import { CocoonPrice } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS, CachedData } from '../utils/cacheUtils';
 
 export default function HomeScreen() {
@@ -467,10 +466,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.ultraModernContainer}>
-      <Header
-        title={t('cocoonPrices')}
-        rightComponent={<LanguageSwitcher />}
-      />
+      <Header title={t('cocoonPrices')} />
       {/* Offline Mode Banner */}
       {isOffline && (
         <View style={styles.offlineBanner}>

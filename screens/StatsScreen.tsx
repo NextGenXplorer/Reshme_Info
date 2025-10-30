@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next';
 import NetInfo from '@react-native-community/netinfo';
 import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS } from '../utils/cacheUtils';
 import Header from '../components/Header';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
@@ -275,7 +274,7 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header rightComponent={<LanguageSwitcher />} />
+      <Header title={t('stats')} />
 
       {isOffline && (
         <View style={styles.offlineBanner}>

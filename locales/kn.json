@@ -249,5 +249,17 @@
   "viewAllData": "ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ವೀಕ್ಷಿಸಿ",
   "highestPrice": "ಅತ್ಯಧಿಕ",
   "found": "ಕಂಡುಬಂದಿದೆ",
-  "breedPrices": "ತಳಿಯ ಪ್ರಕಾರ ಬೆಲೆಗಳು"
+  "breedPrices": "ತಳಿಯ ಪ್ರಕಾರ ಬೆಲೆಗಳು",
+  "noNotifications": "ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ",
+  "noNotificationsDesc": "ನೀವು ಎಲ್ಲವನ್ನೂ ಓದಿದ್ದೀರಿ! ನವೀಕರಣಗಳು ಮತ್ತು ಘೋಷಣೆಗಳಿಗಾಗಿ ನಂತರ ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ.",
+  "failedToLoadNotifications": "ಅಧಿಸೂಚನೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "total": "ಒಟ್ಟು",
+  "medium": "ಮಧ್ಯಮ",
+  "justNow": "ಇದೀಗ",
+  "minutesAgo": "{{count}} ನಿಮಿಷ ಹಿಂದೆ",
+  "minutesAgo_plural": "{{count}} ನಿಮಿಷಗಳ ಹಿಂದೆ",
+  "hoursAgo": "{{count}} ಗಂಟೆ ಹಿಂದೆ",
+  "hoursAgo_plural": "{{count}} ಗಂಟೆಗಳ ಹಿಂದೆ",
+  "daysAgo": "{{count}} ದಿನ ಹಿಂದೆ",
+  "daysAgo_plural": "{{count}} ದಿನಗಳ ಹಿಂದೆ"
 }

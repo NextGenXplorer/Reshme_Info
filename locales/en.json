@@ -255,5 +255,17 @@
   "viewAllData": "View All Data",
   "highestPrice": "Highest",
   "found": "found",
-  "breedPrices": "Breed-wise Prices"
+  "breedPrices": "Breed-wise Prices",
+  "noNotifications": "No Notifications",
+  "noNotificationsDesc": "You're all caught up! Check back later for updates and announcements.",
+  "failedToLoadNotifications": "Failed to load notifications. Please try again.",
+  "total": "Total",
+  "medium": "Medium",
+  "justNow": "Just now",
+  "minutesAgo": "{{count}} minute ago",
+  "minutesAgo_plural": "{{count}} minutes ago",
+  "hoursAgo": "{{count}} hour ago",
+  "hoursAgo_plural": "{{count}} hours ago",
+  "daysAgo": "{{count}} day ago",
+  "daysAgo_plural": "{{count}} days ago"
 }

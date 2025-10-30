@@ -39,6 +39,7 @@ export default function AdminNotificationScreen({
   const [formData, setFormData] = useState<NotificationFormData>({
     title: '',
     message: '',
+    imageUrl: '',
     priority: 'medium',
     targetAudience: 'all',
     targetMarket: undefined,
@@ -100,6 +101,11 @@ export default function AdminNotificationScreen({
         isActive: true,
       };
 
+      // Only include imageUrl if it's provided
+      if (formData.imageUrl && formData.imageUrl.trim()) {
+        notificationData.imageUrl = formData.imageUrl.trim();
+      }
+
       // Only include targetMarket if it's defined
       if (formData.targetMarket) {
         notificationData.targetMarket = formData.targetMarket;
@@ -122,6 +128,7 @@ export default function AdminNotificationScreen({
             priority: formData.priority,
             targetAudience: formData.targetAudience,
             targetMarket: formData.targetMarket,
+            imageUrl: formData.imageUrl?.trim() || undefined,
           }),
         });
 
@@ -185,6 +192,7 @@ export default function AdminNotificationScreen({
     setFormData({
       title: '',
       message: '',
+      imageUrl: '',
       priority: 'medium',
       targetAudience: 'all',
       targetMarket: undefined,
@@ -364,6 +372,23 @@ export default function AdminNotificationScreen({
                   numberOfLines={4}
                   maxLength={500}
                 />
+              </View>
+
+              {/* Image URL Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Image URL (Optional)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={formData.imageUrl}
+                  onChangeText={(text) => setFormData({ ...formData, imageUrl: text })}
+                  placeholder="https://example.com/image.jpg"
+                  keyboardType="url"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Text style={styles.helperText}>
+                  Add an image URL to display with this notification
+                </Text>
               </View>
 
               {/* Priority Selection */}
@@ -654,6 +679,12 @@ const styles = StyleSheet.create({
   textArea: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   filterChipsContainer: {
     flexDirection: 'row',

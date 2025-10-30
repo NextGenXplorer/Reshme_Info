@@ -3,18 +3,29 @@ import { View, Text, StyleSheet, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import NotificationBell from './NotificationBell';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface HeaderProps {
   title?: string;
   subtitle?: string;
+  showNotificationBell?: boolean;
+  showLanguageSwitcher?: boolean;
   leftComponent?: React.ReactNode;
   rightComponent?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, subtitle, leftComponent, rightComponent }) => {
+const Header: React.FC<HeaderProps> = ({
+  title,
+  subtitle,
+  showNotificationBell = true,
+  showLanguageSwitcher = true,
+  leftComponent,
+  rightComponent
+}) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const headerStyle = { paddingTop: insets.top };
+  const headerStyle = { paddingTop: insets.top + 12 };
 
   const defaultTitle = t('defaultTitle');
   const defaultSubtitle = t('defaultSubtitle');
@@ -37,7 +48,12 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, leftComponent, rightCo
         )}
       </View>
       <View style={styles.rightComponent}>
-        {rightComponent}
+        {rightComponent !== undefined ? rightComponent : (
+          <View style={styles.rightControls}>
+            {showNotificationBell && <NotificationBell />}
+            {showLanguageSwitcher && <LanguageSwitcher />}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -46,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, leftComponent, rightCo
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 12,
@@ -57,8 +73,9 @@ const styles = StyleSheet.create({
   leftComponent: {
     width: 40,
     height: 40,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingTop: 4,
   },
   logo: {
     width: 32,
@@ -68,22 +85,32 @@ const styles = StyleSheet.create({
   titleContainer: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 4,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#111827',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 12,
     color: '#6B7280',
     marginTop: 2,
+    textAlign: 'center',
   },
   rightComponent: {
-    width: 40,
+    minWidth: 40,
     height: 40,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingTop: 4,
+  },
+  rightControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 });
 

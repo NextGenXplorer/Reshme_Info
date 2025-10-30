@@ -76,6 +76,14 @@ service cloud.firestore {
       allow write: if isSuperAdmin() || (request.auth != null && request.auth.token.role == 'system');
     }
 
+    // Notifications - Read access for all, write for admins only
+    match /notifications/{notificationId} {
+      allow read: if true;  // Public read access for all users
+      allow create: if request.auth != null && request.auth.token.role in ['super_admin', 'market_admin'];
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
     // Default rule - deny all other access
     match /{document=**} {
       allow read, write: if false;

@@ -18,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import NetInfo from '@react-native-community/netinfo';
 import Header from '../components/Header';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -518,7 +517,6 @@ export default function MarketScreen() {
         <Header
           title={t('marketCenters')}
           subtitle={t('silkCocoonTradingHubs')}
-          rightComponent={<LanguageSwitcher />}
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3B82F6" />
@@ -533,7 +531,6 @@ export default function MarketScreen() {
       <Header
         title={t('marketCenters')}
         subtitle={t('silkCocoonTradingHubs')}
-        rightComponent={<LanguageSwitcher />}
       />
 
       {isOffline && (

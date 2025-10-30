@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
@@ -125,7 +124,7 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header rightComponent={<LanguageSwitcher />} />
+      <Header title={t('about')} />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Mission Section */}
         <View style={styles.missionSection}>

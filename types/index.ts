@@ -70,6 +70,7 @@ export interface Notification {
   createdAt: Date;
   expiresAt: Date | null;
   isActive: boolean;
+  imageUrl?: string;
 }
 
 export interface NotificationFormData {
@@ -79,4 +80,12 @@ export interface NotificationFormData {
   targetAudience: 'all' | 'market_specific';
   targetMarket?: string;
   expiryDays: number;
+  imageUrl?: string;
+}
+
+export interface NotificationReadStatus {
+  userId: string;
+  notificationId: string;
+  isRead: boolean;
+  readAt: Date | null;
 }
