@@ -1124,10 +1124,13 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
               </Text>
             </View>
           )}
-          renderIndicator={() => <></>}
+          renderIndicator={() => null}
+          loadingRender={() => <ActivityIndicator size="large" color="#FFFFFF" />}
           enableImageZoom={true}
           saveToLocalByLongPress={false}
           doubleClickInterval={250}
+          pageAnimateTime={250}
+          flipThreshold={80}
         />
       </Modal>
     </SafeAreaView>
