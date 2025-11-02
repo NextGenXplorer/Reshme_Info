@@ -85,15 +85,19 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
           setIsDefaultPassword(false);
         }
 
+        // Format role name for better display
+        const roleDisplay = result.user.role === 'super_admin' ? 'Super Admin' : 'Market Admin';
+
         Alert.alert(
-          'Login Successful',
-          `Welcome, ${result.user.username}!\nRole: ${result.user.role}\nMarket: ${result.user.market}`,
+          '✓ Authentication Successful',
+          `Welcome back, ${result.user.username}!\n\nRole: ${roleDisplay}\nMarket Access: ${result.user.market}\n\nYour session will remain active for 7 days.`,
           [
             {
-              text: 'Continue',
+              text: 'Access Dashboard',
               onPress: () => onLoginSuccess(result.user!),
             },
-          ]
+          ],
+          { cancelable: false }
         );
         setAttempts(0);
       } else {
