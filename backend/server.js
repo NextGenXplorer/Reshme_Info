@@ -304,9 +304,35 @@ app.post('/send-custom-notification', async (req, res) => {
       console.log(`📍 Market-specific notification for: ${targetMarket}`);
     }
 
-    // Separate FCM and Expo tokens
-    const fcmTokens = allTokens.filter(t => t.tokenType === 'fcm').map(t => t.token);
-    const expoTokens = allTokens.filter(t => t.tokenType === 'expo' || !t.tokenType).map(t => t.token);
+    // Separate FCM and Expo tokens with smart detection
+    const fcmTokens = [];
+    const expoTokens = [];
+
+    allTokens.forEach(t => {
+      const token = t.token;
+
+      // Determine token type by format if tokenType field is missing
+      let isExpoToken = false;
+
+      if (t.tokenType === 'expo') {
+        isExpoToken = true;
+      } else if (t.tokenType === 'fcm') {
+        isExpoToken = false;
+      } else {
+        // Smart detection for tokens without tokenType
+        // Expo tokens start with "ExponentPushToken[" or "ExpoPushToken["
+        isExpoToken = token.startsWith('ExponentPushToken[') ||
+                      token.startsWith('ExpoPushToken[');
+      }
+
+      if (isExpoToken) {
+        expoTokens.push(token);
+      } else {
+        fcmTokens.push(token);
+      }
+    });
+
+    console.log(`📊 Token distribution: ${fcmTokens.length} FCM, ${expoTokens.length} Expo`);
 
     let fcmSent = 0;
     let fcmFailed = 0;
@@ -494,9 +520,35 @@ app.post('/send-notification', async (req, res) => {
 
     const allTokens = tokensSnapshot.docs.map(doc => doc.data());
 
-    // Separate FCM and Expo tokens
-    const fcmTokens = allTokens.filter(t => t.tokenType === 'fcm').map(t => t.token);
-    const expoTokens = allTokens.filter(t => t.tokenType === 'expo' || !t.tokenType).map(t => t.token);
+    // Separate FCM and Expo tokens with smart detection
+    const fcmTokens = [];
+    const expoTokens = [];
+
+    allTokens.forEach(t => {
+      const token = t.token;
+
+      // Determine token type by format if tokenType field is missing
+      let isExpoToken = false;
+
+      if (t.tokenType === 'expo') {
+        isExpoToken = true;
+      } else if (t.tokenType === 'fcm') {
+        isExpoToken = false;
+      } else {
+        // Smart detection for tokens without tokenType
+        // Expo tokens start with "ExponentPushToken[" or "ExpoPushToken["
+        isExpoToken = token.startsWith('ExponentPushToken[') ||
+                      token.startsWith('ExpoPushToken[');
+      }
+
+      if (isExpoToken) {
+        expoTokens.push(token);
+      } else {
+        fcmTokens.push(token);
+      }
+    });
+
+    console.log(`📊 Price notification token distribution: ${fcmTokens.length} FCM, ${expoTokens.length} Expo`);
 
     const notificationTitle = `${priceData.market} - ${priceData.breed} Price Update`;
     const notificationBody = `Min: ₹${priceData.minPrice} | Max: ₹${priceData.maxPrice} | Avg: ₹${priceData.avgPrice}/kg`;
