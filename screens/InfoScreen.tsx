@@ -1092,50 +1092,45 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
         transparent={true}
         onRequestClose={() => setSelectedImage(null)}
       >
-        <ImageViewer
-          imageUrls={imageItems.map((item) => ({
-            url: item.url || '',
-            props: {
-              source: { uri: item.url || '' }
-            }
-          }))}
-          index={selectedImageIndex}
-          enableSwipeDown={true}
-          onSwipeDown={() => setSelectedImage(null)}
-          onCancel={() => setSelectedImage(null)}
-          backgroundColor="rgba(0, 0, 0, 0.9)"
-          renderHeader={(currentIndex) => (
-            <View style={styles.imageViewerHeader}>
-              <TouchableOpacity
-                style={styles.imageViewerClose}
-                onPress={() => setSelectedImage(null)}
-              >
-                <Ionicons name="close-circle" size={36} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-          )}
-          renderFooter={(currentIndex) => (
-            <View style={styles.imageViewerFooter}>
-              <Text style={styles.imageViewerTitle}>
-                {getLocalizedTitle(imageItems[currentIndex])}
-              </Text>
-              <Text style={styles.imageViewerCounter}>
-                {currentIndex + 1} / {imageItems.length}
-              </Text>
-            </View>
-          )}
-          renderIndicator={() => <View />}
-          renderArrowLeft={() => <View />}
-          renderArrowRight={() => <View />}
-          loadingRender={() => <ActivityIndicator size="large" color="#FFFFFF" />}
-          enableImageZoom={true}
-          saveToLocalByLongPress={false}
-          doubleClickInterval={250}
-          pageAnimateTime={250}
-          flipThreshold={80}
-          useNativeDriver={true}
-          menuContext={{ saveToLocal: '', cancel: '' }}
-        />
+        <View style={{ flex: 1, marginLeft: -20, marginRight: -20 }}>
+          <ImageViewer
+            imageUrls={imageItems.map((item) => ({
+              url: item.url || '',
+              props: {
+                source: { uri: item.url || '' }
+              }
+            }))}
+            index={selectedImageIndex}
+            enableSwipeDown={true}
+            onSwipeDown={() => setSelectedImage(null)}
+            onCancel={() => setSelectedImage(null)}
+            backgroundColor="rgba(0, 0, 0, 0.9)"
+            renderHeader={(currentIndex) => (
+              <View style={styles.imageViewerHeader}>
+                <TouchableOpacity
+                  style={styles.imageViewerClose}
+                  onPress={() => setSelectedImage(null)}
+                >
+                  <Ionicons name="close-circle" size={36} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+            renderFooter={(currentIndex) => (
+              <View style={styles.imageViewerFooter}>
+                <Text style={styles.imageViewerTitle}>
+                  {getLocalizedTitle(imageItems[currentIndex])}
+                </Text>
+                <Text style={styles.imageViewerCounter}>
+                  {currentIndex + 1} / {imageItems.length}
+                </Text>
+              </View>
+            )}
+            renderIndicator={() => null}
+            enableImageZoom={true}
+            saveToLocalByLongPress={false}
+            doubleClickInterval={250}
+          />
+        </View>
       </Modal>
     </SafeAreaView>
   );
