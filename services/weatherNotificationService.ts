@@ -15,6 +15,21 @@ interface WeatherData {
   windSpeed: number;
   weatherCode: number;
   locationName: string;
+  // Additional atmospheric data
+  precipitation: number;
+  rain: number;
+  showers: number;
+  surfacePressure: number;
+  cloudCover: number;
+  visibility: number;
+  dewPoint: number;
+  // Advanced temperature
+  apparentTemperature: number;
+  soilTemperature0cm: number;
+  soilTemperature6cm: number;
+  // Sun & UV
+  isDay: number;
+  uvIndex: number;
 }
 
 // Define the background task
@@ -41,9 +56,9 @@ TaskManager.defineTask(WEATHER_TASK_NAME, async () => {
       accuracy: Location.Accuracy.Balanced,
     });
 
-    // Fetch weather data
+    // Fetch comprehensive weather data
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`
+      `https://api.open-meteo.com/v1/forecast?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,precipitation,rain,showers,surface_pressure,cloud_cover,visibility,dew_point_2m,apparent_temperature,soil_temperature_0cm,soil_temperature_6cm,is_day,uv_index&timezone=auto`
     );
 
     const data = await response.json();
@@ -64,6 +79,21 @@ TaskManager.defineTask(WEATHER_TASK_NAME, async () => {
       windSpeed: data.current.wind_speed_10m,
       weatherCode: data.current.weather_code,
       locationName,
+      // Additional atmospheric data
+      precipitation: data.current.precipitation || 0,
+      rain: data.current.rain || 0,
+      showers: data.current.showers || 0,
+      surfacePressure: data.current.surface_pressure || 0,
+      cloudCover: data.current.cloud_cover || 0,
+      visibility: data.current.visibility || 0,
+      dewPoint: data.current.dew_point_2m || 0,
+      // Advanced temperature
+      apparentTemperature: data.current.apparent_temperature || data.current.temperature_2m,
+      soilTemperature0cm: data.current.soil_temperature_0cm || 0,
+      soilTemperature6cm: data.current.soil_temperature_6cm || 0,
+      // Sun & UV
+      isDay: data.current.is_day || 0,
+      uvIndex: data.current.uv_index || 0,
     };
 
     // Check if weather changed significantly
@@ -261,10 +291,10 @@ export async function triggerWeatherNotificationNow(): Promise<boolean> {
       accuracy: Location.Accuracy.Balanced,
     });
 
-    // Fetch weather data
+    // Fetch comprehensive weather data
     console.log('🌤️ Fetching weather data...');
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`
+      `https://api.open-meteo.com/v1/forecast?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,precipitation,rain,showers,surface_pressure,cloud_cover,visibility,dew_point_2m,apparent_temperature,soil_temperature_0cm,soil_temperature_6cm,is_day,uv_index&timezone=auto`
     );
 
     const data = await response.json();
@@ -285,6 +315,21 @@ export async function triggerWeatherNotificationNow(): Promise<boolean> {
       windSpeed: data.current.wind_speed_10m,
       weatherCode: data.current.weather_code,
       locationName,
+      // Additional atmospheric data
+      precipitation: data.current.precipitation || 0,
+      rain: data.current.rain || 0,
+      showers: data.current.showers || 0,
+      surfacePressure: data.current.surface_pressure || 0,
+      cloudCover: data.current.cloud_cover || 0,
+      visibility: data.current.visibility || 0,
+      dewPoint: data.current.dew_point_2m || 0,
+      // Advanced temperature
+      apparentTemperature: data.current.apparent_temperature || data.current.temperature_2m,
+      soilTemperature0cm: data.current.soil_temperature_0cm || 0,
+      soilTemperature6cm: data.current.soil_temperature_6cm || 0,
+      // Sun & UV
+      isDay: data.current.is_day || 0,
+      uvIndex: data.current.uv_index || 0,
     };
 
     // Generate notification content

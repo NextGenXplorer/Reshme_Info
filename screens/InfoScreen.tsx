@@ -54,6 +54,21 @@ interface WeatherData {
   windSpeed: number;
   weatherCode: number;
   locationName: string;
+  // Additional atmospheric data
+  precipitation: number;
+  rain: number;
+  showers: number;
+  surfacePressure: number;
+  cloudCover: number;
+  visibility: number;
+  dewPoint: number;
+  // Advanced temperature
+  apparentTemperature: number;
+  soilTemperature0cm: number;
+  soilTemperature6cm: number;
+  // Sun & UV
+  isDay: number;
+  uvIndex: number;
 }
 
 interface AIResponse {
@@ -200,7 +215,7 @@ export default function InfoScreen() {
   const fetchWeatherData = async (latitude: number, longitude: number) => {
     try {
       const response = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,precipitation,rain,showers,surface_pressure,cloud_cover,visibility,dew_point_2m,apparent_temperature,soil_temperature_0cm,soil_temperature_6cm,is_day,uv_index&timezone=auto`
       );
 
       const data = await response.json();
@@ -221,6 +236,21 @@ export default function InfoScreen() {
         windSpeed: data.current.wind_speed_10m,
         weatherCode: data.current.weather_code,
         locationName,
+        // Additional atmospheric data
+        precipitation: data.current.precipitation || 0,
+        rain: data.current.rain || 0,
+        showers: data.current.showers || 0,
+        surfacePressure: data.current.surface_pressure || 0,
+        cloudCover: data.current.cloud_cover || 0,
+        visibility: data.current.visibility || 0,
+        dewPoint: data.current.dew_point_2m || 0,
+        // Advanced temperature
+        apparentTemperature: data.current.apparent_temperature || data.current.temperature_2m,
+        soilTemperature0cm: data.current.soil_temperature_0cm || 0,
+        soilTemperature6cm: data.current.soil_temperature_6cm || 0,
+        // Sun & UV
+        isDay: data.current.is_day || 0,
+        uvIndex: data.current.uv_index || 0,
       };
 
       setWeather(weatherData);
@@ -650,7 +680,7 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
             <Text style={styles.heroTemp}>{Math.round(weather.temperature)}°</Text>
           </View>
 
-          {/* Weather Details */}
+          {/* Weather Details - Primary */}
           <View style={styles.heroDetails}>
             <View style={styles.heroDetailItem}>
               <Ionicons name="water-outline" size={20} color="#E9D5FF" />
@@ -663,8 +693,115 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
               <Text style={styles.heroDetailLabel}>{t('weatherWind')}</Text>
               <Text style={styles.heroDetailValue}>{weather.windSpeed} km/h</Text>
             </View>
+            <View style={styles.heroDetailDivider} />
+            <View style={styles.heroDetailItem}>
+              <Ionicons name="sunny-outline" size={20} color="#E9D5FF" />
+              <Text style={styles.heroDetailLabel}>UV Index</Text>
+              <Text style={styles.heroDetailValue}>{weather.uvIndex}</Text>
+            </View>
           </View>
         </LinearGradient>
+
+        {/* Comprehensive Weather Data Cards */}
+        <View style={styles.weatherCardsContainer}>
+          {/* Temperature Details Card */}
+          <View style={styles.weatherCard}>
+            <View style={styles.weatherCardHeader}>
+              <Ionicons name="thermometer" size={20} color="#EF4444" />
+              <Text style={styles.weatherCardTitle}>Temperature</Text>
+            </View>
+            <View style={styles.weatherCardContent}>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Actual</Text>
+                <Text style={styles.weatherDataValue}>{weather.temperature.toFixed(1)}°C</Text>
+              </View>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Feels Like</Text>
+                <Text style={styles.weatherDataValue}>{weather.apparentTemperature.toFixed(1)}°C</Text>
+              </View>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Dew Point</Text>
+                <Text style={styles.weatherDataValue}>{weather.dewPoint.toFixed(1)}°C</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Soil Temperature Card */}
+          <View style={styles.weatherCard}>
+            <View style={styles.weatherCardHeader}>
+              <Ionicons name="leaf" size={20} color="#10B981" />
+              <Text style={styles.weatherCardTitle}>Soil Temp</Text>
+            </View>
+            <View style={styles.weatherCardContent}>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Surface</Text>
+                <Text style={styles.weatherDataValue}>{weather.soilTemperature0cm.toFixed(1)}°C</Text>
+              </View>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>6cm Depth</Text>
+                <Text style={styles.weatherDataValue}>{weather.soilTemperature6cm.toFixed(1)}°C</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Precipitation Card */}
+          <View style={styles.weatherCard}>
+            <View style={styles.weatherCardHeader}>
+              <Ionicons name="rainy" size={20} color="#3B82F6" />
+              <Text style={styles.weatherCardTitle}>Precipitation</Text>
+            </View>
+            <View style={styles.weatherCardContent}>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Total</Text>
+                <Text style={styles.weatherDataValue}>{weather.precipitation.toFixed(1)} mm</Text>
+              </View>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Rain</Text>
+                <Text style={styles.weatherDataValue}>{weather.rain.toFixed(1)} mm</Text>
+              </View>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Showers</Text>
+                <Text style={styles.weatherDataValue}>{weather.showers.toFixed(1)} mm</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Atmospheric Conditions Card */}
+          <View style={styles.weatherCard}>
+            <View style={styles.weatherCardHeader}>
+              <Ionicons name="analytics" size={20} color="#8B5CF6" />
+              <Text style={styles.weatherCardTitle}>Atmospheric</Text>
+            </View>
+            <View style={styles.weatherCardContent}>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Pressure</Text>
+                <Text style={styles.weatherDataValue}>{weather.surfacePressure.toFixed(0)} hPa</Text>
+              </View>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Cloud Cover</Text>
+                <Text style={styles.weatherDataValue}>{weather.cloudCover}%</Text>
+              </View>
+              <View style={styles.weatherDataRow}>
+                <Text style={styles.weatherDataLabel}>Visibility</Text>
+                <Text style={styles.weatherDataValue}>{(weather.visibility / 1000).toFixed(1)} km</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Day/Night Indicator */}
+          <View style={[styles.weatherCard, styles.dayNightCard]}>
+            <View style={styles.dayNightContent}>
+              <Ionicons
+                name={weather.isDay === 1 ? "sunny" : "moon"}
+                size={32}
+                color={weather.isDay === 1 ? "#F59E0B" : "#6366F1"}
+              />
+              <Text style={styles.dayNightText}>
+                {weather.isDay === 1 ? 'Daytime' : 'Nighttime'}
+              </Text>
+            </View>
+          </View>
+        </View>
       </View>
     );
   };
@@ -1212,6 +1349,65 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     marginTop: 2,
+  },
+
+  // Comprehensive Weather Cards
+  weatherCardsContainer: {
+    padding: 16,
+    gap: 12,
+  },
+  weatherCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  weatherCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  weatherCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  weatherCardContent: {
+    gap: 10,
+  },
+  weatherDataRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  weatherDataLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  weatherDataValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  dayNightCard: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  dayNightContent: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  dayNightText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
   },
 
   // Quick Stats
