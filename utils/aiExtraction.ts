@@ -1,7 +1,7 @@
 import { PriceFormData } from '../types';
 
-// Gemini AI Configuration
-const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
+// Gemini AI Configuration - Using Admin-specific API key for data extraction
+const API_KEY = process.env.EXPO_PUBLIC_GEMINI_ADMIN_API_KEY || '';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent';
 
 export interface ExtractedMarketData {
@@ -48,7 +48,7 @@ export async function extractMarketDataWithAI(
     if (!API_KEY || API_KEY === 'your-gemini-api-key-here') {
       return {
         success: false,
-        error: 'Gemini API key not configured. Please add EXPO_PUBLIC_GEMINI_API_KEY to your .env file.',
+        error: 'Gemini Admin API key not configured. Please add EXPO_PUBLIC_GEMINI_ADMIN_API_KEY to your .env file.',
       };
     }
 

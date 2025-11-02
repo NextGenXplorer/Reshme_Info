@@ -304,43 +304,16 @@ app.post('/send-custom-notification', async (req, res) => {
       console.log(`📍 Market-specific notification for: ${targetMarket}`);
     }
 
-    // Separate FCM and Expo tokens with smart detection
-    const fcmTokens = [];
-    const expoTokens = [];
+    // Use ALL tokens as FCM tokens (Firebase Cloud Messaging only)
+    const fcmTokens = allTokens.map(t => t.token);
 
-    allTokens.forEach(t => {
-      const token = t.token;
-
-      // Determine token type by format if tokenType field is missing
-      let isExpoToken = false;
-
-      if (t.tokenType === 'expo') {
-        isExpoToken = true;
-      } else if (t.tokenType === 'fcm') {
-        isExpoToken = false;
-      } else {
-        // Smart detection for tokens without tokenType
-        // Expo tokens start with "ExponentPushToken[" or "ExpoPushToken["
-        isExpoToken = token.startsWith('ExponentPushToken[') ||
-                      token.startsWith('ExpoPushToken[');
-      }
-
-      if (isExpoToken) {
-        expoTokens.push(token);
-      } else {
-        fcmTokens.push(token);
-      }
-    });
-
-    console.log(`📊 Token distribution: ${fcmTokens.length} FCM, ${expoTokens.length} Expo`);
+    console.log(`📊 Total FCM tokens: ${fcmTokens.length}`);
 
     let fcmSent = 0;
     let fcmFailed = 0;
-    let expoSent = 0;
-    let expoFailed = 0;
     let invalidTokensRemoved = 0;
 
-    // Send to FCM tokens (production users)
+    // Send to ALL tokens via FCM (Firebase Cloud Messaging)
     if (fcmTokens.length > 0) {
       console.log(`📱 Sending custom notification to ${fcmTokens.length} FCM tokens...`);
 
@@ -409,78 +382,12 @@ app.post('/send-custom-notification', async (req, res) => {
       }
     }
 
-    // Send to Expo tokens (Expo Go users)
-    if (expoTokens.length > 0) {
-      console.log(`📱 Sending custom notification to ${expoTokens.length} Expo tokens...`);
-
-      // Use provided imageUrl or fallback to default logo
-      const notificationImageUrl = imageUrl || 'https://raw.githubusercontent.com/NextGenXplorer/Reshme_Info/main/assets/reshme_logo.png';
-
-      const expoMessage = {
-        to: expoTokens,
-        sound: 'default',
-        title: title,
-        body: message,
-        data: {
-          type: 'custom',
-          priority: priority || 'medium',
-          targetAudience: targetAudience || 'all',
-          targetMarket: targetMarket || '',
-          imageUrl: notificationImageUrl,
-        },
-        priority: priority === 'high' ? 'high' : 'default',
-      };
-
-      const expoResponse = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(expoMessage),
-      });
-
-      const expoResult = await expoResponse.json();
-
-      if (expoResult.data && Array.isArray(expoResult.data)) {
-        expoSent = expoResult.data.filter(r => r.status === 'ok').length;
-        expoFailed = expoResult.data.filter(r => r.status === 'error').length;
-
-        console.log(`✅ Expo sent: ${expoSent}`);
-        console.log(`❌ Expo failed: ${expoFailed}`);
-
-        // Clean up invalid Expo tokens
-        const invalidExpoTokens = [];
-        expoResult.data.forEach((resp, idx) => {
-          if (resp.status === 'error') {
-            invalidExpoTokens.push(expoTokens[idx]);
-            console.error(`Failed Expo token ${idx}:`, resp.message || resp.details);
-          }
-        });
-
-        if (invalidExpoTokens.length > 0) {
-          const deletePromises = invalidExpoTokens.map(token =>
-            db.collection('pushTokens').doc(token).delete()
-          );
-          await Promise.all(deletePromises);
-          invalidTokensRemoved += invalidExpoTokens.length;
-          console.log(`🗑️ Cleaned up ${invalidExpoTokens.length} invalid Expo tokens`);
-        }
-      } else {
-        console.error('Unexpected Expo response format:', expoResult);
-        expoFailed = expoTokens.length;
-        console.log(`❌ Expo failed: ${expoFailed} (unexpected response format)`);
-      }
-    }
-
     res.json({
       success: true,
-      message: 'Custom notification sent successfully',
+      message: 'Custom notification sent via FCM to all devices',
       fcmSent,
-      expoSent,
-      totalSent: fcmSent + expoSent,
-      totalFailed: fcmFailed + expoFailed,
+      totalSent: fcmSent,
+      totalFailed: fcmFailed,
       invalidTokensRemoved
     });
 
@@ -493,7 +400,7 @@ app.post('/send-custom-notification', async (req, res) => {
   }
 });
 
-// Send notification endpoint (supports both FCM and Expo tokens)
+// Send notification endpoint (FCM only - Firebase Cloud Messaging)
 app.post('/send-notification', async (req, res) => {
   try {
     const { priceData } = req.body;
@@ -520,46 +427,19 @@ app.post('/send-notification', async (req, res) => {
 
     const allTokens = tokensSnapshot.docs.map(doc => doc.data());
 
-    // Separate FCM and Expo tokens with smart detection
-    const fcmTokens = [];
-    const expoTokens = [];
+    // Use ALL tokens as FCM tokens (Firebase Cloud Messaging only)
+    const fcmTokens = allTokens.map(t => t.token);
 
-    allTokens.forEach(t => {
-      const token = t.token;
-
-      // Determine token type by format if tokenType field is missing
-      let isExpoToken = false;
-
-      if (t.tokenType === 'expo') {
-        isExpoToken = true;
-      } else if (t.tokenType === 'fcm') {
-        isExpoToken = false;
-      } else {
-        // Smart detection for tokens without tokenType
-        // Expo tokens start with "ExponentPushToken[" or "ExpoPushToken["
-        isExpoToken = token.startsWith('ExponentPushToken[') ||
-                      token.startsWith('ExpoPushToken[');
-      }
-
-      if (isExpoToken) {
-        expoTokens.push(token);
-      } else {
-        fcmTokens.push(token);
-      }
-    });
-
-    console.log(`📊 Price notification token distribution: ${fcmTokens.length} FCM, ${expoTokens.length} Expo`);
+    console.log(`📊 Total FCM tokens for price notification: ${fcmTokens.length}`);
 
     const notificationTitle = `${priceData.market} - ${priceData.breed} Price Update`;
     const notificationBody = `Min: ₹${priceData.minPrice} | Max: ₹${priceData.maxPrice} | Avg: ₹${priceData.avgPrice}/kg`;
 
     let fcmSent = 0;
     let fcmFailed = 0;
-    let expoSent = 0;
-    let expoFailed = 0;
     let invalidTokensRemoved = 0;
 
-    // Send to FCM tokens (production users)
+    // Send to ALL tokens via FCM (Firebase Cloud Messaging)
     if (fcmTokens.length > 0) {
       console.log(`📱 Sending to ${fcmTokens.length} FCM tokens...`);
 
@@ -625,73 +505,12 @@ app.post('/send-notification', async (req, res) => {
       }
     }
 
-    // Send to Expo tokens (Expo Go users)
-    if (expoTokens.length > 0) {
-      console.log(`📱 Sending to ${expoTokens.length} Expo tokens...`);
-
-      const expoMessage = {
-        to: expoTokens,
-        sound: 'default',
-        title: notificationTitle,
-        body: notificationBody,
-        data: {
-          priceData,
-          screen: 'Market',
-          market: priceData.market,
-          breed: priceData.breed,
-        },
-      };
-
-      const expoResponse = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(expoMessage),
-      });
-
-      const expoResult = await expoResponse.json();
-
-      if (expoResult.data && Array.isArray(expoResult.data)) {
-        expoSent = expoResult.data.filter(r => r.status === 'ok').length;
-        expoFailed = expoResult.data.filter(r => r.status === 'error').length;
-
-        console.log(`✅ Expo sent: ${expoSent}`);
-        console.log(`❌ Expo failed: ${expoFailed}`);
-
-        // Clean up invalid Expo tokens
-        const invalidExpoTokens = [];
-        expoResult.data.forEach((resp, idx) => {
-          if (resp.status === 'error') {
-            invalidExpoTokens.push(expoTokens[idx]);
-            console.error(`Failed Expo token ${idx}:`, resp.message || resp.details);
-          }
-        });
-
-        if (invalidExpoTokens.length > 0) {
-          const deletePromises = invalidExpoTokens.map(token =>
-            db.collection('pushTokens').doc(token).delete()
-          );
-          await Promise.all(deletePromises);
-          invalidTokensRemoved += invalidExpoTokens.length;
-          console.log(`🗑️ Cleaned up ${invalidExpoTokens.length} invalid Expo tokens`);
-        }
-      } else {
-        console.error('Unexpected Expo response format:', expoResult);
-        expoFailed = expoTokens.length;
-        console.log(`❌ Expo failed: ${expoFailed} (unexpected response format)`);
-      }
-    }
-
     res.json({
       success: true,
-      message: 'Notifications sent successfully',
+      message: 'Price notifications sent via FCM to all devices',
       fcmSent,
-      expoSent,
-      totalSent: fcmSent + expoSent,
-      totalFailed: fcmFailed + expoFailed,
+      totalSent: fcmSent,
+      totalFailed: fcmFailed,
       invalidTokensRemoved
     });
 

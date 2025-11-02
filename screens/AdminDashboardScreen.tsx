@@ -27,6 +27,7 @@ interface AdminDashboardScreenProps {
   onEditPrice: (price: CocoonPrice) => void;
   onManageNotifications: () => void;
   onAIExtract: () => void;
+  onManageContent?: () => void;
 }
 
 interface DashboardStats {
@@ -43,6 +44,7 @@ export default function AdminDashboardScreen({
   onEditPrice,
   onManageNotifications,
   onAIExtract,
+  onManageContent,
 }: AdminDashboardScreenProps) {
   const { t } = useTranslation();
   const [prices, setPrices] = useState<CocoonPrice[]>([]);
@@ -460,6 +462,19 @@ export default function AdminDashboardScreen({
               <Text style={styles.actionCardTitle}>{t('sendNotification')}</Text>
               <Text style={styles.actionCardSubtitle}>{t('sendCustomNotification')}</Text>
             </TouchableOpacity>
+            {onManageContent && (
+              <TouchableOpacity
+                style={styles.actionCard}
+                onPress={onManageContent}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.actionIconContainer, { backgroundColor: '#FEF3C7' }]}>
+                  <Ionicons name="leaf" size={28} color="#F59E0B" />
+                </View>
+                <Text style={styles.actionCardTitle}>{t('manageContent')}</Text>
+                <Text style={styles.actionCardSubtitle}>{t('manageInfoContent')}</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={styles.actionCard}
               onPress={cleanupExpiredData}

@@ -7,8 +7,9 @@ import AdminDashboardScreen from './AdminDashboardScreen';
 import AdminPriceFormScreen from './AdminPriceFormScreen';
 import AdminNotificationScreen from './AdminNotificationScreen';
 import AdminAIExtractScreen from './AdminAIExtractScreen';
+import AdminContentManagementScreen from './AdminContentManagementScreen';
 
-type AdminScreen = 'login' | 'dashboard' | 'add_price' | 'edit_price' | 'notifications' | 'ai_extract';
+type AdminScreen = 'login' | 'dashboard' | 'add_price' | 'edit_price' | 'notifications' | 'ai_extract' | 'content';
 
 interface AdminNavigatorProps {
   onExit: () => void;
@@ -62,6 +63,7 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
 
       case 'notifications':
       case 'ai_extract':
+      case 'content':
         setCurrentScreen('dashboard');
         return true;
 
@@ -122,6 +124,10 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
     setCurrentScreen('ai_extract');
   };
 
+  const handleManageContent = () => {
+    setCurrentScreen('content');
+  };
+
   const handleBackToDashboard = () => {
     setCurrentScreen('dashboard');
   };
@@ -159,6 +165,7 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
           onEditPrice={handleEditPrice}
           onManageNotifications={handleManageNotifications}
           onAIExtract={handleAIExtract}
+          onManageContent={handleManageContent}
         />
       ) : null;
 
@@ -174,6 +181,13 @@ export default function AdminNavigator({ onExit }: AdminNavigatorProps) {
       return currentUser ? (
         <AdminAIExtractScreen
           user={currentUser}
+          onBack={handleBackToDashboard}
+        />
+      ) : null;
+
+    case 'content':
+      return currentUser ? (
+        <AdminContentManagementScreen
           onBack={handleBackToDashboard}
         />
       ) : null;

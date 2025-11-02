@@ -30,9 +30,13 @@ module.exports = {
       googleServicesFile: "./google-services.json",
       permissions: [
         "android.permission.POST_NOTIFICATIONS",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
-        "WAKE_LOCK"
+        "WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE"
       ]
     },
     notification: {
@@ -43,6 +47,24 @@ module.exports = {
     },
     plugins: [
       "expo-font",
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission: "Allow ReshmeInfo to use your location to provide weather-based silk caterpillar care suggestions.",
+          locationAlwaysPermission: "Allow ReshmeInfo to use your location to provide weather-based silk caterpillar care suggestions.",
+          locationWhenInUsePermission: "Allow ReshmeInfo to use your location to provide weather-based silk caterpillar care suggestions.",
+          isAndroidBackgroundLocationEnabled: true
+        }
+      ],
+      "expo-task-manager",
+      [
+        "expo-background-fetch",
+        {
+          "android": {
+            "minimumInterval": 120
+          }
+        }
+      ],
       [
         "expo-notifications",
         {
