@@ -635,7 +635,11 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
       )}
 
       {/* Content */}
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
         {renderSection('basicInfo', 'information-circle', '#3B82F6', t('basicInformation'))}
         {renderSection('image', 'image', '#10B981', t('images'))}
         {renderSection('pdf', 'document-text', '#EF4444', t('pdfDocuments'))}
@@ -998,6 +1002,9 @@ const styles = StyleSheet.create({
   // Scroll View
   scrollView: {
     flex: 1,
+  },
+  scrollViewContent: {
+    paddingBottom: 20,
   },
 
   // Section
