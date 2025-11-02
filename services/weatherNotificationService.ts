@@ -1,13 +1,11 @@
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
-import * as TaskManager from 'expo-task-manager';
-import * as BackgroundFetch from 'expo-background-fetch';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
-const WEATHER_TASK_NAME = 'WEATHER_NOTIFICATION_TASK';
 const LAST_WEATHER_KEY = 'last_weather_notification';
 const WEATHER_ENABLED_KEY = 'weather_notifications_enabled';
+const WEATHER_NOTIFICATION_ID = 'weather_notification_id';
 
 interface WeatherData {
   temperature: number;
@@ -32,23 +30,23 @@ interface WeatherData {
   uvIndex: number;
 }
 
-// Define the background task
-TaskManager.defineTask(WEATHER_TASK_NAME, async () => {
+// Fetch and check weather data
+async function fetchAndCheckWeather(): Promise<boolean> {
   try {
-    console.log('⏰ Running weather notification task');
+    console.log('⏰ Checking weather data');
 
     // Check if notifications are enabled
     const enabled = await AsyncStorage.getItem(WEATHER_ENABLED_KEY);
     if (enabled !== 'true') {
       console.log('❌ Weather notifications disabled');
-      return BackgroundFetch.BackgroundFetchResult.NoData;
+      return false;
     }
 
     // Get location permission
     const { status } = await Location.getForegroundPermissionsAsync();
     if (status !== 'granted') {
       console.log('❌ No location permission');
-      return BackgroundFetch.BackgroundFetchResult.Failed;
+      return false;
     }
 
     // Get current location
@@ -128,12 +126,12 @@ TaskManager.defineTask(WEATHER_TASK_NAME, async () => {
       console.log('ℹ️ Weather unchanged, skipping notification');
     }
 
-    return BackgroundFetch.BackgroundFetchResult.NewData;
+    return true;
   } catch (error) {
-    console.error('❌ Weather task error:', error);
-    return BackgroundFetch.BackgroundFetchResult.Failed;
+    console.error('❌ Weather check error:', error);
+    return false;
   }
-});
+}
 
 function generateWeatherNotification(weather: WeatherData): Notifications.NotificationContentInput {
   // Determine weather condition based on code
@@ -190,40 +188,51 @@ function generateWeatherNotification(weather: WeatherData): Notifications.Notifi
   };
 }
 
-// Register background task
+// Schedule repeating weather notifications (Expo Go compatible)
 export async function registerWeatherNotificationTask(): Promise<boolean> {
   try {
-    // Check if already registered
-    const isRegistered = await TaskManager.isTaskRegisteredAsync(WEATHER_TASK_NAME);
-
-    if (isRegistered) {
-      console.log('✅ Weather task already registered');
-      return true;
+    // Cancel any existing notification
+    const existingId = await AsyncStorage.getItem(WEATHER_NOTIFICATION_ID);
+    if (existingId) {
+      await Notifications.cancelScheduledNotificationAsync(existingId);
     }
 
-    // Register background fetch task - every 2 hours
-    await BackgroundFetch.registerTaskAsync(WEATHER_TASK_NAME, {
-      minimumInterval: 2 * 60 * 60, // 2 hours in seconds
-      stopOnTerminate: false, // Continue after app is closed
-      startOnBoot: true, // Start when device boots
+    // Schedule repeating notification every 2 hours
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '🌤️ Weather Check',
+        body: 'Checking weather conditions for your silk farm...',
+        data: { type: 'weather_check' },
+      },
+      trigger: {
+        seconds: 2 * 60 * 60, // 2 hours
+        repeats: true,
+      },
     });
 
-    console.log('✅ Weather notification task registered');
+    // Store notification ID
+    await AsyncStorage.setItem(WEATHER_NOTIFICATION_ID, notificationId);
+
+    console.log('✅ Weather notifications scheduled (repeating every 2 hours)');
     return true;
   } catch (error) {
-    console.error('❌ Failed to register weather task:', error);
+    console.error('❌ Failed to schedule weather notifications:', error);
     return false;
   }
 }
 
-// Unregister background task
+// Cancel scheduled weather notifications
 export async function unregisterWeatherNotificationTask(): Promise<boolean> {
   try {
-    await BackgroundFetch.unregisterTaskAsync(WEATHER_TASK_NAME);
-    console.log('✅ Weather notification task unregistered');
+    const existingId = await AsyncStorage.getItem(WEATHER_NOTIFICATION_ID);
+    if (existingId) {
+      await Notifications.cancelScheduledNotificationAsync(existingId);
+      await AsyncStorage.removeItem(WEATHER_NOTIFICATION_ID);
+    }
+    console.log('✅ Weather notifications cancelled');
     return true;
   } catch (error) {
-    console.error('❌ Failed to unregister weather task:', error);
+    console.error('❌ Failed to cancel weather notifications:', error);
     return false;
   }
 }
