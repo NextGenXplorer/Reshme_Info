@@ -11,6 +11,8 @@ import {
   ScrollView,
   Dimensions,
   ActivityIndicator,
+  Modal,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +35,8 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [isDefaultPassword, setIsDefaultPassword] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successUser, setSuccessUser] = useState<AdminUser | null>(null);
 
   // Check if already authenticated
   useEffect(() => {
@@ -85,21 +89,16 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
           setIsDefaultPassword(false);
         }
 
-        // Format role name for better display
-        const roleDisplay = result.user.role === 'super_admin' ? 'Super Admin' : 'Market Admin';
-
-        Alert.alert(
-          '✓ Authentication Successful',
-          `Welcome back, ${result.user.username}!\n\nRole: ${roleDisplay}\nMarket Access: ${result.user.market}\n\nYour session will remain active for 7 days.`,
-          [
-            {
-              text: 'Access Dashboard',
-              onPress: () => onLoginSuccess(result.user!),
-            },
-          ],
-          { cancelable: false }
-        );
+        // Show custom success modal
+        setSuccessUser(result.user);
+        setShowSuccessModal(true);
         setAttempts(0);
+
+        // Auto-proceed after 3 seconds
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          onLoginSuccess(result.user!);
+        }, 3000);
       } else {
         setAttempts(prev => prev + 1);
         Alert.alert(
@@ -262,6 +261,72 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
           </Text>
         </View>
       </ScrollView>
+
+      {/* Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+      >
+        <View style={styles.successOverlay}>
+          <View style={styles.successCard}>
+            {/* Success Icon */}
+            <View style={styles.successIconContainer}>
+              <View style={styles.successIconOuter}>
+                <View style={styles.successIconInner}>
+                  <Ionicons name="checkmark" size={48} color="#FFFFFF" />
+                </View>
+              </View>
+            </View>
+
+            {/* Success Message */}
+            <Text style={styles.successTitle}>Authentication Successful!</Text>
+            <Text style={styles.successSubtitle}>Welcome back, {successUser?.username}</Text>
+
+            {/* User Info Cards */}
+            <View style={styles.successInfoContainer}>
+              <View style={styles.successInfoCard}>
+                <View style={styles.successInfoIconContainer}>
+                  <Ionicons name="person" size={20} color="#3B82F6" />
+                </View>
+                <View style={styles.successInfoText}>
+                  <Text style={styles.successInfoLabel}>Role</Text>
+                  <Text style={styles.successInfoValue}>
+                    {successUser?.role === 'super_admin' ? 'Super Admin' : 'Market Admin'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.successInfoCard}>
+                <View style={styles.successInfoIconContainer}>
+                  <Ionicons name="location" size={20} color="#10B981" />
+                </View>
+                <View style={styles.successInfoText}>
+                  <Text style={styles.successInfoLabel}>Market Access</Text>
+                  <Text style={styles.successInfoValue}>{successUser?.market}</Text>
+                </View>
+              </View>
+
+              <View style={styles.successInfoCard}>
+                <View style={styles.successInfoIconContainer}>
+                  <Ionicons name="time" size={20} color="#8B5CF6" />
+                </View>
+                <View style={styles.successInfoText}>
+                  <Text style={styles.successInfoLabel}>Session Duration</Text>
+                  <Text style={styles.successInfoValue}>7 Days</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Auto-redirect message */}
+            <View style={styles.successFooter}>
+              <ActivityIndicator size="small" color="#3B82F6" />
+              <Text style={styles.successFooterText}>Redirecting to dashboard...</Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -456,5 +521,109 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#1E40AF',
     lineHeight: 16,
+  },
+
+  // Success Modal
+  successOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  successCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 32,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.3,
+    shadowRadius: 30,
+    elevation: 20,
+  },
+  successIconContainer: {
+    marginBottom: 24,
+  },
+  successIconOuter: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#D1FAE5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successIconInner: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#10B981',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  successSubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  successInfoContainer: {
+    width: '100%',
+    gap: 12,
+    marginBottom: 24,
+  },
+  successInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    gap: 12,
+  },
+  successInfoIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successInfoText: {
+    flex: 1,
+  },
+  successInfoLabel: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  successInfoValue: {
+    fontSize: 16,
+    color: '#111827',
+    fontWeight: '700',
+  },
+  successFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  successFooterText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
   },
 });
