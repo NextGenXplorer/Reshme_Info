@@ -56,15 +56,6 @@ module.exports = {
           isAndroidBackgroundLocationEnabled: true
         }
       ],
-      "expo-task-manager",
-      [
-        "expo-background-fetch",
-        {
-          "android": {
-            "minimumInterval": 120
-          }
-        }
-      ],
       [
         "expo-notifications",
         {
