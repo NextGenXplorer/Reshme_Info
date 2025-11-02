@@ -11,9 +11,10 @@ import * as Notifications from 'expo-notifications';
 import { db } from './firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useInterstitialAd } from './hooks/useInterstitialAd';
-import { useExitAd } from './hooks/useExitAd';
-import MobileAds from 'react-native-google-mobile-ads';
+// COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
+// import { useInterstitialAd } from './hooks/useInterstitialAd';
+// import { useExitAd } from './hooks/useExitAd';
+// import MobileAds from 'react-native-google-mobile-ads';
 
 // Create context for notifications navigation
 const NotificationsContext = createContext<{
@@ -58,11 +59,17 @@ async function registerForPushNotificationsAsync(): Promise<string | undefined> 
 
   try {
     if (Platform.OS === 'android') {
+      // Set up notification channel with app branding
       await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
+        name: 'ReshmeInfo',
+        description: 'ReshmeInfo - Silk Farming Updates',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+        lightColor: '#3B82F6',
+        sound: 'default',
+        enableLights: true,
+        enableVibrate: true,
+        showBadge: true,
       });
     }
 
@@ -157,22 +164,25 @@ const AppContent = () => {
   }, []);
 
   // Initialize Google Mobile Ads
-  useEffect(() => {
-    MobileAds()
-      .initialize()
-      .then(adapterStatuses => {
-        console.log('AdMob initialized:', adapterStatuses);
-      })
-      .catch(error => {
-        console.error('AdMob initialization error:', error);
-      });
-  }, []);
+  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
+  // useEffect(() => {
+  //   MobileAds()
+  //     .initialize()
+  //     .then(adapterStatuses => {
+  //       console.log('AdMob initialized:', adapterStatuses);
+  //     })
+  //     .catch(error => {
+  //       console.error('AdMob initialization error:', error);
+  //     });
+  // }, []);
 
   // Interstitial ad hook for tab navigation
-  const { showAd, isLoaded } = useInterstitialAd();
+  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
+  // const { showAd, isLoaded } = useInterstitialAd();
 
   // Exit ad hook - shows rewarded interstitial when user presses back button
-  useExitAd({ enabled: true });
+  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
+  // useExitAd({ enabled: true });
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
@@ -210,6 +220,7 @@ const AppContent = () => {
   }, []);
 
   // Handle navigation state changes to show interstitial ads
+  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
   const handleNavigationStateChange = (state: any) => {
     if (!state) return;
 
@@ -217,10 +228,11 @@ const AppContent = () => {
 
     // Show interstitial ad occasionally when switching tabs (not every time to avoid annoyance)
     // Show ad 30% of the time when changing tabs
-    if (currentRoute && currentRoute !== previousRoute && isLoaded && Math.random() < 0.3) {
-      console.log(`Tab changed from ${previousRoute} to ${currentRoute}, showing interstitial ad`);
-      showAd();
-    }
+    // COMMENTED OUT FOR EXPO GO TESTING
+    // if (currentRoute && currentRoute !== previousRoute && isLoaded && Math.random() < 0.3) {
+    //   console.log(`Tab changed from ${previousRoute} to ${currentRoute}, showing interstitial ad`);
+    //   showAd();
+    // }
 
     setPreviousRoute(currentRoute);
   };

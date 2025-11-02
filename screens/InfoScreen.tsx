@@ -14,6 +14,7 @@ import {
   Image,
   Modal,
 } from 'react-native';
+import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Location from 'expo-location';
@@ -93,6 +94,7 @@ export default function InfoScreen() {
   const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
   const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [youtubeVideoTitles, setYoutubeVideoTitles] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -925,11 +927,14 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
             </View>
             <View style={styles.cardContent}>
               <View style={styles.mediaGrid}>
-                {imageItems.map((item) => (
+                {imageItems.map((item, index) => (
                   <TouchableOpacity
                     key={item.id}
                     style={styles.mediaGridItem}
-                    onPress={() => setSelectedImage({ url: item.url || '', title: getLocalizedTitle(item) })}
+                    onPress={() => {
+                      setSelectedImageIndex(index);
+                      setSelectedImage({ url: item.url || '', title: getLocalizedTitle(item) });
+                    }}
                   >
                     <View style={styles.imageContainer}>
                       {!imageErrors[item.id] ? (
@@ -1080,36 +1085,49 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
         {selectedTab === 'media' && renderMediaContent()}
       </ScrollView>
 
-      {/* Fullscreen Image Viewer Modal */}
+      {/* Fullscreen Image Viewer Modal with Zoom */}
       <Modal
         visible={selectedImage !== null}
         transparent={true}
-        animationType="fade"
         onRequestClose={() => setSelectedImage(null)}
       >
-        <View style={styles.imageViewerOverlay}>
-          <TouchableOpacity
-            style={styles.imageViewerClose}
-            onPress={() => setSelectedImage(null)}
-          >
-            <Ionicons name="close-circle" size={36} color="#FFFFFF" />
-          </TouchableOpacity>
-
-          <View style={styles.imageViewerContainer}>
-            {selectedImage && (
-              <>
-                <Image
-                  source={{ uri: selectedImage.url }}
-                  style={styles.fullscreenImage}
-                  resizeMode="contain"
-                />
-                <View style={styles.imageViewerFooter}>
-                  <Text style={styles.imageViewerTitle}>{selectedImage.title}</Text>
-                </View>
-              </>
-            )}
-          </View>
-        </View>
+        <ImageViewer
+          imageUrls={imageItems.map((item) => ({
+            url: item.url || '',
+            props: {
+              source: { uri: item.url || '' }
+            }
+          }))}
+          index={selectedImageIndex}
+          enableSwipeDown={true}
+          onSwipeDown={() => setSelectedImage(null)}
+          onCancel={() => setSelectedImage(null)}
+          backgroundColor="rgba(0, 0, 0, 0.9)"
+          renderHeader={(currentIndex) => (
+            <View style={styles.imageViewerHeader}>
+              <TouchableOpacity
+                style={styles.imageViewerClose}
+                onPress={() => setSelectedImage(null)}
+              >
+                <Ionicons name="close-circle" size={36} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          )}
+          renderFooter={(currentIndex) => (
+            <View style={styles.imageViewerFooter}>
+              <Text style={styles.imageViewerTitle}>
+                {getLocalizedTitle(imageItems[currentIndex])}
+              </Text>
+              <Text style={styles.imageViewerCounter}>
+                {currentIndex + 1} / {imageItems.length}
+              </Text>
+            </View>
+          )}
+          renderIndicator={() => <></>}
+          enableImageZoom={true}
+          saveToLocalByLongPress={false}
+          doubleClickInterval={250}
+        />
       </Modal>
     </SafeAreaView>
   );
@@ -1667,11 +1685,27 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
   },
+  imageViewerHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+  },
   imageViewerTitle: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
+    marginBottom: 8,
+  },
+  imageViewerCounter: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.8,
   },
 });
 
