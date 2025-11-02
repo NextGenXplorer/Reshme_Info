@@ -28,7 +28,6 @@ import {
   enableWeatherNotifications,
   disableWeatherNotifications,
   areWeatherNotificationsEnabled,
-  triggerWeatherNotificationNow,
 } from '../services/weatherNotificationService';
 
 const { width } = Dimensions.get('window');
@@ -618,10 +617,6 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
     }
   };
 
-  const handleTestWeatherNotification = async () => {
-    await triggerWeatherNotificationNow();
-  };
-
   // Render Hero Weather Section
   const renderHeroWeather = () => {
     if (!weather) return null;
@@ -648,23 +643,8 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
               <Ionicons name="location-sharp" size={16} color="#FFFFFF" />
               <Text style={styles.heroLocation}>{weather.locationName}</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              {/* Test Notification Button */}
-              {weatherNotificationsEnabled && (
-                <TouchableOpacity
-                  onPress={handleTestWeatherNotification}
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 12
-                  }}
-                >
-                  <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '600' }}>Test</Text>
-                </TouchableOpacity>
-              )}
-              {/* Notification Toggle */}
-              <TouchableOpacity onPress={handleWeatherNotificationToggle}>
+            {/* Notification Toggle */}
+            <TouchableOpacity onPress={handleWeatherNotificationToggle}>
                 <Ionicons
                   name={weatherNotificationsEnabled ? "notifications" : "notifications-outline"}
                   size={24}
