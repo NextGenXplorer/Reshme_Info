@@ -519,15 +519,38 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
 
   const openLink = async (url: string, type: string) => {
     try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
+      // Validate URL
+      if (!url || url.trim() === '') {
+        console.error('Empty URL provided');
+        Alert.alert(t('error'), 'No link available');
+        return;
+      }
+
+      console.log(`Attempting to open ${type}:`, url);
+
+      // For YouTube videos, ensure proper URL format
+      if (type === 'video' && (url.includes('youtube.com') || url.includes('youtu.be'))) {
+        // Ensure URL starts with http:// or https://
+        let formattedUrl = url;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          formattedUrl = 'https://' + url;
+        }
+
+        console.log('Opening YouTube URL:', formattedUrl);
+        await Linking.openURL(formattedUrl);
       } else {
-        Alert.alert(t('error'), t('cannotOpenLink'));
+        // For other links (PDFs, images, etc.)
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+          await Linking.openURL(url);
+        } else {
+          console.error('URL not supported:', url);
+          Alert.alert(t('error'), t('cannotOpenLink'));
+        }
       }
     } catch (error) {
-      console.error(`Error opening ${type}:`, error);
-      Alert.alert(t('error'), t('linkOpenError'));
+      console.error(`Error opening ${type}:`, error, 'URL:', url);
+      Alert.alert(t('error'), `${t('linkOpenError')}: ${url}`);
     }
   };
 
