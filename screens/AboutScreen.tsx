@@ -220,7 +220,7 @@ export default function AboutScreen({ setShowAdminPanel }: { setShowAdminPanel: 
             </View>
             <View style={styles.appInfoRow}>
               <Text style={styles.appInfoLabel}>{t('lastUpdated')}</Text>
-              <Text style={styles.appInfoValue}>October 2025</Text>
+              <Text style={styles.appInfoValue}>November 2025</Text>
             </View>
             <View style={styles.appInfoRow}>
               <Text style={styles.appInfoLabel}>{t('platform')}</Text>

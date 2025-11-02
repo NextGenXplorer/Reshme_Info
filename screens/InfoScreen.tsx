@@ -622,17 +622,82 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
     if (!weather) return null;
 
     const getWeatherIcon = () => {
-      if (weather.weatherCode >= 61 && weather.weatherCode <= 67) return 'rainy';
-      if (weather.weatherCode >= 71 && weather.weatherCode <= 77) return 'snow';
-      if (weather.weatherCode >= 2 && weather.weatherCode <= 3) return 'cloudy';
+      const isDay = weather.isDay === 1;
+
+      // Thunderstorm
       if (weather.weatherCode >= 95) return 'thunderstorm';
-      return 'sunny';
+
+      // Rain
+      if (weather.weatherCode >= 61 && weather.weatherCode <= 67) return 'rainy';
+      if (weather.weatherCode >= 80 && weather.weatherCode <= 82) return 'rainy';
+
+      // Snow
+      if (weather.weatherCode >= 71 && weather.weatherCode <= 77) return 'snow';
+      if (weather.weatherCode >= 85 && weather.weatherCode <= 86) return 'snow';
+
+      // Partly Cloudy
+      if (weather.weatherCode >= 2 && weather.weatherCode <= 3) {
+        return isDay ? 'partly-sunny' : 'cloudy-night';
+      }
+
+      // Cloudy/Overcast
+      if (weather.weatherCode === 45 || weather.weatherCode === 48) return 'cloudy';
+
+      // Clear sky
+      if (weather.weatherCode === 0 || weather.weatherCode === 1) {
+        return isDay ? 'sunny' : 'moon';
+      }
+
+      // Default: check day/night
+      return isDay ? 'sunny' : 'moon';
+    };
+
+    // Dynamic gradient colors based on weather and time of day
+    const getWeatherGradient = (): string[] => {
+      const isDay = weather.isDay === 1;
+
+      // Thunderstorm - dark purple/grey
+      if (weather.weatherCode >= 95) {
+        return ['#4C4F69', '#2D3142'];
+      }
+
+      // Rain - blue/grey gradient
+      if ((weather.weatherCode >= 61 && weather.weatherCode <= 67) ||
+          (weather.weatherCode >= 80 && weather.weatherCode <= 82)) {
+        return isDay ? ['#5B8FB9', '#4A6FA5'] : ['#2E4057', '#1A2634'];
+      }
+
+      // Snow - light blue/white
+      if ((weather.weatherCode >= 71 && weather.weatherCode <= 77) ||
+          (weather.weatherCode >= 85 && weather.weatherCode <= 86)) {
+        return isDay ? ['#B8D4E3', '#93B7CF'] : ['#4A5F75', '#2E3E50'];
+      }
+
+      // Cloudy/Overcast - grey gradient
+      if (weather.weatherCode === 45 || weather.weatherCode === 48 ||
+          (weather.weatherCode >= 2 && weather.weatherCode <= 3)) {
+        return isDay ? ['#7C8B9C', '#5E6F82'] : ['#3D4E5E', '#2B3947'];
+      }
+
+      // Clear sky - sunny or night
+      if (weather.weatherCode === 0 || weather.weatherCode === 1) {
+        if (isDay) {
+          // Sunny - warm orange/blue sky gradient
+          return ['#F59E0B', '#F97316'];
+        } else {
+          // Night - deep blue/purple gradient
+          return ['#1E3A8A', '#312E81'];
+        }
+      }
+
+      // Default based on day/night
+      return isDay ? ['#3B82F6', '#2563EB'] : ['#4C1D95', '#5B21B6'];
     };
 
     return (
       <View style={styles.heroWeather}>
         <LinearGradient
-          colors={['#8B5CF6', '#6366F1']}
+          colors={getWeatherGradient()}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroGradient}
