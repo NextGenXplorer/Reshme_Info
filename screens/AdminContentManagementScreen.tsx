@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -52,6 +52,7 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
     message: string;
     details?: string;
   }>({ show: false, success: false, message: '' });
+  const notificationTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -73,6 +74,15 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
 
   useEffect(() => {
     fetchContent();
+  }, []);
+
+  // Cleanup notification timer on unmount
+  useEffect(() => {
+    return () => {
+      if (notificationTimerRef.current) {
+        clearTimeout(notificationTimerRef.current);
+      }
+    };
   }, []);
 
   const fetchContent = async () => {
@@ -308,8 +318,11 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
       });
     } finally {
       setSendingNotification(false);
-      // Auto-hide status after 8 seconds (increased for reading)
-      setTimeout(() => {
+      // Auto-hide status after 8 seconds (increased for reading) with cleanup
+      if (notificationTimerRef.current) {
+        clearTimeout(notificationTimerRef.current);
+      }
+      notificationTimerRef.current = setTimeout(() => {
         setNotificationStatus({ show: false, success: false, message: '' });
       }, 8000);
     }

@@ -37,10 +37,20 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
   const [isDefaultPassword, setIsDefaultPassword] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successUser, setSuccessUser] = useState<AdminUser | null>(null);
+  const successTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Check if already authenticated
   useEffect(() => {
     checkExistingSession();
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+      }
+    };
   }, []);
 
   const checkExistingSession = async () => {
@@ -94,8 +104,8 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
         setShowSuccessModal(true);
         setAttempts(0);
 
-        // Auto-proceed after 3 seconds
-        setTimeout(() => {
+        // Auto-proceed after 3 seconds with cleanup
+        successTimerRef.current = setTimeout(() => {
           setShowSuccessModal(false);
           onLoginSuccess(result.user!);
         }, 3000);
