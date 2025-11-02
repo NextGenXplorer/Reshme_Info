@@ -115,7 +115,7 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
   const handleForgotPassword = () => {
     Alert.alert(
       'Password Recovery',
-      'Please contact your system administrator for password recovery.\n\nSupport: admin@reshmeinfo.com',
+      'Please contact your system administrator for password recovery.\n\nSupport: reshmeinfo@gmail.com',
       [{ text: 'OK' }]
     );
   };
@@ -257,16 +257,6 @@ export default function AdminLoginScreen({ onLoginSuccess, onCancel }: AdminLogi
             This is a secure administrative area. All activities are logged and monitored.
           </Text>
         </View>
-
-        {/* Security Notice - No Credentials Displayed */}
-        {__DEV__ && (
-          <View style={styles.devSection}>
-            <Text style={styles.devTitle}>Development Mode:</Text>
-            <Text style={styles.devText}>• Admin credentials are loaded from .env file</Text>
-            <Text style={styles.devText}>• See ADMIN_PANEL_README.md for details</Text>
-            <Text style={styles.devText}>• Using default passwords will trigger a warning</Text>
-          </View>
-        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -462,25 +452,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#1E40AF',
     lineHeight: 16,
-  },
-
-  // Development Section
-  devSection: {
-    backgroundColor: '#FEF2F2',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  devTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#DC2626',
-    marginBottom: 8,
-  },
-  devText: {
-    fontSize: 11,
-    color: '#991B1B',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    marginBottom: 4,
   },
 });
