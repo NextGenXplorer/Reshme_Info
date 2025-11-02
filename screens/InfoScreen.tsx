@@ -696,7 +696,7 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
             <View style={styles.heroDetailDivider} />
             <View style={styles.heroDetailItem}>
               <Ionicons name="sunny-outline" size={20} color="#E9D5FF" />
-              <Text style={styles.heroDetailLabel}>UV Index</Text>
+              <Text style={styles.heroDetailLabel}>{t('weatherUVIndex')}</Text>
               <Text style={styles.heroDetailValue}>{weather.uvIndex}</Text>
             </View>
           </View>
@@ -708,19 +708,19 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
           <View style={styles.weatherCard}>
             <View style={styles.weatherCardHeader}>
               <Ionicons name="thermometer" size={20} color="#EF4444" />
-              <Text style={styles.weatherCardTitle}>Temperature</Text>
+              <Text style={styles.weatherCardTitle}>{t('weatherTemperature')}</Text>
             </View>
             <View style={styles.weatherCardContent}>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Actual</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherActual')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.temperature.toFixed(1)}°C</Text>
               </View>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Feels Like</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherFeelsLike')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.apparentTemperature.toFixed(1)}°C</Text>
               </View>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Dew Point</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherDewPoint')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.dewPoint.toFixed(1)}°C</Text>
               </View>
             </View>
@@ -730,15 +730,15 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
           <View style={styles.weatherCard}>
             <View style={styles.weatherCardHeader}>
               <Ionicons name="leaf" size={20} color="#10B981" />
-              <Text style={styles.weatherCardTitle}>Soil Temp</Text>
+              <Text style={styles.weatherCardTitle}>{t('weatherSoilTemp')}</Text>
             </View>
             <View style={styles.weatherCardContent}>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Surface</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherSurface')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.soilTemperature0cm.toFixed(1)}°C</Text>
               </View>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>6cm Depth</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherDepth6cm')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.soilTemperature6cm.toFixed(1)}°C</Text>
               </View>
             </View>
@@ -748,19 +748,19 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
           <View style={styles.weatherCard}>
             <View style={styles.weatherCardHeader}>
               <Ionicons name="rainy" size={20} color="#3B82F6" />
-              <Text style={styles.weatherCardTitle}>Precipitation</Text>
+              <Text style={styles.weatherCardTitle}>{t('weatherPrecipitation')}</Text>
             </View>
             <View style={styles.weatherCardContent}>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Total</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherTotal')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.precipitation.toFixed(1)} mm</Text>
               </View>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Rain</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherRain')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.rain.toFixed(1)} mm</Text>
               </View>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Showers</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherShowers')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.showers.toFixed(1)} mm</Text>
               </View>
             </View>
@@ -770,19 +770,19 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
           <View style={styles.weatherCard}>
             <View style={styles.weatherCardHeader}>
               <Ionicons name="analytics" size={20} color="#8B5CF6" />
-              <Text style={styles.weatherCardTitle}>Atmospheric</Text>
+              <Text style={styles.weatherCardTitle}>{t('weatherAtmospheric')}</Text>
             </View>
             <View style={styles.weatherCardContent}>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Pressure</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherPressure')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.surfacePressure.toFixed(0)} hPa</Text>
               </View>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Cloud Cover</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherCloudCover')}</Text>
                 <Text style={styles.weatherDataValue}>{weather.cloudCover}%</Text>
               </View>
               <View style={styles.weatherDataRow}>
-                <Text style={styles.weatherDataLabel}>Visibility</Text>
+                <Text style={styles.weatherDataLabel}>{t('weatherVisibility')}</Text>
                 <Text style={styles.weatherDataValue}>{(weather.visibility / 1000).toFixed(1)} km</Text>
               </View>
             </View>
@@ -797,7 +797,7 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
                 color={weather.isDay === 1 ? "#F59E0B" : "#6366F1"}
               />
               <Text style={styles.dayNightText}>
-                {weather.isDay === 1 ? 'Daytime' : 'Nighttime'}
+                {weather.isDay === 1 ? t('weatherDaytime') : t('weatherNighttime')}
               </Text>
             </View>
           </View>
