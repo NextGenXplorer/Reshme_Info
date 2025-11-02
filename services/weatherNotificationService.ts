@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 const WEATHER_TASK_NAME = 'WEATHER_NOTIFICATION_TASK';
 const LAST_WEATHER_KEY = 'last_weather_notification';
@@ -236,16 +237,75 @@ export async function areWeatherNotificationsEnabled(): Promise<boolean> {
 // Trigger weather notification manually (for testing)
 export async function triggerWeatherNotificationNow(): Promise<boolean> {
   try {
-    const result = await TaskManager.getTaskOptionsAsync(WEATHER_TASK_NAME);
-    if (result) {
-      // Execute the task manually
-      await BackgroundFetch.setMinimumIntervalAsync(15 * 60); // 15 minutes for testing
-      console.log('✅ Weather notification triggered manually');
-      return true;
+    console.log('🧪 Triggering weather notification manually...');
+
+    // Check if notifications are enabled
+    const enabled = await AsyncStorage.getItem(WEATHER_ENABLED_KEY);
+    if (enabled !== 'true') {
+      console.log('❌ Weather notifications disabled');
+      Alert.alert('Error', 'Weather notifications are disabled. Please enable them first.');
+      return false;
     }
-    return false;
+
+    // Get location permission
+    const { status } = await Location.getForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('❌ No location permission');
+      Alert.alert('Error', 'Location permission required');
+      return false;
+    }
+
+    // Get current location
+    console.log('📍 Getting location...');
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
+
+    // Fetch weather data
+    console.log('🌤️ Fetching weather data...');
+    const response = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`
+    );
+
+    const data = await response.json();
+
+    // Get location name
+    const locationData = await Location.reverseGeocodeAsync({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
+
+    const locationName = locationData[0]
+      ? `${locationData[0].city || locationData[0].district || ''}, ${locationData[0].region || ''}`
+      : 'Your Location';
+
+    const weather: WeatherData = {
+      temperature: data.current.temperature_2m,
+      humidity: data.current.relative_humidity_2m,
+      windSpeed: data.current.wind_speed_10m,
+      weatherCode: data.current.weather_code,
+      locationName,
+    };
+
+    // Generate notification content
+    console.log('📬 Generating notification...', weather);
+    const notificationContent = generateWeatherNotification(weather);
+
+    // Send local notification immediately
+    await Notifications.scheduleNotificationAsync({
+      content: notificationContent,
+      trigger: null, // Send immediately
+    });
+
+    // Save weather data
+    await AsyncStorage.setItem(LAST_WEATHER_KEY, JSON.stringify(weather));
+
+    console.log('✅ Test notification sent successfully!');
+    Alert.alert('Success', 'Weather notification sent! Check your notification panel.');
+    return true;
   } catch (error) {
     console.error('❌ Failed to trigger weather notification:', error);
+    Alert.alert('Error', `Failed to send notification: ${error.message}`);
     return false;
   }
 }
