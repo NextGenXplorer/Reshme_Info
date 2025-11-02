@@ -1124,13 +1124,17 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
               </Text>
             </View>
           )}
-          renderIndicator={() => null}
+          renderIndicator={() => <View />}
+          renderArrowLeft={() => <View />}
+          renderArrowRight={() => <View />}
           loadingRender={() => <ActivityIndicator size="large" color="#FFFFFF" />}
           enableImageZoom={true}
           saveToLocalByLongPress={false}
           doubleClickInterval={250}
           pageAnimateTime={250}
           flipThreshold={80}
+          useNativeDriver={true}
+          menuContext={{ saveToLocal: '', cancel: '' }}
         />
       </Modal>
     </SafeAreaView>
