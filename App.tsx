@@ -11,10 +11,9 @@ import * as Notifications from 'expo-notifications';
 import { db } from './firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
-// import { useInterstitialAd } from './hooks/useInterstitialAd';
-// import { useExitAd } from './hooks/useExitAd';
-// import MobileAds from 'react-native-google-mobile-ads';
+import { useInterstitialAd } from './hooks/useInterstitialAd';
+import { useExitAd } from './hooks/useExitAd';
+import MobileAds from 'react-native-google-mobile-ads';
 
 // Create context for notifications navigation
 const NotificationsContext = createContext<{
@@ -164,25 +163,22 @@ const AppContent = () => {
   }, []);
 
   // Initialize Google Mobile Ads
-  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
-  // useEffect(() => {
-  //   MobileAds()
-  //     .initialize()
-  //     .then(adapterStatuses => {
-  //       console.log('AdMob initialized:', adapterStatuses);
-  //     })
-  //     .catch(error => {
-  //       console.error('AdMob initialization error:', error);
-  //     });
-  // }, []);
+  useEffect(() => {
+    MobileAds()
+      .initialize()
+      .then(adapterStatuses => {
+        console.log('AdMob initialized:', adapterStatuses);
+      })
+      .catch(error => {
+        console.error('AdMob initialization error:', error);
+      });
+  }, []);
 
   // Interstitial ad hook for tab navigation
-  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
-  // const { showAd, isLoaded } = useInterstitialAd();
+  const { showAd, isLoaded } = useInterstitialAd();
 
   // Exit ad hook - shows rewarded interstitial when user presses back button
-  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
-  // useExitAd({ enabled: true });
+  useExitAd({ enabled: true });
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
@@ -220,7 +216,6 @@ const AppContent = () => {
   }, []);
 
   // Handle navigation state changes to show interstitial ads
-  // COMMENTED OUT FOR EXPO GO TESTING - Uncomment for production build
   const handleNavigationStateChange = (state: any) => {
     if (!state) return;
 
@@ -228,11 +223,10 @@ const AppContent = () => {
 
     // Show interstitial ad occasionally when switching tabs (not every time to avoid annoyance)
     // Show ad 30% of the time when changing tabs
-    // COMMENTED OUT FOR EXPO GO TESTING
-    // if (currentRoute && currentRoute !== previousRoute && isLoaded && Math.random() < 0.3) {
-    //   console.log(`Tab changed from ${previousRoute} to ${currentRoute}, showing interstitial ad`);
-    //   showAd();
-    // }
+    if (currentRoute && currentRoute !== previousRoute && isLoaded && Math.random() < 0.3) {
+      console.log(`Tab changed from ${previousRoute} to ${currentRoute}, showing interstitial ad`);
+      showAd();
+    }
 
     setPreviousRoute(currentRoute);
   };
