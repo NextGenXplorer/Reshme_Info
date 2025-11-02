@@ -645,13 +645,12 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
             </View>
             {/* Notification Toggle */}
             <TouchableOpacity onPress={handleWeatherNotificationToggle}>
-                <Ionicons
-                  name={weatherNotificationsEnabled ? "notifications" : "notifications-outline"}
-                  size={24}
-                  color="#FFFFFF"
-                />
-              </TouchableOpacity>
-            </View>
+              <Ionicons
+                name={weatherNotificationsEnabled ? "notifications" : "notifications-outline"}
+                size={24}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
           </View>
 
           {/* Temperature */}
