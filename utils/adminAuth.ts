@@ -71,7 +71,7 @@ const getAdminCredentials = (): AdminCredentials[] => {
 
 // Session management
 const ADMIN_SESSION_KEY = '@admin_session';
-const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 export class AdminAuthService {
   private static instance: AdminAuthService;
