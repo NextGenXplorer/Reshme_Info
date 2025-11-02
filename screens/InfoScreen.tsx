@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -97,6 +97,11 @@ export default function InfoScreen() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [youtubeVideoTitles, setYoutubeVideoTitles] = useState<{ [key: string]: string }>({});
 
+  // Memoized filtered content items for different media types
+  const imageItems = useMemo(() => contentItems.filter(item => item.type === 'image'), [contentItems]);
+  const videoItems = useMemo(() => contentItems.filter(item => item.type === 'video'), [contentItems]);
+  const pdfItems = useMemo(() => contentItems.filter(item => item.type === 'pdf'), [contentItems]);
+
   useEffect(() => {
     requestLocationAndWeather();
     fetchContent();
@@ -105,13 +110,12 @@ export default function InfoScreen() {
 
   // Fetch YouTube titles when content items change
   useEffect(() => {
-    const videoItems = contentItems.filter(item => item.type === 'video');
     videoItems.forEach(item => {
       if (item.url && !youtubeVideoTitles[item.id]) {
         fetchYouTubeTitle(item.url, item.id);
       }
     });
-  }, [contentItems]);
+  }, [videoItems]);
 
   // Check weather notification status on mount
   const checkWeatherNotificationStatus = async () => {
@@ -908,9 +912,6 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
 
   // Render Media Tab Content
   const renderMediaContent = () => {
-    const imageItems = contentItems.filter(item => item.type === 'image');
-    const videoItems = contentItems.filter(item => item.type === 'video');
-
     return (
       <View style={styles.tabContent}>
         {/* Image Gallery */}
