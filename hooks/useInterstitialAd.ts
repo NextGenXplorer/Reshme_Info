@@ -38,34 +38,47 @@ export function useInterstitialAd(options?: UseInterstitialAdOptions) {
       requestNonPersonalizedAdsOnly: true, // For GDPR compliance
     });
 
+    // Define loadAd function BEFORE setting up listeners
+    const loadAd = () => {
+      console.log('📢 Loading interstitial ad...');
+      setIsLoading(true);
+      ad.load();
+    };
+
     // Set up event listeners
     const loadedListener = ad.addAdEventListener(AdEventType.LOADED, () => {
-      console.log('Interstitial ad loaded successfully');
+      console.log('✅ Interstitial ad loaded successfully');
+      console.log('Ad Unit ID:', adUnitId);
+      console.log('Is Dev Mode:', __DEV__);
       setIsLoaded(true);
       setIsLoading(false);
     });
 
     const errorListener = ad.addAdEventListener(AdEventType.ERROR, (error) => {
-      console.error('Interstitial ad failed to load:', error);
+      console.error('❌ Interstitial ad failed to load:', error);
+      console.error('Ad Unit ID:', adUnitId);
+      console.error('Error details:', JSON.stringify(error));
       setIsLoaded(false);
       setIsLoading(false);
+
+      // Retry loading after 10 seconds on error
+      setTimeout(() => {
+        console.log('🔄 Retrying ad load after error...');
+        loadAd();
+      }, 10000);
     });
 
     const closedListener = ad.addAdEventListener(AdEventType.CLOSED, () => {
-      console.log('Interstitial ad closed');
+      console.log('🚪 Interstitial ad closed');
       setIsLoaded(false);
       // Reload the ad for next time
+      console.log('🔄 Reloading ad after close...');
       loadAd();
     });
 
     setInterstitial(ad);
 
-    // Load the ad
-    const loadAd = () => {
-      setIsLoading(true);
-      ad.load();
-    };
-
+    // Initial load
     loadAd();
 
     // Cleanup
@@ -79,12 +92,18 @@ export function useInterstitialAd(options?: UseInterstitialAdOptions) {
   const showAd = async () => {
     if (isLoaded && interstitial) {
       try {
+        console.log('🎬 Showing interstitial ad...');
         await interstitial.show();
+        console.log('✅ Interstitial ad displayed successfully');
       } catch (error) {
-        console.error('Error showing interstitial ad:', error);
+        console.error('❌ Error showing interstitial ad:', error);
+        console.error('Error details:', JSON.stringify(error));
       }
     } else {
-      console.log('Interstitial ad not ready yet');
+      console.log('⚠️ Interstitial ad not ready yet');
+      console.log('isLoaded:', isLoaded);
+      console.log('isLoading:', isLoading);
+      console.log('interstitial exists:', !!interstitial);
     }
   };
 

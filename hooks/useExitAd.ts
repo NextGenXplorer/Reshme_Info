@@ -33,22 +33,44 @@ export function useExitAd(options?: UseExitAdOptions) {
   const enabled = options?.enabled !== false; // Default to enabled
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      console.log('⚠️ Exit ad disabled');
+      return;
+    }
+
+    console.log('🚀 Creating exit ad (Rewarded Interstitial)...');
+    console.log('Exit ad unit ID:', adUnitId);
+    console.log('Is Dev Mode:', __DEV__);
 
     // Create and load the rewarded interstitial ad
     const ad = RewardedInterstitialAd.createForAdRequest(adUnitId, {
       requestNonPersonalizedAdsOnly: true,
     });
 
+    // Define loadAd function BEFORE setting up listeners
+    const loadAd = () => {
+      console.log('📢 Loading exit ad...');
+      ad.load();
+    };
+
     // Set up event listeners
     const loadedListener = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
       console.log('✅ Exit ad (Rewarded Interstitial) loaded successfully');
+      console.log('Exit ad unit ID:', adUnitId);
       setIsLoaded(true);
     });
 
     const errorListener = ad.addAdEventListener(AdEventType.ERROR, (error) => {
       console.error('❌ Exit ad failed to load:', error);
+      console.error('Exit ad unit ID:', adUnitId);
+      console.error('Error details:', JSON.stringify(error));
       setIsLoaded(false);
+
+      // Retry loading after 15 seconds on error
+      setTimeout(() => {
+        console.log('🔄 Retrying exit ad load after error...');
+        loadAd();
+      }, 15000);
     });
 
     const earnedRewardListener = ad.addAdEventListener(
@@ -70,8 +92,8 @@ export function useExitAd(options?: UseExitAdOptions) {
 
     setRewardedInterstitial(ad);
 
-    // Load the ad
-    ad.load();
+    // Initial load
+    loadAd();
 
     // Cleanup
     return () => {
@@ -86,8 +108,12 @@ export function useExitAd(options?: UseExitAdOptions) {
     if (!enabled) return;
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      console.log('⬅️ Hardware back button pressed');
+      console.log('Exit ad state - isShowing:', isShowing, 'isLoaded:', isLoaded);
+
       // If ad is already showing, don't intercept
       if (isShowing) {
+        console.log('⚠️ Exit ad already showing, ignoring back press');
         return false;
       }
 
@@ -100,19 +126,23 @@ export function useExitAd(options?: UseExitAdOptions) {
         setIsShowing(true);
         rewardedInterstitial.show().catch((error) => {
           console.error('❌ Error showing exit ad:', error);
+          console.error('Error details:', JSON.stringify(error));
           setIsShowing(false);
 
           // If ad fails to show, allow exit
+          console.log('⚠️ Exit ad failed to show, allowing app exit');
           BackHandler.exitApp();
         });
 
         return true; // Prevent default back behavior
       } else {
-        // Ad not loaded, try to load for next time but allow exit
+        // Ad not loaded, allow exit
         console.log('⚠️ Exit ad not ready, allowing exit');
+        console.log('rewardedInterstitial exists:', !!rewardedInterstitial);
 
         // Reload ad for next time
         if (rewardedInterstitial && !isLoaded) {
+          console.log('🔄 Attempting to reload exit ad for next time');
           rewardedInterstitial.load();
         }
 
