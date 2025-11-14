@@ -9,6 +9,8 @@ import {
   StatusBar,
   ScrollView,
   Dimensions,
+  Linking,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import i18n, { saveLanguagePreference } from '../i18n';
@@ -26,8 +28,26 @@ interface LanguageSelectionScreenProps {
 export default function LanguageSelectionScreen({ onComplete }: LanguageSelectionScreenProps) {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  const openPrivacyPolicy = () => {
+    Linking.openURL('https://reshme-info.vercel.app/privacy-policy.html');
+  };
+
+  const openTerms = () => {
+    Linking.openURL('https://reshme-info.vercel.app/terms.html');
+  };
 
   const handleLanguageSelect = async (language: 'en' | 'kn') => {
+    if (!agreedToTerms) {
+      Alert.alert(
+        'Agreement Required',
+        'Please agree to the Privacy Policy and Terms of Service to continue.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     setSelectedLanguage(language);
     setLoading(true);
 
@@ -189,6 +209,47 @@ export default function LanguageSelectionScreen({ onComplete }: LanguageSelectio
         <Text style={styles.noteKannada}>
           ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಭಾಷೆಯನ್ನು ಬದಲಾಯಿಸಬಹುದು
         </Text>
+
+        {/* Privacy Policy & Terms Agreement */}
+        <View style={styles.agreementSection}>
+          <TouchableOpacity
+            style={styles.checkboxContainer}
+            onPress={() => setAgreedToTerms(!agreedToTerms)}
+            activeOpacity={0.7}
+          >
+            <View style={[
+              styles.checkbox,
+              agreedToTerms && styles.checkboxChecked
+            ]}>
+              {agreedToTerms && (
+                <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+              )}
+            </View>
+            <View style={styles.agreementText}>
+              <Text style={styles.agreementTextContent}>
+                I agree to the{' '}
+                <Text style={styles.link} onPress={openPrivacyPolicy}>
+                  Privacy Policy
+                </Text>
+                {' '}and{' '}
+                <Text style={styles.link} onPress={openTerms}>
+                  Terms of Service
+                </Text>
+              </Text>
+              <Text style={styles.agreementTextKannada}>
+                ನಾನು{' '}
+                <Text style={styles.link} onPress={openPrivacyPolicy}>
+                  ಗೌಪ್ಯತಾ ನೀತಿ
+                </Text>
+                {' '}ಮತ್ತು{' '}
+                <Text style={styles.link} onPress={openTerms}>
+                  ಸೇವಾ ನಿಯಮಗಳನ್ನು
+                </Text>
+                {' '}ಒಪ್ಪುತ್ತೇನೆ
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
 
         {/* Footer */}
@@ -362,5 +423,47 @@ const styles = StyleSheet.create({
     fontSize: isSmallScreen ? 11 : 12,
     color: '#9CA3AF',
     textAlign: 'center',
+  },
+  agreementSection: {
+    marginTop: 24,
+    paddingHorizontal: 4,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    marginTop: 2,
+  },
+  checkboxChecked: {
+    backgroundColor: '#10B981',
+    borderColor: '#10B981',
+  },
+  agreementText: {
+    flex: 1,
+  },
+  agreementTextContent: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  agreementTextKannada: {
+    fontSize: 13,
+    color: '#6B7280',
+    lineHeight: 18,
+  },
+  link: {
+    color: '#10B981',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

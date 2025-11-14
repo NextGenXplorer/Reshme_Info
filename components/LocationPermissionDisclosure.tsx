@@ -7,9 +7,15 @@ import {
   StyleSheet,
   ScrollView,
   Linking,
+  Dimensions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const isSmallScreen = SCREEN_HEIGHT < 700;
+const isMediumScreen = SCREEN_HEIGHT >= 700 && SCREEN_HEIGHT < 850;
 
 interface LocationPermissionDisclosureProps {
   visible: boolean;
@@ -25,7 +31,7 @@ export default function LocationPermissionDisclosure({
   const { t } = useTranslation();
 
   const openPrivacyPolicy = () => {
-    Linking.openURL('https://reshmeinfo.web.app/privacy-policy.html');
+    Linking.openURL('https://reshme-info.vercel.app/privacy-policy.html');
   };
 
   return (
@@ -183,14 +189,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: isSmallScreen ? 16 : 20,
   },
   container: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: isSmallScreen ? 12 : 16,
     maxWidth: 500,
     width: '100%',
-    maxHeight: '90%',
+    maxHeight: isSmallScreen ? '95%' : '90%',
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -198,31 +204,31 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   scrollView: {
-    padding: 24,
+    padding: isSmallScreen ? 16 : isMediumScreen ? 20 : 24,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: isSmallScreen ? 12 : 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: isSmallScreen ? 18 : isMediumScreen ? 20 : 22,
     fontWeight: 'bold',
     color: '#1F2937',
-    marginTop: 12,
+    marginTop: isSmallScreen ? 8 : 12,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: isSmallScreen ? 13 : isMediumScreen ? 14 : 15,
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 22,
+    marginBottom: isSmallScreen ? 12 : isMediumScreen ? 16 : 20,
+    lineHeight: isSmallScreen ? 18 : 22,
   },
   content: {
-    marginBottom: 20,
+    marginBottom: isSmallScreen ? 12 : 20,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: isSmallScreen ? 14 : 20,
   },
   lastSection: {
     marginBottom: 0,
@@ -230,63 +236,63 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: isSmallScreen ? 8 : 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
     fontWeight: '600',
     color: '#1F2937',
     marginLeft: 8,
   },
   featureList: {
-    marginLeft: 8,
+    marginLeft: isSmallScreen ? 4 : 8,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: isSmallScreen ? 8 : 12,
   },
   featureText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : isMediumScreen ? 13 : 14,
     color: '#4B5563',
-    marginLeft: 12,
+    marginLeft: isSmallScreen ? 8 : 12,
     flex: 1,
-    lineHeight: 20,
+    lineHeight: isSmallScreen ? 17 : 20,
   },
   backgroundSection: {
     backgroundColor: '#FEF3C7',
-    padding: 16,
-    borderRadius: 12,
+    padding: isSmallScreen ? 12 : 16,
+    borderRadius: isSmallScreen ? 8 : 12,
     borderWidth: 1,
     borderColor: '#F59E0B',
   },
   backgroundText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : isMediumScreen ? 13 : 14,
     color: '#92400E',
-    lineHeight: 20,
-    marginBottom: 12,
+    lineHeight: isSmallScreen ? 17 : 20,
+    marginBottom: isSmallScreen ? 8 : 12,
   },
   warningBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ECFDF5',
-    padding: 12,
+    padding: isSmallScreen ? 10 : 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#10B981',
   },
   warningText: {
-    fontSize: 13,
+    fontSize: isSmallScreen ? 11 : isMediumScreen ? 12 : 13,
     color: '#065F46',
     marginLeft: 8,
     flex: 1,
-    lineHeight: 18,
+    lineHeight: isSmallScreen ? 16 : 18,
   },
   privacyText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : isMediumScreen ? 13 : 14,
     color: '#4B5563',
-    lineHeight: 20,
-    marginBottom: 12,
+    lineHeight: isSmallScreen ? 17 : 20,
+    marginBottom: isSmallScreen ? 8 : 12,
   },
   privacyLink: {
     flexDirection: 'row',
@@ -295,28 +301,30 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   privacyLinkText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : isMediumScreen ? 13 : 14,
     color: '#3B82F6',
     fontWeight: '600',
     marginRight: 4,
   },
   settingsText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : isMediumScreen ? 13 : 14,
     color: '#6B7280',
-    lineHeight: 20,
+    lineHeight: isSmallScreen ? 17 : 20,
     fontStyle: 'italic',
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 12,
-    marginTop: 20,
+    marginTop: isSmallScreen ? 16 : 20,
+    width: '100%',
   },
   button: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
+    width: '100%',
+    paddingVertical: isSmallScreen ? 12 : 14,
+    borderRadius: isSmallScreen ? 10 : 12,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 48, // Ensure touch target size
   },
   declineButton: {
     backgroundColor: '#F3F4F6',
@@ -324,7 +332,7 @@ const styles = StyleSheet.create({
     borderColor: '#D1D5DB',
   },
   declineButtonText: {
-    fontSize: 16,
+    fontSize: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
     fontWeight: '600',
     color: '#6B7280',
   },
@@ -332,7 +340,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
   },
   acceptButtonText: {
-    fontSize: 16,
+    fontSize: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
     fontWeight: '600',
     color: '#FFFFFF',
   },
