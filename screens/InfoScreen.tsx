@@ -29,6 +29,7 @@ import {
   disableWeatherNotifications,
   areWeatherNotificationsEnabled,
 } from '../services/weatherNotificationService';
+import LocationPermissionDisclosure from '../components/LocationPermissionDisclosure';
 
 const { width } = Dimensions.get('window');
 
@@ -110,6 +111,8 @@ export default function InfoScreen() {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [youtubeVideoTitles, setYoutubeVideoTitles] = useState<{ [key: string]: string }>({});
+  const [showLocationDisclosure, setShowLocationDisclosure] = useState(false);
+  const [hasShownDisclosure, setHasShownDisclosure] = useState(false);
 
   // Memoized filtered content items for different media types
   const imageItems = useMemo(() => contentItems.filter(item => item.type === 'image'), [contentItems]);
@@ -182,6 +185,15 @@ export default function InfoScreen() {
 
   const requestLocationAndWeather = async () => {
     try {
+      // Check if we've already shown the disclosure
+      const disclosureShown = await AsyncStorage.getItem('location_disclosure_shown');
+
+      // If disclosure hasn't been shown, show it first
+      if (!disclosureShown && !hasShownDisclosure) {
+        setShowLocationDisclosure(true);
+        return;
+      }
+
       // Request location permission
       const { status } = await Location.requestForegroundPermissionsAsync();
 
@@ -209,6 +221,24 @@ export default function InfoScreen() {
       console.error('Location error:', error);
       Alert.alert(t('error'), t('locationError'));
     }
+  };
+
+  const handleLocationDisclosureAccept = async () => {
+    setShowLocationDisclosure(false);
+    setHasShownDisclosure(true);
+    await AsyncStorage.setItem('location_disclosure_shown', 'true');
+
+    // Now request the actual permission
+    requestLocationAndWeather();
+  };
+
+  const handleLocationDisclosureDecline = () => {
+    setShowLocationDisclosure(false);
+    Alert.alert(
+      t('locationRequired'),
+      t('locationRequiredForFeatures'),
+      [{ text: t('ok') }]
+    );
   };
 
   const fetchWeatherData = async (latitude: number, longitude: number) => {
@@ -1266,6 +1296,13 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
         {selectedTab === 'guides' && renderGuidesContent()}
         {selectedTab === 'media' && renderMediaContent()}
       </ScrollView>
+
+      {/* Location Permission Disclosure Dialog */}
+      <LocationPermissionDisclosure
+        visible={showLocationDisclosure}
+        onAccept={handleLocationDisclosureAccept}
+        onDecline={handleLocationDisclosureDecline}
+      />
 
       {/* Fullscreen Image Viewer Modal with Zoom */}
       <Modal
