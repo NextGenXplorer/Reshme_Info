@@ -106,6 +106,7 @@ export default function InfoScreen() {
   const [aiRequestCooldown, setAiRequestCooldown] = useState<boolean>(false);
   const [weatherNotificationsEnabled, setWeatherNotificationsEnabled] = useState(false);
   const [aiCacheAge, setAiCacheAge] = useState<number | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
   const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
   const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
@@ -118,6 +119,31 @@ export default function InfoScreen() {
   const imageItems = useMemo(() => contentItems.filter(item => item.type === 'image'), [contentItems]);
   const videoItems = useMemo(() => contentItems.filter(item => item.type === 'video'), [contentItems]);
   const pdfItems = useMemo(() => contentItems.filter(item => item.type === 'pdf'), [contentItems]);
+
+  // Countdown timer for cooldown period
+  useEffect(() => {
+    if (cooldownSeconds > 0) {
+      const timer = setInterval(() => {
+        const now = Date.now();
+        const timeSinceLastRequest = now - lastAiRequestTime;
+        const COOLDOWN_PERIOD = 30000; // 30 seconds
+        const remainingSeconds = Math.ceil((COOLDOWN_PERIOD - timeSinceLastRequest) / 1000);
+
+        if (remainingSeconds <= 0) {
+          setCooldownSeconds(0);
+          setAiResponse(prev => ({ ...prev, error: null }));
+        } else {
+          setCooldownSeconds(remainingSeconds);
+          setAiResponse(prev => ({
+            ...prev,
+            error: t('pleaseWaitBeforeRetrying', { seconds: remainingSeconds })
+          }));
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [cooldownSeconds, lastAiRequestTime, t]);
 
   useEffect(() => {
     requestLocationAndWeather();
@@ -381,6 +407,7 @@ export default function InfoScreen() {
 
     if (timeSinceLastRequest < COOLDOWN_PERIOD) {
       const remainingSeconds = Math.ceil((COOLDOWN_PERIOD - timeSinceLastRequest) / 1000);
+      setCooldownSeconds(remainingSeconds); // Start countdown timer
       setAiResponse({
         suggestions: '',
         loading: false,
