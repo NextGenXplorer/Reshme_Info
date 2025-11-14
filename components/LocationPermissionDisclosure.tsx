@@ -43,7 +43,11 @@ export default function LocationPermissionDisclosure({
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <ScrollView style={styles.scrollView}>
+          <ScrollView
+            contentContainerStyle={styles.scrollViewContent}
+            showsVerticalScrollIndicator={true}
+            bounces={true}
+          >
             {/* Header */}
             <View style={styles.header}>
               <Ionicons name="location" size={48} color="#3B82F6" />
@@ -202,9 +206,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
+    overflow: 'hidden', // Ensure content doesn't overflow
   },
-  scrollView: {
+  scrollViewContent: {
     padding: isSmallScreen ? 16 : isMediumScreen ? 20 : 24,
+    flexGrow: 1, // Allow content to grow and be scrollable
   },
   header: {
     alignItems: 'center',
