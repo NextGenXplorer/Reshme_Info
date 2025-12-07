@@ -1,33 +1,38 @@
-name: 📦 Expo EAS Local Android Build
+name: 📦 Expo Android Build (AAB + APK — Safe)
 
 on:
   push:
     branches:
-      - main  # run when pushing to main branch
-  workflow_dispatch:  # allow manual trigger from GitHub
+      - main
+  workflow_dispatch:
 
 jobs:
-  build-android-local:
+  android-build:
     runs-on: ubuntu-latest
 
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_NO_VCS: 1
+      EAS_LOCAL_BUILD_SKIP_CLEANUP: 1
+
     steps:
-      - name: 🏗 Setup repository
+      - name: 🏗 Checkout repo
         uses: actions/checkout@v4
 
-      - name: 🧱 Setup Node.js
+      - name: 🧱 Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          
+          cache: npm
 
-      - name: 🧰 Setup EAS CLI
+      - name: 🧰 Setup Expo + EAS
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: 🧩 Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -35,25 +40,28 @@ jobs:
           api-level: 34
           build-tools: 34.0.0
 
-      - name: 🔐 Decode custom keystore
-        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > my-release-key.jks
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-
-      - name: 🏗️ Build Android AAB locally
+      # ✅ Play Store build → AAB
+      - name: 🏗 Build AAB (production)
         run: |
-          eas build --platform android --profile production --local --non-interactive
-        env:
-          EAS_NO_VCS: 1
-          EAS_LOCAL_BUILD_SKIP_CLEANUP: 1
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          ANDROID_KEYSTORE_PATH: my-release-key.jks
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          eas build \
+            --platform android \
+            --profile production \
+            --local \
+            --non-interactive
 
-      - name: 📤 Upload built AAB
+      # ✅ Installable APK → signed, universal
+      - name: 🏗 Build APK (preview)
+        run: |
+          eas build \
+            --platform android \
+            --profile preview \
+            --local \
+            --non-interactive
+
+      - name: 📤 Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: expo-android-aab
-          path: /home/runner/work/Reshme_Info/Reshme_Info/*.aab
+          name: android-builds
+          path: |
+            **/*.aab
+            **/*.apk
