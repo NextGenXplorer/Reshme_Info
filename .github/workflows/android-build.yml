@@ -1,74 +1,77 @@
-name: Build Android APK
+name: 📦 Expo EAS Android AAB → APK (Signed)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  android-build:
     runs-on: ubuntu-latest
-    env:
-      # Firebase Environment Variables
-      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
-      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-      EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-      EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
-
-      # Admin Credentials
-      EXPO_PUBLIC_ADMIN_USERNAME_1: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_1 }}
-      EXPO_PUBLIC_ADMIN_PASSWORD_1: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_1 }}
-      EXPO_PUBLIC_ADMIN_ROLE_1: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_1 }}
-      EXPO_PUBLIC_ADMIN_MARKET_1: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_1 }}
-
-      EXPO_PUBLIC_ADMIN_USERNAME_2: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_2 }}
-      EXPO_PUBLIC_ADMIN_PASSWORD_2: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_2 }}
-      EXPO_PUBLIC_ADMIN_ROLE_2: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_2 }}
-      EXPO_PUBLIC_ADMIN_MARKET_2: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_2 }}
-
-      EXPO_PUBLIC_ADMIN_USERNAME_3: ${{ secrets.EXPO_PUBLIC_ADMIN_USERNAME_3 }}
-      EXPO_PUBLIC_ADMIN_PASSWORD_3: ${{ secrets.EXPO_PUBLIC_ADMIN_PASSWORD_3 }}
-      EXPO_PUBLIC_ADMIN_ROLE_3: ${{ secrets.EXPO_PUBLIC_ADMIN_ROLE_3 }}
-      EXPO_PUBLIC_ADMIN_MARKET_3: ${{ secrets.EXPO_PUBLIC_ADMIN_MARKET_3 }}
-
-      # Backend URL
-      EXPO_PUBLIC_BACKEND_URL: ${{ secrets.EXPO_PUBLIC_BACKEND_URL }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: 🏗 Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: 🧱 Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      # Install new Expo CLI
-      - run: npm install -g expo
+      - name: 🧰 Setup Expo & EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
-      # Install dependencies
-      - run: npm install
+      - name: 📦 Install dependencies
+        run: npm install
 
-      # Verify environment variables are available
-      - name: Verify environment variables
+      - name: 🧩 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 🔐 Restore keystore from Base64
         run: |
-          echo "🔍 Checking environment variables..."
-          echo "Firebase API Key: ${EXPO_PUBLIC_FIREBASE_API_KEY:0:20}..."
-          echo "Project ID: $EXPO_PUBLIC_FIREBASE_PROJECT_ID"
-          echo "Admin Username 1: $EXPO_PUBLIC_ADMIN_USERNAME_1"
-          echo "✅ Environment variables are set"
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
 
-      # Run prebuild (Android only)
-      # app.config.js will read from process.env directly (no .env file needed)
-      - name: Run Expo prebuild
-        run: expo prebuild --platform android --clean
+      - name: 🏗️ Build Android AAB (local)
+        run: eas build --platform android --profile production --local --non-interactive
+        env:
+          EAS_NO_VCS: 1
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ANDROID_KEYSTORE_PATH: keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      # Build APK
-      - run: cd android && ./gradlew assembleRelease
+      - name: 📥 Download bundletool
+        run: |
+          curl -L -o bundletool.jar \
+          https://github.com/google/bundletool/releases/latest/download/bundletool-all.jar
 
-      # Upload APK artifact
-      - uses: actions/upload-artifact@v4
+      - name: 🔁 Convert AAB → SIGNED universal APK
+        run: |
+          AAB_PATH=$(find . -name "*.aab" | head -n 1)
+
+          java -jar bundletool.jar build-apks \
+            --bundle=$AAB_PATH \
+            --output=app.apks \
+            --mode=universal \
+            --ks=keystore.jks \
+            --ks-key-alias=${{ secrets.ANDROID_KEY_ALIAS }} \
+            --ks-pass=pass:${{ secrets.ANDROID_KEYSTORE_PASSWORD }} \
+            --key-pass=pass:${{ secrets.ANDROID_KEY_PASSWORD }}
+
+          unzip app.apks -d apk-output
+
+      - name: 📤 Upload AAB
+        uses: actions/upload-artifact@v4
         with:
-          name: app-release.apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: android-aab
+          path: "**/*.aab"
 
+      - name: 📤 Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: apk-output/universal.apk
