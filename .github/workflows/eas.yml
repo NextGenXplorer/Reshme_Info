@@ -3,8 +3,8 @@ name: 📦 Expo EAS Local Android Build
 on:
   push:
     branches:
-      - main  # run when pushing to main branch
-  workflow_dispatch:  # allow manual trigger from GitHub
+      - main
+  workflow_dispatch:
 
 jobs:
   build-android-local:
@@ -18,7 +18,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          
 
       - name: 🧰 Setup EAS CLI
         uses: expo/expo-github-action@v8
@@ -36,42 +35,36 @@ jobs:
           build-tools: 34.0.0
 
       - name: 🔐 Decode custom keystore
-        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > my-release-key.jks
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > my-release-key.jks
 
-      - name: 🏗️ Build Android AAB locally
-        run: |
-          eas build --platform android --profile production --local --non-interactive
+      - name: 🏗️ Build Android AAB (production)
+        run: eas build --platform android --profile production --local --non-interactive
         env:
           EAS_NO_VCS: 1
-          EAS_LOCAL_BUILD_SKIP_CLEANUP: 1
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           ANDROID_KEYSTORE_PATH: my-release-key.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-         
-     - name: 🏗️ Build Android APK locally
-       run: |
-         eas build --platform android --profile preview --local --non-interactive
-       env:
-         EAS_NO_VCS: 1
-         EAS_LOCAL_BUILD_SKIP_CLEANUP: 1
-         EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-         ANDROID_KEYSTORE_PATH: my-release-key.jks
-         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-         ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-         ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      - name: 🏗️ Build Android APK (preview)
+        run: eas build --platform android --profile preview --local --non-interactive
+        env:
+          EAS_NO_VCS: 1
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ANDROID_KEYSTORE_PATH: my-release-key.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: 📤 Upload built AAB
+      - name: 📤 Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: expo-android-aab
-          path: /home/runner/work/Reshme_Info/Reshme_Info/*.aab
-      - name: 📤 Upload built APK
+          name: android-aab
+          path: "**/*.aab"
+
+      - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: expo-android-apk
-          path: /home/runner/work/Reshme_Info/Reshme_Info/*.apk
+          name: android-apk
+          path: "**/*.apk"
