@@ -1,8 +1,9 @@
 import { PriceFormData } from '../types';
+import { callAIWithFallback, AIProvider, getProviderCount, getRateLimitStatus, initializeProviders } from './aiProviders';
 
-// Gemini AI Configuration - Using Admin-specific API key for data extraction
-const API_KEY = process.env.EXPO_PUBLIC_GEMINI_ADMIN_API_KEY || '';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent';
+// Re-export provider utilities for use in screens
+export { getProviderCount, getRateLimitStatus, initializeProviders } from './aiProviders';
+export type { AIProvider } from './aiProviders';
 
 export interface ExtractedMarketData {
   market: string;
@@ -36,19 +37,36 @@ export interface AIExtractionResult {
   priceEntries?: PriceFormData[];
   error?: string;
   rawResponse?: string;
+  provider?: AIProvider;
+  triedProviders?: AIProvider[];
+  isRateLimited?: boolean;
 }
 
 /**
- * Extract market data from Kannada or English text using Gemini AI
+ * Extract market data from Kannada or English text using AI (with multi-provider fallback)
  */
 export async function extractMarketDataWithAI(
-  inputText: string
+  inputText: string,
+  preferredProvider?: AIProvider
 ): Promise<AIExtractionResult> {
   try {
-    if (!API_KEY || API_KEY === 'your-gemini-api-key-here') {
+    // Check if any providers are available
+    const { total, available } = getProviderCount();
+    if (total === 0) {
       return {
         success: false,
-        error: 'Gemini Admin API key not configured. Please add EXPO_PUBLIC_GEMINI_ADMIN_API_KEY to your .env file.',
+        error: 'No AI providers configured. Please add at least one API key to your .env file:\n- EXPO_PUBLIC_GEMINI_ADMIN_API_KEY (Gemini)\n- EXPO_PUBLIC_GROQ_API_KEY (Groq)\n- EXPO_PUBLIC_OPENROUTER_API_KEY (OpenRouter)',
+      };
+    }
+
+    if (available === 0) {
+      const status = getRateLimitStatus();
+      const nextAvailable = status.reduce((min, s) =>
+        s.isLimited && s.remainingSeconds < min ? s.remainingSeconds : min, Infinity);
+      return {
+        success: false,
+        error: `All AI providers are rate limited. Try again in ${Math.ceil(nextAvailable)}s or add more API keys.`,
+        isRateLimited: true,
       };
     }
 
@@ -246,28 +264,20 @@ Extract the following information and return ONLY a valid JSON object (no markdo
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
 
-    // Call Gemini API directly using REST
-    const response = await fetch(`${GEMINI_API_URL}?key=${API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }]
-      })
-    });
+    // Call AI with automatic fallback between providers
+    const aiResponse = await callAIWithFallback(prompt, preferredProvider);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Gemini API Error: ${errorData.error?.message || 'Unknown error'}`);
+    if (!aiResponse.success) {
+      return {
+        success: false,
+        error: aiResponse.error || 'AI extraction failed',
+        provider: aiResponse.provider,
+        triedProviders: aiResponse.triedProviders,
+        isRateLimited: aiResponse.isRateLimited,
+      };
     }
 
-    const data = await response.json();
-    const text = data.candidates[0]?.content?.parts[0]?.text;
+    const text = aiResponse.content!;
 
     // Clean up response - remove markdown code blocks if present
     let cleanedText = text.trim();
@@ -329,6 +339,8 @@ Extract the following information and return ONLY a valid JSON object (no markdo
       data: extractedData,
       priceEntries,
       rawResponse: text,
+      provider: aiResponse.provider,
+      triedProviders: aiResponse.triedProviders,
     };
   } catch (error) {
     console.error('AI extraction error:', error);

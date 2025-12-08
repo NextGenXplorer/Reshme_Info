@@ -99,6 +99,18 @@ module.exports = {
       EXPO_PUBLIC_ADMIN_ROLE_3: process.env.EXPO_PUBLIC_ADMIN_ROLE_3,
       EXPO_PUBLIC_ADMIN_MARKET_3: process.env.EXPO_PUBLIC_ADMIN_MARKET_3,
 
+      // Backend URL
+      EXPO_PUBLIC_BACKEND_URL: process.env.EXPO_PUBLIC_BACKEND_URL,
+
+      // AI Provider API Keys (Multi-Provider System)
+      // Gemini - Primary provider for Kannada text extraction
+      EXPO_PUBLIC_GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY,
+      EXPO_PUBLIC_GEMINI_ADMIN_API_KEY: process.env.EXPO_PUBLIC_GEMINI_ADMIN_API_KEY,
+      // Groq - Fast fallback provider
+      EXPO_PUBLIC_GROQ_API_KEY: process.env.EXPO_PUBLIC_GROQ_API_KEY,
+      // OpenRouter - Backup provider with multiple model access
+      EXPO_PUBLIC_OPENROUTER_API_KEY: process.env.EXPO_PUBLIC_OPENROUTER_API_KEY,
+
       // EAS Project ID (required for dynamic configs)
       eas: {
         projectId: "2cb9f6e5-78a4-478c-a133-7c87876c655c"

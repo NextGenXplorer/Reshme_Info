@@ -421,7 +421,7 @@ export default function InfoScreen() {
     setAiRequestCooldown(true);
 
     try {
-      const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
+      const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY || '';
 
       if (!apiKey) {
         setAiResponse({
@@ -457,30 +457,39 @@ Please provide:
 
 Keep the response concise, practical, and actionable for farmers. Remember to respond in ${isKannada ? 'Kannada (ಕನ್ನಡ)' : 'English'}.`;
 
-      // Use the same working API as aiExtraction.ts
-      const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent';
+      // Use Groq API
+      const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-      const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      const response = await fetch(GROQ_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
+          model: 'openai/gpt-oss-20b',
+          messages: [{
+            role: 'user',
+            content: prompt
+          }],
+          temperature: 1,
+          max_tokens: 8192,
+          top_p: 1,
+          stream: false,
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`Gemini API Error: ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Groq API Error: ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      const text = data.candidates[0]?.content?.parts[0]?.text;
+      const text = data.choices[0]?.message?.content;
+
+      if (!text) {
+        throw new Error('No response from AI');
+      }
 
       // Save to cache
       await saveAIResponseToCache(language, text, weatherData);
@@ -499,7 +508,7 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
         setAiRequestCooldown(false);
       }, COOLDOWN_PERIOD);
     } catch (error) {
-      console.error('Gemini AI error:', error);
+      console.error('Groq AI error:', error);
 
       // Check if it's a rate limit error (429)
       const errorMessage = error instanceof Error ? error.message : '';
@@ -1006,6 +1015,41 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
     }
   };
 
+  // Clean AI response from HTML tags and format properly
+  const cleanAIResponse = (text: string): string => {
+    if (!text) return '';
+
+    let cleaned = text;
+
+    // Remove HTML tags but preserve content
+    cleaned = cleaned.replace(/<br\s*\/?>/gi, '\n'); // Convert <br> to newlines
+    cleaned = cleaned.replace(/<\/p>/gi, '\n\n'); // Convert </p> to double newlines
+    cleaned = cleaned.replace(/<p>/gi, ''); // Remove <p> tags
+    cleaned = cleaned.replace(/<strong>(.*?)<\/strong>/gi, '**$1**'); // Convert <strong> to markdown bold
+    cleaned = cleaned.replace(/<b>(.*?)<\/b>/gi, '**$1**'); // Convert <b> to markdown bold
+    cleaned = cleaned.replace(/<em>(.*?)<\/em>/gi, '*$1*'); // Convert <em> to markdown italic
+    cleaned = cleaned.replace(/<i>(.*?)<\/i>/gi, '*$1*'); // Convert <i> to markdown italic
+    cleaned = cleaned.replace(/<u>(.*?)<\/u>/gi, '$1'); // Remove underline tags
+    cleaned = cleaned.replace(/<h1>(.*?)<\/h1>/gi, '# $1\n'); // Convert h1 to markdown
+    cleaned = cleaned.replace(/<h2>(.*?)<\/h2>/gi, '## $1\n'); // Convert h2 to markdown
+    cleaned = cleaned.replace(/<h3>(.*?)<\/h3>/gi, '### $1\n'); // Convert h3 to markdown
+    cleaned = cleaned.replace(/<h4>(.*?)<\/h4>/gi, '#### $1\n'); // Convert h4 to markdown
+    cleaned = cleaned.replace(/<li>(.*?)<\/li>/gi, '- $1\n'); // Convert li to markdown list
+    cleaned = cleaned.replace(/<ul>/gi, '\n'); // Remove ul tags
+    cleaned = cleaned.replace(/<\/ul>/gi, '\n'); // Remove ul tags
+    cleaned = cleaned.replace(/<ol>/gi, '\n'); // Remove ol tags
+    cleaned = cleaned.replace(/<\/ol>/gi, '\n'); // Remove ol tags
+    cleaned = cleaned.replace(/<[^>]+>/g, ''); // Remove any remaining HTML tags
+
+    // Clean up excessive newlines
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+    // Trim whitespace
+    cleaned = cleaned.trim();
+
+    return cleaned;
+  };
+
   // Render AI Suggestions Tab Content
   const renderAISuggestions = () => (
     <View style={styles.tabContent}>
@@ -1048,7 +1092,7 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
         ) : aiResponse.suggestions ? (
           <View style={styles.cardContent}>
             <Markdown style={markdownStyles}>
-              {aiResponse.suggestions}
+              {cleanAIResponse(aiResponse.suggestions)}
             </Markdown>
           </View>
         ) : (
@@ -2027,20 +2071,27 @@ const markdownStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#111827',
-    marginTop: 8,
+    marginTop: 12,
     marginBottom: 8,
   },
   heading2: {
     fontSize: 16,
     fontWeight: '700',
     color: '#111827',
-    marginTop: 8,
+    marginTop: 10,
     marginBottom: 6,
   },
   heading3: {
     fontSize: 15,
     fontWeight: '600',
     color: '#374151',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  heading4: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4B5563',
     marginTop: 6,
     marginBottom: 4,
   },
@@ -2048,7 +2099,7 @@ const markdownStyles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     color: '#374151',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   strong: {
     fontWeight: '700',
@@ -2059,16 +2110,31 @@ const markdownStyles = StyleSheet.create({
     color: '#4B5563',
   },
   bullet_list: {
-    marginBottom: 8,
+    marginBottom: 10,
+    marginTop: 4,
   },
   ordered_list: {
-    marginBottom: 8,
+    marginBottom: 10,
+    marginTop: 4,
   },
   list_item: {
     fontSize: 14,
     lineHeight: 22,
     color: '#374151',
-    marginBottom: 4,
+    marginBottom: 6,
+    marginLeft: 4,
+  },
+  bullet_list_icon: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#8B5CF6',
+    marginRight: 8,
+  },
+  ordered_list_icon: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#8B5CF6',
+    marginRight: 8,
   },
   code_inline: {
     backgroundColor: '#F3F4F6',

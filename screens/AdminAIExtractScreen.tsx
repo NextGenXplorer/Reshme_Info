@@ -16,7 +16,14 @@ import { useTranslation } from 'react-i18next';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
 import { AdminUser, PriceFormData } from '../types';
-import { extractMarketDataWithAI, ExtractedMarketData, validateExtractedData } from '../utils/aiExtraction';
+import {
+  extractMarketDataWithAI,
+  ExtractedMarketData,
+  validateExtractedData,
+  getProviderCount,
+  getRateLimitStatus,
+  AIProvider
+} from '../utils/aiExtraction';
 import { adminAuth } from '../utils/adminAuth';
 import Header from '../components/Header';
 
@@ -33,6 +40,18 @@ export default function AdminAIExtractScreen({ user, onBack }: AdminAIExtractScr
   const [priceEntries, setPriceEntries] = useState<PriceFormData[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [usedProvider, setUsedProvider] = useState<AIProvider | null>(null);
+  const [triedProviders, setTriedProviders] = useState<AIProvider[]>([]);
+  const [providerStatus, setProviderStatus] = useState<{ total: number; available: number }>({ total: 0, available: 0 });
+
+  // Update provider status on mount and after extraction
+  React.useEffect(() => {
+    updateProviderStatus();
+  }, []);
+
+  const updateProviderStatus = () => {
+    setProviderStatus(getProviderCount());
+  };
 
   const handleExtract = async () => {
     if (!inputText.trim()) {
@@ -41,11 +60,22 @@ export default function AdminAIExtractScreen({ user, onBack }: AdminAIExtractScr
     }
 
     setLoading(true);
+    setUsedProvider(null);
+    setTriedProviders([]);
+
     try {
       const result = await extractMarketDataWithAI(inputText);
 
+      // Update provider info
+      if (result.provider) setUsedProvider(result.provider);
+      if (result.triedProviders) setTriedProviders(result.triedProviders);
+      updateProviderStatus();
+
       if (!result.success) {
-        Alert.alert('Extraction Failed', result.error || 'Failed to extract data');
+        const errorMsg = result.isRateLimited
+          ? `${result.error}\n\nTried providers: ${result.triedProviders?.join(', ') || 'none'}`
+          : result.error || 'Failed to extract data';
+        Alert.alert('Extraction Failed', errorMsg);
         return;
       }
 
@@ -428,6 +458,63 @@ export default function AdminAIExtractScreen({ user, onBack }: AdminAIExtractScr
             </Text>
           </View>
 
+          {/* AI Provider Status */}
+          <View style={styles.providerStatusCard}>
+            <View style={styles.providerStatusHeader}>
+              <Ionicons name="hardware-chip" size={20} color="#8B5CF6" />
+              <Text style={styles.providerStatusTitle}>AI Providers</Text>
+              <View style={[
+                styles.providerCountBadge,
+                { backgroundColor: providerStatus.available > 0 ? '#10B98120' : '#EF444420' }
+              ]}>
+                <Text style={[
+                  styles.providerCountText,
+                  { color: providerStatus.available > 0 ? '#10B981' : '#EF4444' }
+                ]}>
+                  {providerStatus.available}/{providerStatus.total} available
+                </Text>
+              </View>
+            </View>
+            <View style={styles.providerList}>
+              {['gemini', 'groq', 'openrouter'].map((provider) => {
+                const status = getRateLimitStatus().find(s => s.provider === provider);
+                const isConfigured = providerStatus.total > 0 && status !== undefined;
+                const isLimited = status?.isLimited || false;
+                const isUsed = usedProvider === provider;
+
+                return (
+                  <View key={provider} style={[
+                    styles.providerChip,
+                    isUsed && styles.providerChipUsed,
+                    isLimited && styles.providerChipLimited,
+                    !isConfigured && styles.providerChipDisabled,
+                  ]}>
+                    <Ionicons
+                      name={isUsed ? 'checkmark-circle' : isLimited ? 'time' : isConfigured ? 'ellipse' : 'ellipse-outline'}
+                      size={14}
+                      color={isUsed ? '#10B981' : isLimited ? '#F59E0B' : isConfigured ? '#6B7280' : '#D1D5DB'}
+                    />
+                    <Text style={[
+                      styles.providerChipText,
+                      isUsed && styles.providerChipTextUsed,
+                      isLimited && styles.providerChipTextLimited,
+                      !isConfigured && styles.providerChipTextDisabled,
+                    ]}>
+                      {provider === 'gemini' ? 'Gemini' : provider === 'groq' ? 'Groq' : 'OpenRouter'}
+                      {isLimited && status?.remainingSeconds ? ` (${Math.ceil(status.remainingSeconds)}s)` : ''}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+            {usedProvider && (
+              <Text style={styles.usedProviderText}>
+                Last extraction: {usedProvider === 'gemini' ? 'Gemini' : usedProvider === 'groq' ? 'Groq' : 'OpenRouter'}
+                {triedProviders.length > 1 && ` (tried ${triedProviders.length} providers)`}
+              </Text>
+            )}
+          </View>
+
           {/* Input Area */}
           {!showPreview ? (
             <>
@@ -577,6 +664,86 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1E40AF',
     lineHeight: 22,
+  },
+
+  // Provider Status
+  providerStatusCard: {
+    backgroundColor: '#F5F3FF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  providerStatusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  providerStatusTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6D28D9',
+    flex: 1,
+  },
+  providerCountBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  providerCountText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  providerList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  providerChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  providerChipUsed: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
+  },
+  providerChipLimited: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#F59E0B',
+  },
+  providerChipDisabled: {
+    backgroundColor: '#F9FAFB',
+    borderColor: '#E5E7EB',
+  },
+  providerChipText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  providerChipTextUsed: {
+    color: '#059669',
+    fontWeight: '600',
+  },
+  providerChipTextLimited: {
+    color: '#D97706',
+  },
+  providerChipTextDisabled: {
+    color: '#9CA3AF',
+  },
+  usedProviderText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 10,
+    fontStyle: 'italic',
   },
 
   // Input
