@@ -46,8 +46,10 @@ jobs:
 
       - name: 📥 Download bundletool
         run: |
-          curl -L -o bundletool.jar \
-          https://github.com/google/bundletool/releases/latest/download/bundletool-all.jar
+          BUNDLETOOL_VERSION=$(curl -s https://api.github.com/repos/google/bundletool/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+          curl -L -o bundletool.jar "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          echo "Downloaded bundletool version: ${BUNDLETOOL_VERSION}"
+          ls -la bundletool.jar
 
       - name: 🔁 Convert AAB → SIGNED universal APK
         run: |
