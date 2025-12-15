@@ -1,8 +1,19 @@
-// Load environment variables from .env file (for local development)
-// In EAS Build, environment variables are already in process.env (no .env file needed)
-if (process.env.EAS_BUILD !== 'true') {
+// Load environment variables from .env file
+// Try to load dotenv for both local development and EAS local builds
+try {
   require('dotenv').config();
+  console.log('✅ dotenv loaded successfully');
+} catch (e) {
+  console.log('ℹ️ dotenv not available, using process.env directly');
 }
+
+// Debug: Log admin credentials availability (without exposing values)
+console.log('🔍 Admin credentials check:', {
+  username1: !!process.env.EXPO_PUBLIC_ADMIN_USERNAME_1,
+  password1: !!process.env.EXPO_PUBLIC_ADMIN_PASSWORD_1,
+  role1: !!process.env.EXPO_PUBLIC_ADMIN_ROLE_1,
+  market1: !!process.env.EXPO_PUBLIC_ADMIN_MARKET_1,
+});
 
 module.exports = {
   expo: {
