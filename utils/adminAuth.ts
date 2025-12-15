@@ -10,18 +10,49 @@ interface AdminCredentials {
   market: string;
 }
 
+// Direct access to environment variables (same approach as firebase.config.ts)
+// These are inlined by Metro at build time for EXPO_PUBLIC_* variables
+const ENV = {
+  ADMIN_USERNAME_1: process.env.EXPO_PUBLIC_ADMIN_USERNAME_1,
+  ADMIN_PASSWORD_1: process.env.EXPO_PUBLIC_ADMIN_PASSWORD_1,
+  ADMIN_ROLE_1: process.env.EXPO_PUBLIC_ADMIN_ROLE_1,
+  ADMIN_MARKET_1: process.env.EXPO_PUBLIC_ADMIN_MARKET_1,
+  ADMIN_USERNAME_2: process.env.EXPO_PUBLIC_ADMIN_USERNAME_2,
+  ADMIN_PASSWORD_2: process.env.EXPO_PUBLIC_ADMIN_PASSWORD_2,
+  ADMIN_ROLE_2: process.env.EXPO_PUBLIC_ADMIN_ROLE_2,
+  ADMIN_MARKET_2: process.env.EXPO_PUBLIC_ADMIN_MARKET_2,
+  ADMIN_USERNAME_3: process.env.EXPO_PUBLIC_ADMIN_USERNAME_3,
+  ADMIN_PASSWORD_3: process.env.EXPO_PUBLIC_ADMIN_PASSWORD_3,
+  ADMIN_ROLE_3: process.env.EXPO_PUBLIC_ADMIN_ROLE_3,
+  ADMIN_MARKET_3: process.env.EXPO_PUBLIC_ADMIN_MARKET_3,
+  ADMIN_USERNAME_4: process.env.EXPO_PUBLIC_ADMIN_USERNAME_4,
+  ADMIN_PASSWORD_4: process.env.EXPO_PUBLIC_ADMIN_PASSWORD_4,
+  ADMIN_ROLE_4: process.env.EXPO_PUBLIC_ADMIN_ROLE_4,
+  ADMIN_MARKET_4: process.env.EXPO_PUBLIC_ADMIN_MARKET_4,
+  ADMIN_USERNAME_5: process.env.EXPO_PUBLIC_ADMIN_USERNAME_5,
+  ADMIN_PASSWORD_5: process.env.EXPO_PUBLIC_ADMIN_PASSWORD_5,
+  ADMIN_ROLE_5: process.env.EXPO_PUBLIC_ADMIN_ROLE_5,
+  ADMIN_MARKET_5: process.env.EXPO_PUBLIC_ADMIN_MARKET_5,
+};
+
 // Load admin credentials ONLY from environment variables
 const getAdminCredentials = (): AdminCredentials[] => {
   const envCredentials: AdminCredentials[] = [];
+
+  // Fallback to Constants.expoConfig.extra if process.env doesn't work
   const expoExtra = Constants.expoConfig?.extra || {};
 
   // --- DIAGNOSTIC LOG ---
-  // This will print all the environment variables the app can see.
-  // Helps to debug issues with .env file loading.
-  console.log(
-    '--- DIAGNOSTIC: Expo Extra Config ---',
-    JSON.stringify(Constants.expoConfig?.extra, null, 2)
-  );
+  console.log('--- DIAGNOSTIC: Direct ENV check ---', {
+    username1: !!ENV.ADMIN_USERNAME_1,
+    password1: !!ENV.ADMIN_PASSWORD_1,
+    role1: ENV.ADMIN_ROLE_1,
+    market1: ENV.ADMIN_MARKET_1,
+  });
+  console.log('--- DIAGNOSTIC: Expo Extra Config ---', {
+    username1: !!expoExtra.EXPO_PUBLIC_ADMIN_USERNAME_1,
+    password1: !!expoExtra.EXPO_PUBLIC_ADMIN_PASSWORD_1,
+  });
 
   // List of known insecure default passwords
   const insecurePasswords = [
@@ -33,11 +64,13 @@ const getAdminCredentials = (): AdminCredentials[] => {
   ];
 
   // Load all admin credentials from environment variables
-  for (let i = 1; i <= 10; i++) {
-    const username = expoExtra[`EXPO_PUBLIC_ADMIN_USERNAME_${i}`];
-    const password = expoExtra[`EXPO_PUBLIC_ADMIN_PASSWORD_${i}`];
-    const role = expoExtra[`EXPO_PUBLIC_ADMIN_ROLE_${i}`] as 'super_admin' | 'market_admin';
-    const market = expoExtra[`EXPO_PUBLIC_ADMIN_MARKET_${i}`];
+  // Try direct process.env first (like Firebase does), fallback to Constants.extra
+  for (let i = 1; i <= 5; i++) {
+    const envKey = `ADMIN_USERNAME_${i}` as keyof typeof ENV;
+    const username = ENV[envKey] || expoExtra[`EXPO_PUBLIC_ADMIN_USERNAME_${i}`];
+    const password = ENV[`ADMIN_PASSWORD_${i}` as keyof typeof ENV] || expoExtra[`EXPO_PUBLIC_ADMIN_PASSWORD_${i}`];
+    const role = (ENV[`ADMIN_ROLE_${i}` as keyof typeof ENV] || expoExtra[`EXPO_PUBLIC_ADMIN_ROLE_${i}`]) as 'super_admin' | 'market_admin';
+    const market = ENV[`ADMIN_MARKET_${i}` as keyof typeof ENV] || expoExtra[`EXPO_PUBLIC_ADMIN_MARKET_${i}`];
 
     if (username && password && role && market) {
       envCredentials.push({ username, password, role, market });
