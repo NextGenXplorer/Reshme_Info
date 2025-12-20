@@ -24,7 +24,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
 import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS, CachedData } from '../utils/cacheUtils';
-import { useBannerAd, BannerAd, BannerAdSize } from '../hooks/useBannerAd';
 
 export default function MarketScreen() {
   const { t, i18n } = useTranslation();
@@ -41,9 +40,6 @@ export default function MarketScreen() {
   const [isOffline, setIsOffline] = useState(false);
   const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
   const [playingId, setPlayingId] = useState<string | null>(null);
-
-  // Banner Ad
-  const { adUnitId, onAdLoaded, onAdFailedToLoad } = useBannerAd();
 
   const animatedValues = useRef<Animated.Value[]>([]).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -606,19 +602,6 @@ export default function MarketScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Banner Ad at bottom */}
-      <View style={styles.bannerAdContainer}>
-        <BannerAd
-          unitId={adUnitId}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{
-            requestNonPersonalizedAdsOnly: true,
-          }}
-          onAdLoaded={onAdLoaded}
-          onAdFailedToLoad={onAdFailedToLoad}
-        />
-      </View>
-
       {/* Date Picker Modal */}
       {showDatePicker && (
         <DateTimePicker
@@ -638,11 +621,6 @@ const styles = StyleSheet.create({
   ultraModernContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-  bannerAdContainer: {
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 4,
   },
 
   // Loading Screen
