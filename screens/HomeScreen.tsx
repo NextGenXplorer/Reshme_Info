@@ -1,145 +1,372 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-  Alert,
-  Animated,
-  Easing,
-  ScrollView,
-  Image,
-  Platform,
   SafeAreaView,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  Modal,
+  Dimensions,
+  ActivityIndicator,
+  RefreshControl,
+  Linking,
+  ScrollView,
 } from 'react-native';
-import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import NetInfo from '@react-native-community/netinfo';
-import * as Speech from 'expo-speech';
-import { db, COLLECTIONS } from '../firebase.config';
-import { CocoonPrice } from '../types';
-import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
+import { db } from '../firebase.config';
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import Header from '../components/Header';
-import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS, CachedData } from '../utils/cacheUtils';
+import { callAIWithFallback } from '../utils/aiProviders';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Content item interface matching admin panel structure
+interface ContentItem {
+  id: string;
+  type: 'image' | 'pdf' | 'video' | 'basicInfo';
+  title: string;
+  titleKn?: string;
+  url?: string;
+  description?: string;
+  descriptionKn?: string;
+  order: number;
+  active: boolean;
+  createdAt: any;
+  updatedAt: any;
+  // YouTube metadata (fetched automatically)
+  youtubeThumbnail?: string;
+  youtubeTitle?: string;
+}
+
+// Extract YouTube video ID from various URL formats
+const extractYouTubeVideoId = (url: string): string | null => {
+  if (!url) return null;
+
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^&\n?#]+)/,
+    /youtube\.com\/shorts\/([^&\n?#]+)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return null;
+};
+
+// Check if URL is a YouTube link
+const isYouTubeUrl = (url: string): boolean => {
+  if (!url) return false;
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+// Get YouTube thumbnail URL
+const getYouTubeThumbnail = (videoId: string): string => {
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+};
+
+// Convert Google Drive/Photos links to direct image URLs
+const getDirectImageUrl = (url: string): string => {
+  if (!url) return url;
+
+  console.log('🖼️ Processing image URL:', url);
+
+  // Google Drive file link: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+  const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+  if (driveFileMatch) {
+    const directUrl = `https://drive.google.com/uc?export=view&id=${driveFileMatch[1]}`;
+    console.log('🖼️ Converted to Drive direct URL:', directUrl);
+    return directUrl;
+  }
+
+  // Google Drive open link: https://drive.google.com/open?id=FILE_ID
+  const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (driveOpenMatch) {
+    const directUrl = `https://drive.google.com/uc?export=view&id=${driveOpenMatch[1]}`;
+    console.log('🖼️ Converted to Drive direct URL:', directUrl);
+    return directUrl;
+  }
+
+  // Google Drive uc link (already direct): https://drive.google.com/uc?export=view&id=FILE_ID
+  if (url.includes('drive.google.com/uc')) {
+    return url;
+  }
+
+  // Google Drive thumbnail link: https://drive.google.com/thumbnail?id=FILE_ID
+  const driveThumbnailMatch = url.match(/drive\.google\.com\/thumbnail\?id=([^&]+)/);
+  if (driveThumbnailMatch) {
+    const directUrl = `https://drive.google.com/uc?export=view&id=${driveThumbnailMatch[1]}`;
+    console.log('🖼️ Converted thumbnail to direct URL:', directUrl);
+    return directUrl;
+  }
+
+  // Google Photos share link
+  if (url.includes('photos.google.com') || url.includes('photos.app.goo.gl')) {
+    console.log('⚠️ Google Photos links may not display directly. Use a direct image URL.');
+    return url;
+  }
+
+  // lh3.googleusercontent.com - direct Google image URL (works directly)
+  if (url.includes('lh3.googleusercontent.com') || url.includes('googleusercontent.com')) {
+    return url;
+  }
+
+  return url;
+};
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
-  const [prices, setPrices] = useState<CocoonPrice[]>([]);
-  const [filteredPrices, setFilteredPrices] = useState<CocoonPrice[]>([]);
-  const [selectedBreed, setSelectedBreed] = useState<string>('all');
-  const [selectedMarket, setSelectedMarket] = useState<string>('all');
+  const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
-  const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [imageLoading, setImageLoading] = useState<{ [key: string]: boolean }>({});
+  const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
+  const [youtubeMetadata, setYoutubeMetadata] = useState<{ [key: string]: { title: string; titleKn: string; thumbnail: string } }>({});
+  const [translations, setTranslations] = useState<{ [key: string]: { titleTranslated: string; descriptionTranslated: string; isTranslating: boolean; fromLang: string; toLang: string } }>({});
 
-  const animatedValues = useRef<Animated.Value[]>([]).current;
-  const slideAnimation = useRef(new Animated.Value(0)).current;
+  const isKannada = i18n.language === 'kn';
 
-  const breeds = ['all', 'CB', 'BV'];
-  const markets = ['all', 'Ramanagara', 'Kollegala', 'Kanakapura', 'Siddalagatta', 'Kolar'];
+  // Detect if text is in Kannada (uses Kannada Unicode range)
+  const isKannadaText = (text: string): boolean => {
+    if (!text || text.trim().length === 0) return false;
 
-  const fetchPrices = async (dateFilter?: Date) => {
+    // Kannada Unicode range: \u0C80-\u0CFF
+    const kannadaChars = (text.match(/[\u0C80-\u0CFF]/g) || []).length;
+    // English/Latin characters: a-z, A-Z
+    const englishChars = (text.match(/[a-zA-Z]/g) || []).length;
+
+    // If there are any Kannada characters and more Kannada than English, it's Kannada
+    if (kannadaChars > 0 && kannadaChars >= englishChars) {
+      return true;
+    }
+
+    // If no Kannada characters at all, it's not Kannada
+    if (kannadaChars === 0) {
+      return false;
+    }
+
+    // Mixed text - if at least 20% is Kannada, consider it Kannada
+    const totalLetters = kannadaChars + englishChars;
+    return totalLetters > 0 && (kannadaChars / totalLetters) >= 0.2;
+  };
+
+  // Detect source language for translation
+  const detectSourceLanguage = (text: string): 'en' | 'kn' => {
+    return isKannadaText(text) ? 'kn' : 'en';
+  };
+
+  // Translate text using Groq with fallback (auto-detect direction)
+  const translateText = async (text: string, type: 'title' | 'description' = 'title'): Promise<{ translated: string; fromLang: string; toLang: string }> => {
     try {
-      // Check internet connectivity first
-      const netState = await NetInfo.fetch();
+      if (!text || text.trim().length === 0) return { translated: '', fromLang: '', toLang: '' };
 
-      if (!netState.isConnected) {
-        // Load from cache when offline
-        const cachedData = await loadFromCache(CACHE_KEYS.HOME_PRICES);
+      const sourceIsKannada = isKannadaText(text);
+      const targetLang = sourceIsKannada ? 'English' : 'Kannada';
+      const fromLang = sourceIsKannada ? 'kn' : 'en';
+      const toLang = sourceIsKannada ? 'en' : 'kn';
 
-        if (cachedData && cachedData.data.length > 0) {
-          setPrices(cachedData.data);
-          setIsOffline(true);
-          setCacheTimestamp(getCacheAge(cachedData));
-        } else {
-          // No cache available
-          Alert.alert(t('noInternet'), t('noInternetMessage'));
-        }
+      const prompt = type === 'title'
+        ? `Translate the following title to ${targetLang} language. Only return the translated text, nothing else:\n\n"${text}"`
+        : `Translate the following description to ${targetLang} language. Keep it natural and easy to read. Only return the translated text, nothing else:\n\n"${text}"`;
 
-        setLoading(false);
-        setRefreshing(false);
-        return;
+      const response = await callAIWithFallback(prompt, 'groq');
+
+      if (response.success && response.content) {
+        // Clean up the response - remove quotes if present
+        return {
+          translated: response.content.trim().replace(/^["']|["']$/g, ''),
+          fromLang,
+          toLang
+        };
       }
+      return { translated: '', fromLang: '', toLang: '' };
+    } catch (error) {
+      console.log('Translation error:', error);
+      return { translated: '', fromLang: '', toLang: '' };
+    }
+  };
 
-      // Online - fetch from Firebase
-      setIsOffline(false);
+  // Translate content item (title and description) - bidirectional
+  const translateContent = async (item: ContentItem) => {
+    // Skip if nothing to translate
+    if (!item.title && !item.description) return;
 
-      let q;
+    // Check if already translated - proper check for items with only title or only description
+    const existing = translations[item.id];
+    if (existing && !existing.isTranslating) {
+      const titleDone = !item.title || existing.titleTranslated;
+      const descDone = !item.description || existing.descriptionTranslated;
+      if (titleDone && descDone) return;
+    }
 
-      if (dateFilter) {
-        const startOfDay = new Date(dateFilter);
-        startOfDay.setHours(0, 0, 0, 0);
+    console.log('📝 Translating content:', item.id, 'Title:', item.title?.substring(0, 30), 'Desc:', item.description?.substring(0, 30));
 
-        const endOfDay = new Date(dateFilter);
-        endOfDay.setHours(23, 59, 59, 999);
+    // Mark as translating
+    setTranslations(prev => ({
+      ...prev,
+      [item.id]: { titleTranslated: '', descriptionTranslated: '', isTranslating: true, fromLang: '', toLang: '' }
+    }));
 
-        q = query(
-          collection(db, COLLECTIONS.COCOON_PRICES),
-          where('lastUpdated', '>=', Timestamp.fromDate(startOfDay)),
-          where('lastUpdated', '<=', Timestamp.fromDate(endOfDay)),
-          orderBy('lastUpdated', 'desc')
-        );
+    try {
+      // Always translate both title and description if they exist
+      const [titleResult, descResult] = await Promise.all([
+        item.title ? translateText(item.title, 'title') : Promise.resolve({ translated: '', fromLang: '', toLang: '' }),
+        item.description ? translateText(item.description, 'description') : Promise.resolve({ translated: '', fromLang: '', toLang: '' })
+      ]);
+
+      console.log('✅ Translation done:', item.id, 'Title:', titleResult.translated?.substring(0, 30), 'Desc:', descResult.translated?.substring(0, 30));
+
+      setTranslations(prev => ({
+        ...prev,
+        [item.id]: {
+          titleTranslated: titleResult.translated || '',
+          descriptionTranslated: descResult.translated || '',
+          isTranslating: false,
+          fromLang: titleResult.fromLang || descResult.fromLang || '',
+          toLang: titleResult.toLang || descResult.toLang || ''
+        }
+      }));
+    } catch (error) {
+      console.log('❌ Content translation error:', error);
+      setTranslations(prev => ({
+        ...prev,
+        [item.id]: { ...prev[item.id], isTranslating: false }
+      }));
+    }
+  };
+
+  // Translate YouTube title to Kannada (always English to Kannada for YouTube)
+  const translateYouTubeTitle = async (title: string): Promise<string> => {
+    try {
+      if (!title) return '';
+
+      const prompt = `Translate the following YouTube video title to Kannada language. Only return the translated text, nothing else:\n\n"${title}"`;
+      const response = await callAIWithFallback(prompt, 'groq');
+
+      if (response.success && response.content) {
+        return response.content.trim().replace(/^["']|["']$/g, '');
+      }
+      return '';
+    } catch (error) {
+      console.log('YouTube title translation error:', error);
+      return '';
+    }
+  };
+
+  // Fetch YouTube metadata using oEmbed API
+  const fetchYouTubeMetadata = async (url: string, itemId: string) => {
+    try {
+      const videoId = extractYouTubeVideoId(url);
+      if (!videoId) return;
+
+      // Use oEmbed API (no API key required)
+      const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+      const response = await fetch(oEmbedUrl);
+
+      if (response.ok) {
+        const data = await response.json();
+        const englishTitle = data.title || '';
+
+        // Set initial metadata with English title
+        setYoutubeMetadata(prev => ({
+          ...prev,
+          [itemId]: {
+            title: englishTitle,
+            titleKn: '', // Will be filled after translation
+            thumbnail: getYouTubeThumbnail(videoId),
+          }
+        }));
+
+        // Translate title to Kannada using Groq
+        if (englishTitle) {
+          const kannadaTitle = await translateYouTubeTitle(englishTitle);
+          if (kannadaTitle) {
+            setYoutubeMetadata(prev => ({
+              ...prev,
+              [itemId]: {
+                ...prev[itemId],
+                titleKn: kannadaTitle,
+              }
+            }));
+          }
+        }
       } else {
-        q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
-      }
-
-      const querySnapshot = await getDocs(q);
-      const pricesData: CocoonPrice[] = [];
-      const now = new Date();
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const expiresAt = data.expiresAt ? data.expiresAt.toDate() : null;
-
-        // Only add non-expired data
-        if (!expiresAt || expiresAt > now) {
-          pricesData.push({
-            id: doc.id,
-            ...data,
-            lastUpdated: data.lastUpdated.toDate(),
-            expiresAt: expiresAt,
-          } as CocoonPrice);
-        }
-      });
-
-      setPrices(pricesData);
-
-      // Save to cache
-      await saveToCache(CACHE_KEYS.HOME_PRICES, pricesData);
-      setCacheTimestamp('');
-
-      if (dateFilter) {
-        const dateExists = pricesData.length > 0;
-        if (!dateExists) {
-          Alert.alert(t('noData'), t('noDataMessage'));
-        }
+        // Fallback to just thumbnail if oEmbed fails
+        setYoutubeMetadata(prev => ({
+          ...prev,
+          [itemId]: {
+            title: '',
+            titleKn: '',
+            thumbnail: getYouTubeThumbnail(videoId),
+          }
+        }));
       }
     } catch (error) {
-      // Check if error is due to network issues
-      const netState = await NetInfo.fetch();
-      if (!netState.isConnected) {
-        // Try cache on error
-        const cachedData = await loadFromCache(CACHE_KEYS.HOME_PRICES);
-        if (cachedData && cachedData.data.length > 0) {
-          setPrices(cachedData.data);
-          setIsOffline(true);
-          setCacheTimestamp(getCacheAge(cachedData));
-        } else {
-          Alert.alert(t('noInternet'), t('noInternetMessage'));
-        }
-      } else {
-        Alert.alert(t('error'), t('failedToFetch'));
+      console.log('Error fetching YouTube metadata:', error);
+      // Still try to set thumbnail on error
+      const videoId = extractYouTubeVideoId(url);
+      if (videoId) {
+        setYoutubeMetadata(prev => ({
+          ...prev,
+          [itemId]: {
+            title: '',
+            titleKn: '',
+            thumbnail: getYouTubeThumbnail(videoId),
+          }
+        }));
       }
-      console.error('Error fetching prices:', error);
+    }
+  };
+
+  // Fetch content from Firestore - sorted by latest updated
+  const fetchContent = async () => {
+    try {
+      const contentRef = collection(db, 'infoContent');
+      const q = query(
+        contentRef,
+        where('active', '==', true),
+        orderBy('updatedAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const items: ContentItem[] = [];
+
+      querySnapshot.forEach((doc) => {
+        items.push({
+          id: doc.id,
+          ...doc.data(),
+        } as ContentItem);
+      });
+
+      setContent(items);
+
+      // Fetch YouTube metadata for video items and translate content
+      items.forEach(item => {
+        if (item.type === 'video' && item.url && isYouTubeUrl(item.url)) {
+          fetchYouTubeMetadata(item.url, item.id);
+        }
+
+        // Translate ALL content - bidirectional support
+        // This handles: English→Kannada AND Kannada→English
+        // Check if source is Kannada (needs EN translation) or English (needs KN translation)
+        const textToCheck = item.title || item.description || '';
+        const sourceIsKannada = isKannadaText(textToCheck);
+
+        // If source is Kannada, we ALWAYS need English translation (regardless of content type)
+        // If source is English and no admin Kannada translation, we need Kannada translation
+        if (sourceIsKannada || (!item.titleKn && !item.descriptionKn)) {
+          translateContent(item);
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching content:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -147,920 +374,1064 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    fetchPrices(selectedDate); // Fetch today's data on initial load
-    Animated.timing(slideAnimation, {
-      toValue: 1,
-      duration: 1000,
-      delay: 400,
-      easing: Easing.out(Easing.back(1.2)),
-      useNativeDriver: true,
-    }).start();
-
+    fetchContent();
   }, []);
 
-  const animateCards = (itemsToAnimate: CocoonPrice[]) => {
-    animatedValues.length = 0;
-    itemsToAnimate.forEach(() => {
-      animatedValues.push(new Animated.Value(0));
-    });
-
-    const animations = itemsToAnimate.map((_, i) => {
-      return Animated.timing(animatedValues[i], {
-        toValue: 1,
-        duration: 600,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-        delay: i * 120,
-      });
-    });
-    Animated.stagger(80, animations).start();
-  };
-
-  useEffect(() => {
-    let filtered = prices;
-
-    if (selectedBreed !== 'all') {
-      filtered = filtered.filter((price) => price.breed === selectedBreed);
-    }
-
-    if (selectedMarket !== 'all') {
-      filtered = filtered.filter((price) => price.market === selectedMarket);
-    }
-
-    // Sort alphabetically by market (A-Z)
-    filtered = filtered.sort((a, b) => a.market.localeCompare(b.market));
-
-    setFilteredPrices(filtered);
-    animateCards(filtered);
-  }, [selectedBreed, selectedMarket, prices]);
-
-  const onRefresh = () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchPrices(selectedDate); // Refresh today's data
-  };
+    setYoutubeMetadata({}); // Clear cached metadata
+    setTranslations({}); // Clear cached translations to re-translate
+    fetchContent();
+  }, []);
 
-  const onDateChange = (event: any, date?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowDatePicker(false);
-    }
+  // Get localized title (with AI translation - bidirectional)
+  const getTitle = (item: ContentItem) => {
+    const trans = translations[item.id];
 
-    if (date) {
-      setSelectedDate(date);
-      fetchPrices(date);
-    }
-  };
-
-  const showDatePickerModal = () => {
-    setShowDatePicker(true);
-  };
-
-  const resetDateFilter = () => {
-    const today = new Date();
-    setSelectedDate(today); // Reset to today
-    fetchPrices(today); // Fetch today's data
-  };
-
-  const formatDateForDisplay = (date: Date) => {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return t('today');
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return t('yesterday');
+    // If in Kannada mode
+    if (isKannada) {
+      // First check admin-provided Kannada translation
+      if (item.titleKn) return item.titleKn;
+      // If original is English, use translated Kannada
+      if (trans?.titleTranslated && trans.toLang === 'kn') {
+        return trans.titleTranslated;
+      }
     } else {
-      return date.toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      });
+      // In English mode - if original is Kannada, use translated English
+      if (trans?.titleTranslated && trans.toLang === 'en') {
+        return trans.titleTranslated;
+      }
+    }
+    return item.title;
+  };
+
+  // Get localized description (with AI translation - bidirectional)
+  const getDescription = (item: ContentItem) => {
+    const trans = translations[item.id];
+
+    // If in Kannada mode
+    if (isKannada) {
+      // First check admin-provided Kannada translation
+      if (item.descriptionKn) return item.descriptionKn;
+      // If original is English, use translated Kannada
+      if (trans?.descriptionTranslated && trans.toLang === 'kn') {
+        return trans.descriptionTranslated;
+      }
+    } else {
+      // In English mode - if original is Kannada, use translated English
+      if (trans?.descriptionTranslated && trans.toLang === 'en') {
+        return trans.descriptionTranslated;
+      }
+    }
+    return item.description || '';
+  };
+
+  // Check if content is being translated
+  const isTranslatingContent = (itemId: string) => {
+    return translations[itemId]?.isTranslating || false;
+  };
+
+  // Check if content has AI translation and should show badge
+  const hasAITranslation = (item: ContentItem) => {
+    const trans = translations[item.id];
+    if (!trans) return false;
+
+    // Check if we have any translation (title or description)
+    const hasTranslatedContent = trans.titleTranslated || trans.descriptionTranslated;
+    if (!hasTranslatedContent) return false;
+
+    // Show badge if we have a translation that matches the current language mode
+    if (isKannada && trans.toLang === 'kn') return true;
+    if (!isKannada && trans.toLang === 'en') return true;
+
+    return false;
+  };
+
+  // Get translation direction text
+  const getTranslationLabel = (item: ContentItem) => {
+    const trans = translations[item.id];
+    if (!trans) return '';
+
+    if (trans.fromLang === 'en' && trans.toLang === 'kn') {
+      return 'EN → ಕನ್ನಡ';
+    } else if (trans.fromLang === 'kn' && trans.toLang === 'en') {
+      return 'ಕನ್ನಡ → EN';
+    }
+    return '';
+  };
+
+  // Get display title (prefer YouTube title for videos, with translation)
+  const getDisplayTitle = (item: ContentItem) => {
+    const localTitle = getTitle(item);
+
+    // For videos, prefer YouTube fetched title (with Kannada translation if available)
+    if (item.type === 'video' && youtubeMetadata[item.id]) {
+      const ytMeta = youtubeMetadata[item.id];
+
+      // If in Kannada mode and translated title available, use it
+      if (isKannada && ytMeta.titleKn) {
+        return ytMeta.titleKn;
+      }
+      // Otherwise use English title
+      if (ytMeta.title) {
+        return ytMeta.title;
+      }
+    }
+
+    return localTitle || (isKannada ? 'ಶೀರ್ಷಿಕೆ ಇಲ್ಲ' : 'Untitled');
+  };
+
+  // Get icon for content type
+  const getContentTypeIcon = (type: string) => {
+    switch (type) {
+      case 'image':
+        return 'image';
+      case 'video':
+        return 'logo-youtube';
+      case 'pdf':
+        return 'document-text';
+      case 'basicInfo':
+        return 'information-circle';
+      default:
+        return 'document';
     }
   };
 
-  const speakPrice = async (item: CocoonPrice) => {
+  // Get content type label
+  const getContentTypeLabel = (type: string) => {
+    switch (type) {
+      case 'image':
+        return isKannada ? 'ಚಿತ್ರ' : 'Image';
+      case 'video':
+        return isKannada ? 'ವೀಡಿಯೋ' : 'Video';
+      case 'pdf':
+        return isKannada ? 'ಪಿಡಿಎಫ್' : 'PDF';
+      case 'basicInfo':
+        return isKannada ? 'ಮಾಹಿತಿ' : 'Info';
+      default:
+        return type;
+    }
+  };
+
+  // Open item in detail view
+  const openItemDetail = (item: ContentItem) => {
+    setSelectedItem(item);
+    setModalVisible(true);
+  };
+
+  // Close detail modal
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedItem(null);
+  };
+
+  // Handle external link opening
+  const openExternalLink = async (url: string) => {
     try {
-      // Stop any ongoing speech
-      await Speech.stop();
-
-      // If currently playing this item, stop it
-      if (playingId === item.id) {
-        setPlayingId(null);
-        return;
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
       }
-
-      setPlayingId(item.id);
-
-      // Get current language
-      const currentLang = i18n.language;
-      const langCode = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
-
-      // Build the speech text based on current language
-      const breedText = t(`breed_${item.breed}` as any, item.breed);
-      const marketText = t(`market_${item.market}` as any, item.market);
-
-      // Form natural sentences based on language
-      let speechText = '';
-
-      if (currentLang === 'kn') {
-        // Kannada sentence formation
-        speechText = t('tts_price_kannada', {
-          breed: breedText,
-          grade: item.quality,
-          market: marketText,
-          lot: item.lotNumber,
-          maxPrice: item.maxPrice,
-          avgPrice: item.avgPrice,
-          minPrice: item.minPrice
-        });
-      } else {
-        // English sentence formation
-        speechText = t('tts_price_english', {
-          breed: breedText,
-          grade: item.quality,
-          market: marketText,
-          lot: item.lotNumber,
-          maxPrice: item.maxPrice,
-          avgPrice: item.avgPrice,
-          minPrice: item.minPrice
-        });
-      }
-
-      // Speak the text with natural rate
-      await Speech.speak(speechText, {
-        language: langCode,
-        pitch: 1.0,
-        rate: 0.75, // Natural speaking rate
-        onDone: () => setPlayingId(null),
-        onStopped: () => setPlayingId(null),
-        onError: () => setPlayingId(null),
-      });
     } catch (error) {
-      console.error('TTS Error:', error);
-      setPlayingId(null);
-      Alert.alert(t('error'), t('speechError') || 'Text-to-speech error');
+      console.error('Error opening link:', error);
     }
   };
 
-  const ModernFilterButton = ({
-    title,
-    isSelected,
-    onPress,
-    icon,
-  }: {
-    title: string;
-    isSelected: boolean;
-    onPress: () => void;
-    icon?: string;
-  }) => (
-    <TouchableOpacity
-      style={[styles.ultraModernFilter, isSelected && styles.ultraModernFilterSelected]}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      {isSelected ? (
-        <View style={styles.ultraModernFilterGradient}>
-          {icon && <Ionicons name={icon as any} size={14} color="#FFFFFF" style={{ marginRight: 6 }} />}
-          <Text style={styles.ultraModernFilterTextSelected}>{title}</Text>
-        </View>
-      ) : (
-        <View style={styles.ultraModernFilterContent}>
-          {icon && <Ionicons name={icon as any} size={14} color="#6B7280" style={{ marginRight: 6 }} />}
-          <Text style={styles.ultraModernFilterText}>{title}</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
+  // Render feed card
+  const renderFeedCard = ({ item }: { item: ContentItem }) => {
+    const isImageType = item.type === 'image' && item.url;
+    const isVideoType = item.type === 'video';
+    const isYouTube = isVideoType && item.url && isYouTubeUrl(item.url);
+    const ytMetadata = youtubeMetadata[item.id];
 
-
-  const renderPriceCard = ({ item }: { item: CocoonPrice }) => {
     return (
-      <View style={styles.ultraModernCard}>
-        <View style={styles.ultraModernCardGradient}>
-          <View style={styles.ultraModernCardContent}>
-            {/* Header with breed and quality */}
-            <View style={styles.ultraModernCardHeader}>
-              <View style={styles.breedSection}>
-                <View style={styles.breedIconContainer}>
-                  <Ionicons name="leaf" size={18} color="#10B981" />
-                </View>
-                <View style={styles.breedInfo}>
-                  <Text style={styles.ultraModernBreedText}>{t(`breed_${item.breed}` as any, item.breed)}</Text>
-                  <View style={styles.qualityBadgeContainer}>
-                    <View style={styles.ultraModernQualityBadge}>
-                      <Ionicons name="star" size={10} color="#92400E" />
-                      <Text style={styles.ultraModernQualityText}>
-                        {t('grade')} {item.quality}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.headerRightSection}>
-                <TouchableOpacity
-                  style={[
-                    styles.playButton,
-                    playingId === item.id && styles.playButtonActive
-                  ]}
-                  onPress={() => speakPrice(item)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons
-                    name={playingId === item.id ? "stop-circle" : "play-circle"}
-                    size={32}
-                    color={playingId === item.id ? "#EF4444" : "#3B82F6"}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Market and Lot badges */}
-            <View style={styles.marketLotsSection}>
-              <View style={styles.ultraModernMarketBadge}>
-                <Ionicons name="location" size={10} color="#5B21B6" />
-                <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
-              </View>
-              <View style={styles.lotNumberBadge}>
-                <Ionicons name="apps" size={10} color="#92400E" />
-                <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
-              </View>
-            </View>
-
-            {/* Price Table */}
-            <View style={styles.priceTable}>
-              <Text style={styles.priceTableTitle}>{t('priceDetails')}</Text>
-
-              {/* Table Header */}
-              <View style={styles.tableHeader}>
-                <Text style={styles.tableHeaderText}>{t('type')}</Text>
-                <Text style={styles.tableHeaderText}>{t('price')}</Text>
-                <Text style={styles.tableHeaderText}>{t('status')}</Text>
-              </View>
-
-              {/* Table Rows */}
-              <View style={[styles.tableRow, styles.tableRowHighlight]}>
-                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>{t('maximum')}</Text>
-                <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
-                <View style={styles.tableStatusCell}>
-                  <Ionicons name="trending-up" size={14} color="#10B981" />
-                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>{t('high')}</Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCellType}>{t('average')}</Text>
-                <Text style={styles.tableCellPrice}>₹{item.avgPrice}</Text>
-                <View style={styles.tableStatusCell}>
-                  <Ionicons name="analytics" size={14} color="#6366F1" />
-                  <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>{t('avg')}</Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCellType}>{t('minimum')}</Text>
-                <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
-                <View style={styles.tableStatusCell}>
-                  <Ionicons name="trending-down" size={14} color="#EF4444" />
-                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>{t('low')}</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Footer with update time */}
-            <View style={styles.ultraModernFooter}>
-              <View style={styles.updateTimestamp}>
-                <Ionicons name="time-outline" size={12} color="#9CA3AF" />
-                <Text style={styles.ultraModernUpdateText}>
-                  {t('updated')}: {item.lastUpdated.toLocaleDateString()}
-                </Text>
-              </View>
-            </View>
+      <TouchableOpacity
+        style={styles.feedCard}
+        activeOpacity={0.9}
+        onPress={() => openItemDetail(item)}
+      >
+        {/* Card Header - Content Type Badge */}
+        <View style={styles.cardHeader}>
+          <View style={[
+            styles.contentTypeBadge,
+            isVideoType && styles.videoBadge,
+            item.type === 'pdf' && styles.pdfBadge,
+          ]}>
+            <Ionicons
+              name={getContentTypeIcon(item.type) as any}
+              size={14}
+              color="#FFFFFF"
+            />
+            <Text style={styles.contentTypeText}>
+              {getContentTypeLabel(item.type)}
+            </Text>
           </View>
         </View>
-      </View>
+
+        {/* Image Content - Show actual image */}
+        {isImageType && (
+          <View style={styles.imageContainer}>
+            {imageLoading[item.id] && !imageError[item.id] && (
+              <View style={styles.imageLoadingOverlay}>
+                <ActivityIndicator size="large" color="#10B981" />
+              </View>
+            )}
+            {imageError[item.id] ? (
+              <View style={styles.imageErrorContainer}>
+                <Ionicons name="image-outline" size={50} color="#D1D5DB" />
+                <Text style={styles.imageErrorText}>
+                  {isKannada ? 'ಚಿತ್ರ ಲೋಡ್ ವಿಫಲ' : 'Image failed to load'}
+                </Text>
+                <Text style={styles.imageErrorHint}>
+                  {isKannada ? 'Google Drive ಲಿಂಕ್ ಪರಿಶೀಲಿಸಿ' : 'Check image URL format'}
+                </Text>
+              </View>
+            ) : (
+              <Image
+                source={{ uri: getDirectImageUrl(item.url!) }}
+                style={styles.feedImage}
+                resizeMode="cover"
+                onLoadStart={() => {
+                  setImageLoading(prev => ({ ...prev, [item.id]: true }));
+                  setImageError(prev => ({ ...prev, [item.id]: false }));
+                }}
+                onLoadEnd={() => setImageLoading(prev => ({ ...prev, [item.id]: false }))}
+                onError={(e) => {
+                  console.log('❌ Image load error:', item.url, e.nativeEvent.error);
+                  setImageLoading(prev => ({ ...prev, [item.id]: false }));
+                  setImageError(prev => ({ ...prev, [item.id]: true }));
+                }}
+              />
+            )}
+          </View>
+        )}
+
+        {/* YouTube Video - Show thumbnail with play button */}
+        {isYouTube && (
+          <View style={styles.videoContainer}>
+            {ytMetadata?.thumbnail ? (
+              <>
+                <Image
+                  source={{ uri: ytMetadata.thumbnail }}
+                  style={styles.videoThumbnail}
+                  resizeMode="cover"
+                />
+                <View style={styles.playButtonOverlay}>
+                  <View style={styles.playButton}>
+                    <Ionicons name="play" size={32} color="#FFFFFF" />
+                  </View>
+                </View>
+                <View style={styles.youtubeBadge}>
+                  <Ionicons name="logo-youtube" size={20} color="#FF0000" />
+                </View>
+              </>
+            ) : (
+              <View style={styles.videoPlaceholder}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text style={styles.loadingThumbnailText}>
+                  {isKannada ? 'ಲೋಡ್ ಆಗುತ್ತಿದೆ...' : 'Loading...'}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Non-YouTube Video Placeholder */}
+        {isVideoType && !isYouTube && (
+          <View style={styles.videoPlaceholder}>
+            <Ionicons name="play-circle" size={60} color="#FFFFFF" />
+            <Text style={styles.videoText}>
+              {isKannada ? 'ವೀಡಿಯೋ ವೀಕ್ಷಿಸಿ' : 'Watch Video'}
+            </Text>
+          </View>
+        )}
+
+        {/* PDF Placeholder */}
+        {item.type === 'pdf' && (
+          <View style={styles.pdfPlaceholder}>
+            <Ionicons name="document-text" size={50} color="#EF4444" />
+            <Text style={styles.pdfText}>
+              {isKannada ? 'PDF ಡಾಕ್ಯುಮೆಂಟ್' : 'PDF Document'}
+            </Text>
+          </View>
+        )}
+
+        {/* Basic Info */}
+        {item.type === 'basicInfo' && (
+          <View style={styles.infoPlaceholder}>
+            <Ionicons name="information-circle" size={50} color="#3B82F6" />
+          </View>
+        )}
+
+        {/* Card Content */}
+        <View style={styles.cardContent}>
+          {/* Title - show loading while fetching/translating */}
+          {(isYouTube && !ytMetadata?.title && !getTitle(item)) || (!isYouTube && isTranslatingContent(item.id) && !getTitle(item)) ? (
+            <View style={styles.titleLoadingContainer}>
+              <ActivityIndicator size="small" color="#6B7280" />
+              <Text style={styles.titleLoadingText}>
+                {isKannada ? 'ಲೋಡ್ ಆಗುತ್ತಿದೆ...' : 'Loading...'}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.cardTitle} numberOfLines={2}>
+              {getDisplayTitle(item)}
+            </Text>
+          )}
+
+          {/* Source & Translation status indicator */}
+          <View style={styles.sourceIndicatorRow}>
+            {/* YouTube badge */}
+            {isYouTube && ytMetadata?.title && (
+              <View style={styles.youtubeSourceBadge}>
+                <Ionicons name="logo-youtube" size={12} color="#EF4444" />
+                <Text style={styles.youtubeSourceText}>YouTube</Text>
+              </View>
+            )}
+
+            {/* YouTube translation status */}
+            {isYouTube && ytMetadata?.titleKn && (
+              <View style={styles.translationBadge}>
+                <Ionicons name="language" size={12} color="#10B981" />
+                <Text style={styles.translatedText}>EN → ಕನ್ನಡ</Text>
+              </View>
+            )}
+            {isYouTube && ytMetadata?.title && !ytMetadata?.titleKn && (
+              <View style={styles.translationBadge}>
+                <ActivityIndicator size={10} color="#6B7280" />
+                <Text style={styles.translatingText}>
+                  {isKannada ? 'ಅನುವಾದ...' : 'Translating...'}
+                </Text>
+              </View>
+            )}
+
+            {/* Non-YouTube translation status (bidirectional) */}
+            {!isYouTube && hasAITranslation(item) && (
+              <View style={styles.translationBadge}>
+                <Ionicons name="language" size={12} color="#10B981" />
+                <Text style={styles.translatedText}>{getTranslationLabel(item)}</Text>
+              </View>
+            )}
+            {!isYouTube && isTranslatingContent(item.id) && (
+              <View style={styles.translationBadge}>
+                <ActivityIndicator size={10} color="#6B7280" />
+                <Text style={styles.translatingText}>
+                  {isKannada ? 'ಅನುವಾದ...' : 'Translating...'}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Description */}
+          {getDescription(item) ? (
+            <Text style={styles.cardDescription} numberOfLines={3}>
+              {getDescription(item)}
+            </Text>
+          ) : isTranslatingContent(item.id) && item.description ? (
+            <View style={styles.descLoadingContainer}>
+              <ActivityIndicator size="small" color="#9CA3AF" />
+              <Text style={styles.descLoadingText}>
+                {isKannada ? 'ವಿವರಣೆ ಅನುವಾದ...' : 'Translating description...'}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        {/* Card Footer */}
+        <View style={styles.cardFooter}>
+          <View style={styles.viewMoreButton}>
+            <Text style={styles.viewMoreText}>
+              {item.type === 'video'
+                ? (isKannada ? 'ವೀಕ್ಷಿಸಿ' : 'Watch')
+                : (isKannada ? 'ಹೆಚ್ಚು ನೋಡಿ' : 'View More')
+              }
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color="#10B981" />
+          </View>
+        </View>
+      </TouchableOpacity>
     );
   };
 
-  if (loading) {
+  // Render detail modal
+  const renderDetailModal = () => {
+    if (!selectedItem) return null;
+
+    const isYouTube = selectedItem.type === 'video' && selectedItem.url && isYouTubeUrl(selectedItem.url);
+    const ytMetadata = youtubeMetadata[selectedItem.id];
+
     return (
-      <SafeAreaView style={styles.ultraModernContainer}>
-        <View style={styles.ultraModernLoadingContainer}>
-          <View style={styles.loadingContent}>
-            <View style={styles.loadingSpinner}>
-              <View style={styles.loadingSpinnerGradient}>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+              <Ionicons name="arrow-back" size={24} color="#1F2937" />
+            </TouchableOpacity>
+            <Text style={styles.modalHeaderTitle} numberOfLines={1}>
+              {getContentTypeLabel(selectedItem.type)}
+            </Text>
+            <View style={styles.modalTypeBadge}>
+              <Ionicons
+                name={getContentTypeIcon(selectedItem.type) as any}
+                size={18}
+                color="#FFFFFF"
+              />
+            </View>
+          </View>
+
+          <ScrollView
+            style={styles.modalContent}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+          >
+            {/* Full Image */}
+            {selectedItem.type === 'image' && selectedItem.url && (
+              <TouchableOpacity
+                activeOpacity={0.95}
+                style={styles.modalImageContainer}
+              >
                 <Image
-                  source={require('../assets/reshme_logo.png')}
-                  style={styles.loadingLogoImage}
+                  source={{ uri: getDirectImageUrl(selectedItem.url) }}
+                  style={styles.modalImage}
                   resizeMode="contain"
                 />
+              </TouchableOpacity>
+            )}
+
+            {/* YouTube Video with Thumbnail */}
+            {isYouTube && (
+              <TouchableOpacity
+                style={styles.modalVideoContainer}
+                activeOpacity={0.9}
+                onPress={() => openExternalLink(selectedItem.url!)}
+              >
+                {ytMetadata?.thumbnail ? (
+                  <>
+                    <Image
+                      source={{ uri: ytMetadata.thumbnail }}
+                      style={styles.modalVideoThumbnail}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.modalPlayOverlay}>
+                      <View style={styles.modalPlayButton}>
+                        <Ionicons name="play" size={40} color="#FFFFFF" />
+                      </View>
+                      <Text style={styles.tapToPlayText}>
+                        {isKannada ? 'ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ' : 'Tap to play'}
+                      </Text>
+                    </View>
+                    <View style={styles.youtubeModalBadge}>
+                      <Ionicons name="logo-youtube" size={24} color="#FF0000" />
+                      <Text style={styles.youtubeText}>YouTube</Text>
+                    </View>
+                  </>
+                ) : (
+                  <View style={styles.videoPlaceholderModal}>
+                    <Ionicons name="logo-youtube" size={60} color="#FF0000" />
+                    <Text style={styles.watchVideoText}>
+                      {isKannada ? 'ವೀಡಿಯೋ ವೀಕ್ಷಿಸಿ' : 'Watch on YouTube'}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            )}
+
+            {/* Non-YouTube Video */}
+            {selectedItem.type === 'video' && selectedItem.url && !isYouTube && (
+              <TouchableOpacity
+                style={styles.modalVideoPlaceholder}
+                onPress={() => openExternalLink(selectedItem.url!)}
+              >
+                <Ionicons name="play-circle" size={80} color="#FFFFFF" />
+                <Text style={styles.watchVideoText}>
+                  {isKannada ? 'ವೀಡಿಯೋ ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ' : 'Tap to watch video'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* PDF Link */}
+            {selectedItem.type === 'pdf' && selectedItem.url && (
+              <TouchableOpacity
+                style={styles.modalPdfContainer}
+                onPress={() => openExternalLink(selectedItem.url!)}
+              >
+                <Ionicons name="document-text" size={80} color="#EF4444" />
+                <Text style={styles.openPdfText}>
+                  {isKannada ? 'PDF ತೆರೆಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ' : 'Tap to open PDF'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Basic Info Display */}
+            {selectedItem.type === 'basicInfo' && (
+              <View style={styles.modalInfoContainer}>
+                <Ionicons name="information-circle" size={60} color="#3B82F6" />
               </View>
+            )}
+
+            {/* Content Details */}
+            <View style={styles.detailsContainer}>
+              {/* Title */}
+              <Text style={styles.modalDetailTitle}>
+                {getDisplayTitle(selectedItem)}
+              </Text>
+
+              {/* YouTube auto-fetched title indicator */}
+              {isYouTube && ytMetadata?.title && !getTitle(selectedItem) && (
+                <View style={styles.autoFetchedBadge}>
+                  <Ionicons name="sparkles" size={12} color="#6B7280" />
+                  <Text style={styles.autoFetchedText}>
+                    {isKannada ? 'YouTube ನಿಂದ' : 'From YouTube'}
+                  </Text>
+                </View>
+              )}
+
+              {/* Description */}
+              {getDescription(selectedItem) ? (
+                <Text style={styles.modalDescription}>
+                  {getDescription(selectedItem)}
+                </Text>
+              ) : null}
+
+              {/* Action Button for external content */}
+              {(selectedItem.type === 'video' || selectedItem.type === 'pdf') && selectedItem.url && (
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    selectedItem.type === 'video' && styles.videoActionButton,
+                    selectedItem.type === 'pdf' && styles.pdfActionButton,
+                  ]}
+                  onPress={() => openExternalLink(selectedItem.url!)}
+                >
+                  <Ionicons
+                    name={selectedItem.type === 'video' ? 'play' : 'open-outline'}
+                    size={20}
+                    color="#FFFFFF"
+                  />
+                  <Text style={styles.actionButtonText}>
+                    {selectedItem.type === 'video'
+                      ? (isKannada ? 'YouTube ನಲ್ಲಿ ವೀಕ್ಷಿಸಿ' : 'Watch on YouTube')
+                      : (isKannada ? 'PDF ತೆರೆಯಿರಿ' : 'Open PDF')
+                    }
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <Text style={styles.ultraModernLoadingText}>{t('loading')}</Text>
-            <Text style={styles.ultraModernLoadingSubtext}>{t('fetchingLatestMarketPrices')}</Text>
-          </View>
+
+            <View style={styles.bottomSpacing} />
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+    );
+  };
+
+  // Empty state
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="leaf-outline" size={80} color="#D1D5DB" />
+      <Text style={styles.emptyTitle}>
+        {isKannada ? 'ಇನ್ನೂ ವಿಷಯವಿಲ್ಲ' : 'No content yet'}
+      </Text>
+      <Text style={styles.emptySubtitle}>
+        {isKannada
+          ? 'ಹೊಸ ವಿಷಯಕ್ಕಾಗಿ ನಂತರ ಪರಿಶೀಲಿಸಿ'
+          : 'Check back later for new updates'}
+      </Text>
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Header title={t('home')} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#10B981" />
+          <Text style={styles.loadingText}>
+            {isKannada ? 'ಲೋಡ್ ಆಗುತ್ತಿದೆ...' : 'Loading...'}
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.ultraModernContainer}>
-      <Header title={t('cocoonPrices')} />
-      {/* Offline Mode Banner */}
-      {isOffline && (
-        <View style={styles.offlineBanner}>
-          <View style={styles.offlineBannerContent}>
-            <Ionicons name="cloud-offline" size={18} color="#F59E0B" />
-            <View style={styles.offlineBannerText}>
-              <Text style={styles.offlineBannerTitle}>{t('offlineMode')}</Text>
-              <Text style={styles.offlineBannerSubtitle}>
-                {t('dataFromCache')} • {t('lastUpdated')}: {cacheTimestamp}
-              </Text>
-            </View>
-          </View>
-        </View>
-      )}
-      {/* Filter section */}
-      <View style={styles.filterHeader}>
-        <TouchableOpacity
-          style={styles.toggleButton}
-          onPress={() => setIsFilterVisible(!isFilterVisible)}
-        >
-          <Ionicons
-            name={isFilterVisible ? 'chevron-up-circle' : 'chevron-down-circle'}
-            size={24}
-            color="#3B82F6"
-          />
-          <Text style={styles.toggleButtonText}>
-            {isFilterVisible ? t('hideFilters') : t('showFilters')}
-          </Text>
-        </TouchableOpacity>
-      </View>
-      {isFilterVisible && (
-        <View style={styles.ultraModernFilterSection}>
-          <View style={styles.ultraModernFilterCard}>
-            <View style={styles.filterContent}>
-              <View style={styles.filterCategory}>
-              <View style={styles.filterCategoryHeader}>
-                <View style={styles.filterCategoryIcon}>
-                  <Ionicons name="options" size={14} color="#6B7280" />
-                </View>
-                <Text style={styles.ultraModernFilterTitle}>{t('filterByBreed')}</Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.ultraModernFilterList}
-              >
-                {breeds.map((item) => (
-                  <ModernFilterButton
-                    key={item}
-                    title={t(`breed_${item}`)}
-                    isSelected={selectedBreed === item}
-                    onPress={() => setSelectedBreed(item)}
-                    icon={item === 'all' ? 'grid' : 'leaf'}
-                  />
-                ))}
-              </ScrollView>
-            </View>
+    <SafeAreaView style={styles.container}>
+      <Header title={t('home')} />
 
-            <View style={styles.filterCategory}>
-              <View style={styles.filterCategoryHeader}>
-                <View style={styles.filterCategoryIcon}>
-                  <Ionicons name="location" size={14} color="#6B7280" />
-                </View>
-                <Text style={styles.ultraModernFilterTitle}>{t('filterByMarket')}</Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.ultraModernFilterList}
-              >
-                {markets.map((item) => (
-                  <ModernFilterButton
-                    key={item}
-                    title={t(`market_${item}`)}
-                    isSelected={selectedMarket === item}
-                    onPress={() => setSelectedMarket(item)}
-                    icon={item === 'all' ? 'grid' : 'location'}
-                  />
-                ))}
-              </ScrollView>
-            </View>
-
-              <View style={styles.filterCategory}>
-                <View style={styles.filterCategoryHeader}>
-                  <View style={styles.filterCategoryIcon}>
-                    <Ionicons name="calendar" size={14} color="#6B7280" />
-                  </View>
-                  <Text style={styles.ultraModernFilterTitle}>{t('filterByDateTitle')}</Text>
-                </View>
-                <View style={styles.dateFilterContainer}>
-                  <TouchableOpacity
-                    style={styles.dateFilterButton}
-                    onPress={showDatePickerModal}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.dateFilterContent}>
-                      <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
-                      <Text style={styles.dateFilterText}>
-                        {formatDateForDisplay(selectedDate)}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.resetDateButton}
-                    onPress={resetDateFilter}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="refresh" size={16} color="#6B7280" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* Price list */}
       <FlatList
-        data={filteredPrices}
+        data={content}
+        renderItem={renderFeedCard}
         keyExtractor={(item) => item.id}
-        renderItem={renderPriceCard}
+        contentContainerStyle={styles.feedContainer}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#3B82F6']}
-            tintColor="#3B82F6"
-            progressBackgroundColor="#FFFFFF"
+            colors={['#10B981']}
+            tintColor="#10B981"
           />
         }
-        contentContainerStyle={styles.ultraModernListContainer}
-        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={renderEmptyState}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 
-      {/* Date Picker Modal */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={onDateChange}
-          maximumDate={new Date()}
-          minimumDate={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)} // 7 days ago
-        />
-      )}
+      {renderDetailModal()}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  ultraModernContainer: {
+  container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F3F4F6',
   },
-
-  // Loading Screen
-  ultraModernLoadingContainer: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
   },
-  loadingContent: {
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  loadingSpinner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 20,
-    backgroundColor: '#F3F4F6',
-  },
-  loadingSpinnerGradient: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
-  },
-  loadingLogoImage: {
-    width: 50,
-    height: 50,
-  },
-  ultraModernLoadingText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  ultraModernLoadingSubtext: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-
-
-  // Filter Section
-  filterHeader: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  toggleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  toggleButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
-    marginLeft: 8,
-  },
-  ultraModernFilterSection: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    marginBottom: 16,
-  },
-  ultraModernFilterCard: {
-    borderRadius: 16,
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  filterContent: {
-    gap: 16,
-  },
-  filterCategory: {
-    gap: 12,
-  },
-  filterCategoryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  filterCategoryIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-  },
-  ultraModernFilterTitle: {
+  loadingText: {
+    marginTop: 12,
     fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  ultraModernFilterList: {
-    paddingVertical: 8,
-    gap: 12,
-  },
-
-  // Filter Buttons
-  ultraModernFilter: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginRight: 8,
-  },
-  ultraModernFilterSelected: {
-  },
-  ultraModernFilterGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#3B82F6',
-  },
-  ultraModernFilterContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#F9FAFB',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-  },
-  ultraModernFilterText: {
-    fontSize: 14,
-    fontWeight: '500',
     color: '#6B7280',
-    textTransform: 'capitalize',
   },
-  ultraModernFilterTextSelected: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textTransform: 'capitalize',
+  feedContainer: {
+    padding: 16,
+    paddingBottom: 32,
   },
-
-  // Price Cards
-  ultraModernCard: {
-    borderRadius: 16,
-    marginBottom: 16,
-    marginHorizontal: 2,
+  separator: {
+    height: 16,
+  },
+  feedCard: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderRadius: 16,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  ultraModernCardGradient: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+  cardHeader: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 10,
   },
-  ultraModernCardContent: {
-    padding: 20,
-    gap: 16,
-  },
-
-  // Card Header
-  ultraModernCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  breedSection: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flex: 1,
-  },
-  headerRightSection: {
-    marginLeft: 12,
-  },
-  breedIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F0FDF4',
-  },
-  breedInfo: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  ultraModernBreedText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  qualityBadgeContainer: {
-    alignSelf: 'flex-start',
-  },
-  ultraModernQualityBadge: {
+  contentTypeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    gap: 4,
-    backgroundColor: '#FEF3C7',
-  },
-  ultraModernQualityText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#92400E',
-  },
-  marketLotsSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  ultraModernMarketBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.95)',
     paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 20,
     gap: 4,
-    backgroundColor: '#EDE9FE',
   },
-  ultraModernMarketText: {
+  videoBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.95)',
+  },
+  pdfBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.95)',
+  },
+  contentTypeText: {
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
-    color: '#5B21B6',
   },
-  lotNumberBadge: {
-    flexDirection: 'row',
+  // Image styles
+  imageContainer: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.75,
+    backgroundColor: '#F3F4F6',
+    position: 'relative',
+  },
+  imageLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    gap: 4,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#F3F4F6',
+    zIndex: 5,
+  },
+  feedImage: {
+    width: '100%',
+    height: '100%',
+  },
+  // Video styles
+  videoContainer: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.56, // 16:9 aspect ratio
+    backgroundColor: '#000',
+    position: 'relative',
+  },
+  videoThumbnail: {
+    width: '100%',
+    height: '100%',
+  },
+  playButtonOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  playButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingLeft: 4,
+  },
+  youtubeBadge: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: 6,
+    borderRadius: 6,
+  },
+  videoPlaceholder: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.5,
+    backgroundColor: '#1F2937',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingThumbnailText: {
+    color: '#9CA3AF',
+    fontSize: 12,
     marginTop: 8,
   },
-  lotNumberText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#92400E',
-  },
-
-  // Price Table
-  priceTable: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    overflow: 'hidden',
-  },
-  priceTableTitle: {
+  videoText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    padding: 16,
-    backgroundColor: '#F8FAFC',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    textAlign: 'center',
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  tableHeaderText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#374151',
-    textAlign: 'center',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    alignItems: 'center',
-  },
-  tableRowHighlight: {
-    backgroundColor: '#F0FDF4',
-  },
-  tableCellType: {
-    flex: 1,
-    fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
-    textAlign: 'left',
+    marginTop: 8,
   },
-  tableCellPrice: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    textAlign: 'center',
-  },
-  tableStatusCell: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+  // PDF styles
+  pdfPlaceholder: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.35,
+    backgroundColor: '#FEF2F2',
     justifyContent: 'center',
-    gap: 4,
+    alignItems: 'center',
   },
-  tableCellStatus: {
-    fontSize: 12,
+  pdfText: {
+    color: '#EF4444',
+    fontSize: 14,
     fontWeight: '600',
+    marginTop: 8,
   },
-  tableCellHighlight: {
-    color: '#166534',
-    fontWeight: '800',
+  // Info styles
+  infoPlaceholder: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.25,
+    backgroundColor: '#EFF6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-
-  // Footer
-  ultraModernFooter: {
-    alignItems: 'flex-end',
+  // Card content
+  cardContent: {
+    padding: 16,
   },
-  updateTimestamp: {
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 6,
+    lineHeight: 24,
+  },
+  titleLoadingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    gap: 8,
+    marginBottom: 6,
+  },
+  titleLoadingText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+  },
+  sourceIndicatorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  youtubeSourceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FEE2E2',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  youtubeSourceText: {
+    fontSize: 11,
+    color: '#DC2626',
+    fontWeight: '600',
+  },
+  translationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  translatedText: {
+    fontSize: 11,
+    color: '#059669',
+    fontWeight: '500',
+  },
+  translatingText: {
+    fontSize: 11,
+    color: '#6B7280',
+    fontStyle: 'italic',
+  },
+  descLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
+  descLoadingText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+  },
+  cardDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+  },
+  viewMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
-  ultraModernUpdateText: {
-    fontSize: 10,
+  viewMoreText: {
+    color: '#10B981',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  // Empty state
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  closeButton: {
+    padding: 4,
+    marginRight: 12,
+  },
+  modalHeaderTitle: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  modalTypeBadge: {
+    backgroundColor: '#10B981',
+    padding: 8,
+    borderRadius: 8,
+  },
+  modalContent: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  modalImageContainer: {
+    width: '100%',
+    minHeight: SCREEN_HEIGHT * 0.45,
+    maxHeight: SCREEN_HEIGHT * 0.6,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+  },
+  modalImage: {
+    width: '100%',
+    height: '100%',
+  },
+  modalVideoContainer: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.6,
+    backgroundColor: '#000',
+    position: 'relative',
+  },
+  modalVideoThumbnail: {
+    width: '100%',
+    height: '100%',
+  },
+  modalPlayOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  modalPlayButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 0, 0, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingLeft: 6,
+    marginBottom: 12,
+  },
+  tapToPlayText: {
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '500',
+  },
+  youtubeModalBadge: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    gap: 6,
+  },
+  youtubeText: {
+    color: '#1F2937',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  videoPlaceholderModal: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.5,
+    backgroundColor: '#1F2937',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalVideoPlaceholder: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.5,
+    backgroundColor: '#1F2937',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  watchVideoText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 12,
+  },
+  modalPdfContainer: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.5,
+    backgroundColor: '#FEF2F2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  openPdfText: {
+    color: '#EF4444',
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 12,
+  },
+  modalInfoContainer: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.3,
+    backgroundColor: '#EFF6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailsContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    marginTop: 8,
+  },
+  modalDetailTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1F2937',
+    lineHeight: 30,
+    marginBottom: 8,
+  },
+  autoFetchedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 12,
+  },
+  autoFetchedText: {
+    fontSize: 12,
     color: '#6B7280',
   },
-
-  // List Container
-  ultraModernListContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 20,
+  modalDescription: {
+    fontSize: 16,
+    color: '#4B5563',
+    lineHeight: 26,
+    marginTop: 8,
   },
-
-  // Date Filter Styles
-  dateFilterContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-  },
-  dateFilterButton: {
-    flex: 1,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  dateFilterContent: {
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: '#10B981',
+    marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
     gap: 8,
   },
-  dateFilterText: {
-    fontSize: 14,
+  videoActionButton: {
+    backgroundColor: '#EF4444',
+  },
+  pdfActionButton: {
+    backgroundColor: '#EF4444',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '600',
-    color: '#3B82F6',
   },
-  resetDateButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-
-  // Offline Banner Styles
-  offlineBanner: {
-    backgroundColor: '#FEF3C7',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F59E0B',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  offlineBannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  offlineBannerText: {
-    flex: 1,
-  },
-  offlineBannerTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#92400E',
-    marginBottom: 2,
-  },
-  offlineBannerSubtitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#B45309',
-  },
-
-  // Play Button Styles
-  playButton: {
-    width: 40,
+  bottomSpacing: {
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 20,
-    backgroundColor: '#EFF6FF',
-  },
-  playButtonActive: {
-    backgroundColor: '#FEE2E2',
   },
 });

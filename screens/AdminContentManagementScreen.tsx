@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, query, where } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase.config';
+import { callAIWithFallback } from '../utils/aiProviders';
 
 interface ContentItem {
   id: string;
@@ -72,15 +73,176 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
     notificationSound: true,
   });
 
+  // Auto-translation state - tracks which field is being translated TO
+  // 'english' means translating TO English (from Kannada), 'kannada' means translating TO Kannada (from English)
+  const [translatingTo, setTranslatingTo] = useState<{
+    title: 'english' | 'kannada' | null;
+    description: 'english' | 'kannada' | null;
+  }>({
+    title: null,
+    description: null,
+  });
+  const translationTimeoutRef = useRef<{ title: NodeJS.Timeout | null; description: NodeJS.Timeout | null }>({
+    title: null,
+    description: null,
+  });
+
+  // Helper function to detect Kannada text
+  const isKannadaText = (text: string): boolean => {
+    if (!text || text.trim().length === 0) return false;
+    const kannadaRegex = /[\u0C80-\u0CFF]/;
+    const kannadaChars = (text.match(/[\u0C80-\u0CFF]/g) || []).length;
+    const totalChars = text.replace(/[\s\d\p{P}]/gu, '').length;
+    return kannadaRegex.test(text) && (totalChars === 0 || kannadaChars / totalChars > 0.3);
+  };
+
+  // Helper function to convert Google Drive URLs to direct image URLs
+  const getDirectImageUrl = (url: string): string => {
+    if (!url) return url;
+
+    // Google Drive file link: https://drive.google.com/file/d/FILE_ID/view
+    const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+    if (driveFileMatch) {
+      return `https://drive.google.com/uc?export=view&id=${driveFileMatch[1]}`;
+    }
+
+    // Google Drive open link: https://drive.google.com/open?id=FILE_ID
+    const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+    if (driveOpenMatch) {
+      return `https://drive.google.com/uc?export=view&id=${driveOpenMatch[1]}`;
+    }
+
+    // Google Drive uc link (already direct): https://drive.google.com/uc?id=FILE_ID
+    const driveUcMatch = url.match(/drive\.google\.com\/uc\?.*id=([^&]+)/);
+    if (driveUcMatch) {
+      return `https://drive.google.com/uc?export=view&id=${driveUcMatch[1]}`;
+    }
+
+    return url;
+  };
+
+  // Auto-translate function
+  const autoTranslate = async (text: string, field: 'title' | 'description') => {
+    if (!text || text.trim().length < 2) return;
+
+    const sourceIsKannada = isKannadaText(text);
+    const targetField = field === 'title'
+      ? (sourceIsKannada ? 'title' : 'titleKn')
+      : (sourceIsKannada ? 'description' : 'descriptionKn');
+
+    // Skip if target field already has content (user might have entered manually)
+    const currentTargetValue = field === 'title'
+      ? (sourceIsKannada ? formData.title : formData.titleKn)
+      : (sourceIsKannada ? formData.description : formData.descriptionKn);
+
+    // Only skip if the source field is the Kannada one AND the English field has content
+    // Or if source is English AND the Kannada field has content
+    if (currentTargetValue && currentTargetValue.trim().length > 0) {
+      console.log(`⏭️ Skipping auto-translate: ${targetField} already has content`);
+      return;
+    }
+
+    // Set which field we're translating TO
+    const translatingToField = sourceIsKannada ? 'english' : 'kannada';
+    setTranslatingTo(prev => ({ ...prev, [field]: translatingToField }));
+    console.log(`🌐 Auto-translating ${field}: "${text.substring(0, 50)}..." (${sourceIsKannada ? 'Kannada→English' : 'English→Kannada'})`);
+
+    try {
+      const prompt = sourceIsKannada
+        ? `Translate the following Kannada text to English. Only provide the translation, no explanations or additional text:\n\n${text}`
+        : `Translate the following English text to Kannada (ಕನ್ನಡ). Only provide the translation in Kannada script, no explanations or additional text:\n\n${text}`;
+
+      const response = await callAIWithFallback(prompt);
+
+      if (response.success && response.content) {
+        const translatedText = response.content.trim();
+        console.log(`✅ Translation successful: "${translatedText.substring(0, 50)}..."`);
+
+        // Update the appropriate target field
+        if (field === 'title') {
+          if (sourceIsKannada) {
+            // Source was titleKn, update title (English)
+            setFormData(prev => ({ ...prev, title: translatedText }));
+          } else {
+            // Source was title (English), update titleKn
+            setFormData(prev => ({ ...prev, titleKn: translatedText }));
+          }
+        } else {
+          if (sourceIsKannada) {
+            // Source was descriptionKn, update description (English)
+            setFormData(prev => ({ ...prev, description: translatedText }));
+          } else {
+            // Source was description (English), update descriptionKn
+            setFormData(prev => ({ ...prev, descriptionKn: translatedText }));
+          }
+        }
+      } else {
+        console.log(`❌ Translation failed: ${response.error}`);
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+    } finally {
+      setTranslatingTo(prev => ({ ...prev, [field]: null }));
+    }
+  };
+
+  // Debounced translation trigger for title
+  const handleTitleChange = useCallback((text: string, isKannada: boolean) => {
+    if (isKannada) {
+      setFormData(prev => ({ ...prev, titleKn: text }));
+    } else {
+      setFormData(prev => ({ ...prev, title: text }));
+    }
+
+    // Clear existing timeout
+    if (translationTimeoutRef.current.title) {
+      clearTimeout(translationTimeoutRef.current.title);
+    }
+
+    // Only trigger translation if there's meaningful text
+    if (text.trim().length >= 3) {
+      translationTimeoutRef.current.title = setTimeout(() => {
+        autoTranslate(text, 'title');
+      }, 1000); // 1 second debounce
+    }
+  }, [formData]);
+
+  // Debounced translation trigger for description
+  const handleDescriptionChange = useCallback((text: string, isKannada: boolean) => {
+    if (isKannada) {
+      setFormData(prev => ({ ...prev, descriptionKn: text }));
+    } else {
+      setFormData(prev => ({ ...prev, description: text }));
+    }
+
+    // Clear existing timeout
+    if (translationTimeoutRef.current.description) {
+      clearTimeout(translationTimeoutRef.current.description);
+    }
+
+    // Only trigger translation if there's meaningful text
+    if (text.trim().length >= 3) {
+      translationTimeoutRef.current.description = setTimeout(() => {
+        autoTranslate(text, 'description');
+      }, 1000); // 1 second debounce
+    }
+  }, [formData]);
+
   useEffect(() => {
     fetchContent();
   }, []);
 
-  // Cleanup notification timer on unmount
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (notificationTimerRef.current) {
         clearTimeout(notificationTimerRef.current);
+      }
+      if (translationTimeoutRef.current.title) {
+        clearTimeout(translationTimeoutRef.current.title);
+      }
+      if (translationTimeoutRef.current.description) {
+        clearTimeout(translationTimeoutRef.current.description);
       }
     };
   }, []);
@@ -668,20 +830,17 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
         statusBarTranslucent={true}
       >
         <StatusBar barStyle="light-content" backgroundColor="rgba(0, 0, 0, 0.5)" />
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowModal(false)}
-        >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalDismissArea}
+            activeOpacity={1}
+            onPress={() => setShowModal(false)}
+          />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.keyboardAvoidContainer}
           >
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={(e) => e.stopPropagation()}
-            >
-              <View style={styles.modalContent}>
+            <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
                   {editingItem ? t('editContent') : t('addContent')}
@@ -700,26 +859,48 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
             >
               {/* Title (English) */}
               <View style={styles.formGroup}>
-                <Text style={styles.label}>{t('titleEnglish')} *</Text>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>{t('titleEnglish')} *</Text>
+                  {translatingTo.title === 'english' && (
+                    <View style={styles.translatingIndicator}>
+                      <ActivityIndicator size="small" color="#3B82F6" />
+                      <Text style={styles.translatingText}>{t('translating')}</Text>
+                    </View>
+                  )}
+                </View>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, translatingTo.title === 'english' && styles.inputTranslating]}
                   value={formData.title}
-                  onChangeText={(text) => setFormData({ ...formData, title: text })}
+                  onChangeText={(text) => handleTitleChange(text, false)}
                   placeholder={t('enterTitle')}
                   placeholderTextColor="#9CA3AF"
                 />
+                <Text style={styles.autoTranslateHint}>
+                  <Ionicons name="language" size={12} color="#6B7280" /> {t('autoTranslateBidirectional')}
+                </Text>
               </View>
 
               {/* Title (Kannada) */}
               <View style={styles.formGroup}>
-                <Text style={styles.label}>{t('titleKannada')}</Text>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>{t('titleKannada')}</Text>
+                  {translatingTo.title === 'kannada' && (
+                    <View style={styles.translatingIndicator}>
+                      <ActivityIndicator size="small" color="#3B82F6" />
+                      <Text style={styles.translatingText}>{t('translating')}</Text>
+                    </View>
+                  )}
+                </View>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, translatingTo.title === 'kannada' && styles.inputTranslating]}
                   value={formData.titleKn}
-                  onChangeText={(text) => setFormData({ ...formData, titleKn: text })}
+                  onChangeText={(text) => handleTitleChange(text, true)}
                   placeholder={t('enterTitleKannada')}
                   placeholderTextColor="#9CA3AF"
                 />
+                <Text style={styles.autoTranslateHint}>
+                  <Ionicons name="language" size={12} color="#6B7280" /> {t('autoTranslateBidirectional')}
+                </Text>
               </View>
 
               {/* URL (not for basicInfo) */}
@@ -741,38 +922,68 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
                 </View>
               )}
 
-              {/* Description (English) - for basicInfo */}
-              {selectedType === 'basicInfo' && (
-                <>
-                  <View style={styles.formGroup}>
-                    <Text style={styles.label}>{t('descriptionEnglish')}</Text>
-                    <TextInput
-                      style={[styles.input, styles.textArea]}
-                      value={formData.description}
-                      onChangeText={(text) => setFormData({ ...formData, description: text })}
-                      placeholder={t('enterDescription')}
-                      placeholderTextColor="#9CA3AF"
-                      multiline
-                      numberOfLines={6}
-                      textAlignVertical="top"
-                    />
-                  </View>
+              {/* Description (English) - for ALL content types */}
+              <View style={styles.formGroup}>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>
+                    {t('descriptionEnglish')}
+                    <Text style={styles.optionalLabel}> ({t('optional')})</Text>
+                  </Text>
+                  {translatingTo.description === 'english' && (
+                    <View style={styles.translatingIndicator}>
+                      <ActivityIndicator size="small" color="#3B82F6" />
+                      <Text style={styles.translatingText}>{t('translating')}</Text>
+                    </View>
+                  )}
+                </View>
+                <TextInput
+                  style={[styles.input, styles.textArea, translatingTo.description === 'english' && styles.inputTranslating]}
+                  value={formData.description}
+                  onChangeText={(text) => handleDescriptionChange(text, false)}
+                  placeholder={selectedType === 'video'
+                    ? t('enterVideoDescription')
+                    : selectedType === 'image'
+                    ? t('enterImageDescription')
+                    : selectedType === 'pdf'
+                    ? t('enterPdfDescription')
+                    : t('enterDescription')}
+                  placeholderTextColor="#9CA3AF"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+                <Text style={styles.autoTranslateHint}>
+                  <Ionicons name="language" size={12} color="#6B7280" /> {t('autoTranslateBidirectional')}
+                </Text>
+              </View>
 
-                  <View style={styles.formGroup}>
-                    <Text style={styles.label}>{t('descriptionKannada')}</Text>
-                    <TextInput
-                      style={[styles.input, styles.textArea]}
-                      value={formData.descriptionKn}
-                      onChangeText={(text) => setFormData({ ...formData, descriptionKn: text })}
-                      placeholder={t('enterDescriptionKannada')}
-                      placeholderTextColor="#9CA3AF"
-                      multiline
-                      numberOfLines={6}
-                      textAlignVertical="top"
-                    />
-                  </View>
-                </>
-              )}
+              <View style={styles.formGroup}>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>
+                    {t('descriptionKannada')}
+                    <Text style={styles.optionalLabel}> ({t('optional')})</Text>
+                  </Text>
+                  {translatingTo.description === 'kannada' && (
+                    <View style={styles.translatingIndicator}>
+                      <ActivityIndicator size="small" color="#3B82F6" />
+                      <Text style={styles.translatingText}>{t('translating')}</Text>
+                    </View>
+                  )}
+                </View>
+                <TextInput
+                  style={[styles.input, styles.textArea, translatingTo.description === 'kannada' && styles.inputTranslating]}
+                  value={formData.descriptionKn}
+                  onChangeText={(text) => handleDescriptionChange(text, true)}
+                  placeholder={t('enterDescriptionKannada')}
+                  placeholderTextColor="#9CA3AF"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+                <Text style={styles.autoTranslateHint}>
+                  <Ionicons name="language" size={12} color="#6B7280" /> {t('autoTranslateBidirectional')}
+                </Text>
+              </View>
 
               {/* Order */}
               <View style={styles.formGroup}>
@@ -836,7 +1047,7 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
                             {formData.url && selectedType === 'image' && (
                               <View style={styles.imagePreviewContainer}>
                                 <Image
-                                  source={{ uri: formData.url }}
+                                  source={{ uri: getDirectImageUrl(formData.url) }}
                                   style={styles.imagePreview}
                                   resizeMode="cover"
                                 />
@@ -963,10 +1174,9 @@ export default function AdminContentManagementScreen({ onBack }: AdminContentMan
                 </TouchableOpacity>
               </View>
               </ScrollView>
-              </View>
-            </TouchableOpacity>
+            </View>
           </KeyboardAvoidingView>
-        </TouchableOpacity>
+        </View>
       </Modal>
     </View>
   );
@@ -1150,19 +1360,19 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+  },
+  modalDismissArea: {
+    height: '10%',
   },
   keyboardAvoidContainer: {
+    flex: 1,
     width: '100%',
-    height: '90%',
   },
   modalContent: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    height: '100%',
-    width: '100%',
-    flexDirection: 'column',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1192,11 +1402,46 @@ const styles = StyleSheet.create({
   formGroup: {
     marginBottom: 18,
   },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   label: {
     fontSize: 14,
     fontWeight: '600',
     color: '#374151',
-    marginBottom: 8,
+    marginBottom: 0,
+  },
+  optionalLabel: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#9CA3AF',
+  },
+  translatingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  translatingText: {
+    fontSize: 11,
+    color: '#3B82F6',
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  inputTranslating: {
+    borderColor: '#3B82F6',
+    backgroundColor: '#F0F9FF',
+  },
+  autoTranslateHint: {
+    fontSize: 11,
+    color: '#6B7280',
+    marginTop: 6,
+    fontStyle: 'italic',
   },
   helperText: {
     fontSize: 12,

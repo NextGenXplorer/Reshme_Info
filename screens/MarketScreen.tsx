@@ -1,158 +1,96 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
-  Dimensions,
-  TouchableOpacity,
   FlatList,
-  SafeAreaView,
-  Platform,
-  Alert,
+  TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
+  Alert,
+  Animated,
+  Easing,
+  ScrollView,
+  Image,
+  Platform,
+  SafeAreaView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import NetInfo from '@react-native-community/netinfo';
-import Header from '../components/Header';
+import * as Speech from 'expo-speech';
 import { db, COLLECTIONS } from '../firebase.config';
 import { CocoonPrice } from '../types';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS } from '../utils/cacheUtils';
-
-const { width } = Dimensions.get('window');
-
-interface FilterOptions {
-  breed: 'All' | 'CB' | 'BV';
-  market: string;
-  dateRange: 'today' | 'yesterday' | 'week' | 'all';
-  sortBy: 'market' | 'avgPrice' | 'maxPrice' | 'minPrice' | 'date';
-  sortOrder: 'asc' | 'desc';
-}
-
-interface BreedPriceData {
-  breed: string;
-  avgPrice: number;
-  maxPrice: number;
-  minPrice: number;
-  count: number;
-}
-
-interface MarketSummary {
-  market: string;
-  avgPrice: number;
-  maxPrice: number;
-  minPrice: number;
-  lotNumbers: string[];
-  breeds: string[];
-  breedPrices: BreedPriceData[];
-  lastUpdated: Date;
-  totalListings: number;
-  qualities: string[];
-}
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import Header from '../components/Header';
+import { saveToCache, loadFromCache, getCacheAge, CACHE_KEYS, CachedData } from '../utils/cacheUtils';
 
 export default function MarketScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [prices, setPrices] = useState<CocoonPrice[]>([]);
-  const [marketSummaries, setMarketSummaries] = useState<MarketSummary[]>([]);
-  const [filteredSummaries, setFilteredSummaries] = useState<MarketSummary[]>([]);
+  const [filteredPrices, setFilteredPrices] = useState<CocoonPrice[]>([]);
+  const [selectedBreed, setSelectedBreed] = useState<string>('all');
+  const [selectedMarket, setSelectedMarket] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState<'from' | 'to' | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [cacheTimestamp, setCacheTimestamp] = useState<string>('');
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
-  const [filters, setFilters] = useState<FilterOptions>({
-    breed: 'All',
-    market: 'All',
-    dateRange: 'today',
-    sortBy: 'market',
-    sortOrder: 'asc',
-  });
+  const animatedValues = useRef<Animated.Value[]>([]).current;
+  const slideAnimation = useRef(new Animated.Value(0)).current;
 
-  const uniqueMarkets = ['All', ...Array.from(new Set(prices.map(p => p.market)))];
+  const breeds = ['all', 'CB', 'BV'];
+  const markets = ['all', 'Ramanagara', 'Kollegala', 'Kanakapura', 'Siddalagatta', 'Kolar'];
 
-  useEffect(() => {
-    fetchMarketData();
-  }, []);
-
-  useEffect(() => {
-    generateMarketSummaries();
-  }, [prices, filters.dateRange]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [filters, marketSummaries]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchMarketData();
-    setRefreshing(false);
-  };
-
-  const getDateRangeFilter = () => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    switch (filters.dateRange) {
-      case 'today':
-        const todayEnd = new Date(today);
-        todayEnd.setHours(23, 59, 59, 999);
-        return { start: today, end: todayEnd };
-
-      case 'yesterday':
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayEnd = new Date(yesterday);
-        yesterdayEnd.setHours(23, 59, 59, 999);
-        return { start: yesterday, end: yesterdayEnd };
-
-      case 'week':
-        const weekAgo = new Date(today);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return { start: weekAgo, end: now };
-
-      case 'all':
-      default:
-        return null;
-    }
-  };
-
-  const fetchMarketData = async () => {
+  const fetchPrices = async (dateFilter?: Date) => {
     try {
-      setLoading(true);
       // Check internet connectivity first
       const netState = await NetInfo.fetch();
 
       if (!netState.isConnected) {
         // Load from cache when offline
-        const cachedData = await loadFromCache(CACHE_KEYS.MARKET_PRICES);
+        const cachedData = await loadFromCache(CACHE_KEYS.HOME_PRICES);
+
         if (cachedData && cachedData.data.length > 0) {
           setPrices(cachedData.data);
           setIsOffline(true);
           setCacheTimestamp(getCacheAge(cachedData));
         } else {
+          // No cache available
           Alert.alert(t('noInternet'), t('noInternetMessage'));
         }
+
         setLoading(false);
+        setRefreshing(false);
         return;
       }
 
+      // Online - fetch from Firebase
       setIsOffline(false);
 
-      // Fetch all recent data (last 30 days for caching)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      let q;
 
-      const q = query(
-        collection(db, COLLECTIONS.COCOON_PRICES),
-        where('lastUpdated', '>=', Timestamp.fromDate(thirtyDaysAgo)),
-        orderBy('lastUpdated', 'desc')
-      );
+      if (dateFilter) {
+        const startOfDay = new Date(dateFilter);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(dateFilter);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        q = query(
+          collection(db, COLLECTIONS.COCOON_PRICES),
+          where('lastUpdated', '>=', Timestamp.fromDate(startOfDay)),
+          where('lastUpdated', '<=', Timestamp.fromDate(endOfDay)),
+          orderBy('lastUpdated', 'desc')
+        );
+      } else {
+        q = query(collection(db, COLLECTIONS.COCOON_PRICES), orderBy('lastUpdated', 'desc'));
+      }
 
       const querySnapshot = await getDocs(q);
       const pricesData: CocoonPrice[] = [];
@@ -174,13 +112,23 @@ export default function MarketScreen() {
       });
 
       setPrices(pricesData);
-      await saveToCache(CACHE_KEYS.MARKET_PRICES, pricesData);
+
+      // Save to cache
+      await saveToCache(CACHE_KEYS.HOME_PRICES, pricesData);
       setCacheTimestamp('');
+
+      if (dateFilter) {
+        const dateExists = pricesData.length > 0;
+        if (!dateExists) {
+          Alert.alert(t('noData'), t('noDataMessage'));
+        }
+      }
     } catch (error) {
       // Check if error is due to network issues
       const netState = await NetInfo.fetch();
       if (!netState.isConnected) {
-        const cachedData = await loadFromCache(CACHE_KEYS.MARKET_PRICES);
+        // Try cache on error
+        const cachedData = await loadFromCache(CACHE_KEYS.HOME_PRICES);
         if (cachedData && cachedData.data.length > 0) {
           setPrices(cachedData.data);
           setIsOffline(true);
@@ -191,348 +139,335 @@ export default function MarketScreen() {
       } else {
         Alert.alert(t('error'), t('failedToFetch'));
       }
-      console.error('Error fetching market data:', error);
+      console.error('Error fetching prices:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const generateMarketSummaries = () => {
-    // Filter prices by date range first
-    const dateFilter = getDateRangeFilter();
-    let filteredPrices = prices;
+  useEffect(() => {
+    fetchPrices(selectedDate); // Fetch today's data on initial load
+    Animated.timing(slideAnimation, {
+      toValue: 1,
+      duration: 1000,
+      delay: 400,
+      easing: Easing.out(Easing.back(1.2)),
+      useNativeDriver: true,
+    }).start();
 
-    if (dateFilter) {
-      filteredPrices = prices.filter(price => {
-        const priceDate = price.lastUpdated;
-        return priceDate >= dateFilter.start && priceDate <= dateFilter.end;
+  }, []);
+
+  const animateCards = (itemsToAnimate: CocoonPrice[]) => {
+    animatedValues.length = 0;
+    itemsToAnimate.forEach(() => {
+      animatedValues.push(new Animated.Value(0));
+    });
+
+    const animations = itemsToAnimate.map((_, i) => {
+      return Animated.timing(animatedValues[i], {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+        delay: i * 120,
+      });
+    });
+    Animated.stagger(80, animations).start();
+  };
+
+  useEffect(() => {
+    let filtered = prices;
+
+    if (selectedBreed !== 'all') {
+      filtered = filtered.filter((price) => price.breed === selectedBreed);
+    }
+
+    if (selectedMarket !== 'all') {
+      filtered = filtered.filter((price) => price.market === selectedMarket);
+    }
+
+    // Sort alphabetically by market (A-Z)
+    filtered = filtered.sort((a, b) => a.market.localeCompare(b.market));
+
+    setFilteredPrices(filtered);
+    animateCards(filtered);
+  }, [selectedBreed, selectedMarket, prices]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchPrices(selectedDate); // Refresh today's data
+  };
+
+  const onDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+
+    if (date) {
+      setSelectedDate(date);
+      fetchPrices(date);
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
+  };
+
+  const resetDateFilter = () => {
+    const today = new Date();
+    setSelectedDate(today); // Reset to today
+    fetchPrices(today); // Fetch today's data
+  };
+
+  const formatDateForDisplay = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return t('today');
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return t('yesterday');
+    } else {
+      return date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
       });
     }
+  };
 
-    const marketGroups: { [key: string]: CocoonPrice[] } = {};
+  const speakPrice = async (item: CocoonPrice) => {
+    try {
+      // Stop any ongoing speech
+      await Speech.stop();
 
-    filteredPrices.forEach(price => {
-      if (!marketGroups[price.market]) {
-        marketGroups[price.market] = [];
-      }
-      marketGroups[price.market].push(price);
-    });
-
-    const summaries: MarketSummary[] = Object.keys(marketGroups).map(marketName => {
-      const marketPrices = marketGroups[marketName];
-      const avgPrices = marketPrices.map(p => p.avgPrice).filter(p => p != null);
-      const maxPrices = marketPrices.map(p => p.maxPrice).filter(p => p != null);
-      const minPrices = marketPrices.map(p => p.minPrice).filter(p => p != null);
-
-      if (marketPrices.length === 0) {
-        return null;
+      // If currently playing this item, stop it
+      if (playingId === item.id) {
+        setPlayingId(null);
+        return;
       }
 
-      // Calculate breed-specific prices
-      const breedGroups: { [key: string]: CocoonPrice[] } = {};
-      marketPrices.forEach(price => {
-        if (!breedGroups[price.breed]) {
-          breedGroups[price.breed] = [];
-        }
-        breedGroups[price.breed].push(price);
+      setPlayingId(item.id);
+
+      // Get current language
+      const currentLang = i18n.language;
+      const langCode = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
+
+      // Build the speech text based on current language
+      const breedText = t(`breed_${item.breed}` as any, item.breed);
+      const marketText = t(`market_${item.market}` as any, item.market);
+
+      // Form natural sentences based on language
+      let speechText = '';
+
+      if (currentLang === 'kn') {
+        // Kannada sentence formation
+        speechText = t('tts_price_kannada', {
+          breed: breedText,
+          grade: item.quality,
+          market: marketText,
+          lot: item.lotNumber,
+          maxPrice: item.maxPrice,
+          avgPrice: item.avgPrice,
+          minPrice: item.minPrice
+        });
+      } else {
+        // English sentence formation
+        speechText = t('tts_price_english', {
+          breed: breedText,
+          grade: item.quality,
+          market: marketText,
+          lot: item.lotNumber,
+          maxPrice: item.maxPrice,
+          avgPrice: item.avgPrice,
+          minPrice: item.minPrice
+        });
+      }
+
+      // Speak the text with natural rate
+      await Speech.speak(speechText, {
+        language: langCode,
+        pitch: 1.0,
+        rate: 0.75, // Natural speaking rate
+        onDone: () => setPlayingId(null),
+        onStopped: () => setPlayingId(null),
+        onError: () => setPlayingId(null),
       });
-
-      const breedPrices: BreedPriceData[] = Object.keys(breedGroups).map(breed => {
-        const breedPricesList = breedGroups[breed];
-        const breedAvg = breedPricesList.map(p => p.avgPrice).filter(p => p != null);
-        const breedMax = breedPricesList.map(p => p.maxPrice).filter(p => p != null);
-        const breedMin = breedPricesList.map(p => p.minPrice).filter(p => p != null);
-
-        return {
-          breed,
-          avgPrice: breedAvg.length > 0 ? Math.round(breedAvg.reduce((sum, p) => sum + p, 0) / breedAvg.length) : 0,
-          maxPrice: breedMax.length > 0 ? Math.max(...breedMax) : 0,
-          minPrice: breedMin.length > 0 ? Math.min(...breedMin) : 0,
-          count: breedPricesList.length,
-        };
-      });
-
-      return {
-        market: marketName,
-        avgPrice: avgPrices.length > 0 ? Math.round(avgPrices.reduce((sum, price) => sum + price, 0) / avgPrices.length) : 0,
-        maxPrice: maxPrices.length > 0 ? Math.max(...maxPrices) : 0,
-        minPrice: minPrices.length > 0 ? Math.min(...minPrices) : 0,
-        lotNumbers: [...new Set(marketPrices.map(p => p.lotNumber?.toString() || ''))].filter(Boolean),
-        breeds: [...new Set(marketPrices.map(p => p.breed))],
-        breedPrices,
-        qualities: [...new Set(marketPrices.map(p => p.quality))],
-        lastUpdated: new Date(Math.max(...marketPrices.map(p => p.lastUpdated.getTime()))),
-        totalListings: marketPrices.length,
-      };
-    });
-
-    setMarketSummaries(summaries.filter(s => s !== null) as MarketSummary[]);
-  };
-
-  const applyFilters = () => {
-    let filtered = [...marketSummaries];
-
-    // Filter by breed
-    if (filters.breed !== 'All') {
-      filtered = filtered.filter(summary => summary.breeds.includes(filters.breed));
-    }
-
-    // Filter by market
-    if (filters.market !== 'All') {
-      filtered = filtered.filter(summary => summary.market === filters.market);
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      let compareValue = 0;
-
-      switch (filters.sortBy) {
-        case 'market':
-          compareValue = a.market.localeCompare(b.market);
-          break;
-        case 'avgPrice':
-          compareValue = a.avgPrice - b.avgPrice;
-          break;
-        case 'maxPrice':
-          compareValue = a.maxPrice - b.maxPrice;
-          break;
-        case 'minPrice':
-          compareValue = a.minPrice - b.minPrice;
-          break;
-        case 'date':
-          compareValue = a.lastUpdated.getTime() - b.lastUpdated.getTime();
-          break;
-      }
-
-      return filters.sortOrder === 'asc' ? compareValue : -compareValue;
-    });
-
-    setFilteredSummaries(filtered);
-  };
-
-  const updateFilter = (key: keyof FilterOptions, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      breed: 'All',
-      market: 'All',
-      dateRange: 'today',
-      sortBy: 'market',
-      sortOrder: 'asc',
-    });
-  };
-
-  const getDateRangeLabel = () => {
-    switch (filters.dateRange) {
-      case 'today':
-        return t('today');
-      case 'yesterday':
-        return t('yesterday');
-      case 'week':
-        return t('last7Days');
-      case 'all':
-        return t('allTime');
-      default:
-        return t('today');
+    } catch (error) {
+      console.error('TTS Error:', error);
+      setPlayingId(null);
+      Alert.alert(t('error'), t('speechError') || 'Text-to-speech error');
     }
   };
 
-  const FilterChip = ({ label, isActive, onPress }: { label: string; isActive: boolean; onPress: () => void }) => (
+  const ModernFilterButton = ({
+    title,
+    isSelected,
+    onPress,
+    icon,
+  }: {
+    title: string;
+    isSelected: boolean;
+    onPress: () => void;
+    icon?: string;
+  }) => (
     <TouchableOpacity
-      style={[styles.filterChip, isActive && styles.filterChipActive]}
+      style={[styles.ultraModernFilter, isSelected && styles.ultraModernFilterSelected]}
       onPress={onPress}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
     >
-      <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
-        {label}
-      </Text>
+      {isSelected ? (
+        <View style={styles.ultraModernFilterGradient}>
+          {icon && <Ionicons name={icon as any} size={14} color="#FFFFFF" style={{ marginRight: 6 }} />}
+          <Text style={styles.ultraModernFilterTextSelected}>{title}</Text>
+        </View>
+      ) : (
+        <View style={styles.ultraModernFilterContent}>
+          {icon && <Ionicons name={icon as any} size={14} color="#6B7280" style={{ marginRight: 6 }} />}
+          <Text style={styles.ultraModernFilterText}>{title}</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 
-  const renderBreedPrice = (breedData: BreedPriceData) => (
-    <View key={breedData.breed} style={styles.breedPriceRow}>
-      <View style={[styles.breedPriceBadge, {
-        backgroundColor: breedData.breed === 'CB' ? '#3B82F615' : '#10B98115'
-      }]}>
-        <Text style={[styles.breedPriceText, {
-          color: breedData.breed === 'CB' ? '#3B82F6' : '#10B981'
-        }]}>
-          {t(`breed_${breedData.breed}` as any, breedData.breed)}
-        </Text>
-      </View>
-      <View style={styles.breedPriceDetails}>
-        <Text style={styles.breedPriceValue}>₹{breedData.avgPrice}</Text>
-        <Text style={styles.breedPriceRange}>
-          ₹{breedData.minPrice} - ₹{breedData.maxPrice}
-        </Text>
-      </View>
-      <Text style={styles.breedCount}>{breedData.count} {t('listings')}</Text>
-    </View>
-  );
 
-  const renderMarketCard = ({ item }: { item: MarketSummary }) => (
-    <View style={styles.marketCard}>
-      {/* Header */}
-      <View style={styles.marketCardHeader}>
-        <View style={styles.marketInfo}>
-          <View style={styles.marketTitleRow}>
-            <Ionicons name="location" size={20} color="#3B82F6" />
-            <Text style={styles.marketNameText}>{t(`market_${item.market}` as any, item.market)}</Text>
-          </View>
-          <Text style={styles.listingsText}>
-            {item.totalListings} {item.totalListings === 1 ? t('listing') : t('listings')} • {item.qualities.join(', ')}
-          </Text>
-        </View>
-      </View>
-
-      {/* Overall Prices */}
-      <View style={styles.overallPricesCard}>
-        <View style={styles.priceColumn}>
-          <View style={styles.priceIconContainer}>
-            <Ionicons name="trending-up" size={16} color="#10B981" />
-          </View>
-          <Text style={styles.priceCardLabel}>{t('maxPriceLabel')}</Text>
-          <Text style={styles.maxPriceText}>₹{item.maxPrice}</Text>
-        </View>
-        <View style={styles.priceDivider} />
-        <View style={styles.priceColumn}>
-          <View style={[styles.priceIconContainer, { backgroundColor: '#3B82F615' }]}>
-            <Ionicons name="analytics" size={16} color="#3B82F6" />
-          </View>
-          <Text style={styles.priceCardLabel}>{t('avgPriceLabel')}</Text>
-          <Text style={styles.avgPriceText}>₹{item.avgPrice}</Text>
-        </View>
-        <View style={styles.priceDivider} />
-        <View style={styles.priceColumn}>
-          <View style={[styles.priceIconContainer, { backgroundColor: '#EF444415' }]}>
-            <Ionicons name="trending-down" size={16} color="#EF4444" />
-          </View>
-          <Text style={styles.priceCardLabel}>{t('minPriceLabel')}</Text>
-          <Text style={styles.minPriceText}>₹{item.minPrice}</Text>
-        </View>
-      </View>
-
-      {/* Breed-Specific Prices */}
-      {item.breedPrices.length > 0 && (
-        <View style={styles.breedPricesSection}>
-          <Text style={styles.breedPricesTitle}>{t('breedPrices') || 'Breed-wise Prices'}</Text>
-          {item.breedPrices.map(renderBreedPrice)}
-        </View>
-      )}
-
-      {/* Lot Numbers */}
-      {item.lotNumbers.length > 0 && (
-        <View style={styles.lotSection}>
-          <Ionicons name="cube-outline" size={14} color="#6B7280" />
-          <Text style={styles.lotLabel}>{t('lotNumbersLabel')}:</Text>
-          <Text style={styles.lotText}>
-            {item.lotNumbers.slice(0, 3).join(', ')}
-            {item.lotNumbers.length > 3 && ` +${item.lotNumbers.length - 3}`}
-          </Text>
-        </View>
-      )}
-
-      {/* Updated Time */}
-      <View style={styles.updateSection}>
-        <Ionicons name="time-outline" size={14} color="#6B7280" />
-        <Text style={styles.updateText}>
-          {t('updatedLabel')} {item.lastUpdated.toLocaleDateString('en-IN', {
-            day: '2-digit',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}
-        </Text>
-      </View>
-    </View>
-  );
-
-  const OverviewCard = () => {
-    const totalMarkets = marketSummaries.length;
-    const totalListings = prices.length;
-    const overallAvgPrice = marketSummaries.length > 0
-      ? Math.round(marketSummaries.reduce((sum, market) => sum + market.avgPrice, 0) / marketSummaries.length)
-      : 0;
-    const highestPrice = marketSummaries.length > 0
-      ? Math.max(...marketSummaries.map(m => m.maxPrice))
-      : 0;
-
+  const renderPriceCard = ({ item }: { item: CocoonPrice }) => {
     return (
-      <View style={styles.overviewCard}>
-        <Text style={styles.overviewTitle}>{t('marketOverview')}</Text>
-        <View style={styles.overviewStats}>
-          <View style={styles.overviewStat}>
-            <View style={[styles.overviewIcon, { backgroundColor: '#3B82F615' }]}>
-              <Ionicons name="business" size={20} color="#3B82F6" />
+      <View style={styles.ultraModernCard}>
+        <View style={styles.ultraModernCardGradient}>
+          <View style={styles.ultraModernCardContent}>
+            {/* Header with breed and quality */}
+            <View style={styles.ultraModernCardHeader}>
+              <View style={styles.breedSection}>
+                <View style={styles.breedIconContainer}>
+                  <Ionicons name="leaf" size={18} color="#10B981" />
+                </View>
+                <View style={styles.breedInfo}>
+                  <Text style={styles.ultraModernBreedText}>{t(`breed_${item.breed}` as any, item.breed)}</Text>
+                  <View style={styles.qualityBadgeContainer}>
+                    <View style={styles.ultraModernQualityBadge}>
+                      <Ionicons name="star" size={10} color="#92400E" />
+                      <Text style={styles.ultraModernQualityText}>
+                        {t('grade')} {item.quality}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.headerRightSection}>
+                <TouchableOpacity
+                  style={[
+                    styles.playButton,
+                    playingId === item.id && styles.playButtonActive
+                  ]}
+                  onPress={() => speakPrice(item)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={playingId === item.id ? "stop-circle" : "play-circle"}
+                    size={32}
+                    color={playingId === item.id ? "#EF4444" : "#3B82F6"}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-            <Text style={styles.overviewNumber}>{totalMarkets}</Text>
-            <Text style={styles.overviewLabel}>{t('activeMarkets')}</Text>
-          </View>
-          <View style={styles.overviewStat}>
-            <View style={[styles.overviewIcon, { backgroundColor: '#10B98115' }]}>
-              <Ionicons name="receipt" size={20} color="#10B981" />
+
+            {/* Market and Lot badges */}
+            <View style={styles.marketLotsSection}>
+              <View style={styles.ultraModernMarketBadge}>
+                <Ionicons name="location" size={10} color="#5B21B6" />
+                <Text style={styles.ultraModernMarketText}>{t(`market_${item.market}` as any, item.market)}</Text>
+              </View>
+              <View style={styles.lotNumberBadge}>
+                <Ionicons name="apps" size={10} color="#92400E" />
+                <Text style={styles.lotNumberText}>{t('lot')}: {item.lotNumber}</Text>
+              </View>
             </View>
-            <Text style={styles.overviewNumber}>{totalListings}</Text>
-            <Text style={styles.overviewLabel}>{t('totalListings')}</Text>
-          </View>
-          <View style={styles.overviewStat}>
-            <View style={[styles.overviewIcon, { backgroundColor: '#F59E0B15' }]}>
-              <Ionicons name="analytics" size={20} color="#F59E0B" />
+
+            {/* Price Table */}
+            <View style={styles.priceTable}>
+              <Text style={styles.priceTableTitle}>{t('priceDetails')}</Text>
+
+              {/* Table Header */}
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>{t('type')}</Text>
+                <Text style={styles.tableHeaderText}>{t('price')}</Text>
+                <Text style={styles.tableHeaderText}>{t('status')}</Text>
+              </View>
+
+              {/* Table Rows */}
+              <View style={[styles.tableRow, styles.tableRowHighlight]}>
+                <Text style={[styles.tableCellType, styles.tableCellHighlight]}>{t('maximum')}</Text>
+                <Text style={[styles.tableCellPrice, styles.tableCellHighlight]}>₹{item.maxPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="trending-up" size={14} color="#10B981" />
+                  <Text style={[styles.tableCellStatus, { color: '#10B981' }]}>{t('high')}</Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCellType}>{t('average')}</Text>
+                <Text style={styles.tableCellPrice}>₹{item.avgPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="analytics" size={14} color="#6366F1" />
+                  <Text style={[styles.tableCellStatus, { color: '#6366F1' }]}>{t('avg')}</Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCellType}>{t('minimum')}</Text>
+                <Text style={styles.tableCellPrice}>₹{item.minPrice}</Text>
+                <View style={styles.tableStatusCell}>
+                  <Ionicons name="trending-down" size={14} color="#EF4444" />
+                  <Text style={[styles.tableCellStatus, { color: '#EF4444' }]}>{t('low')}</Text>
+                </View>
+              </View>
             </View>
-            <Text style={styles.overviewNumber}>₹{overallAvgPrice}</Text>
-            <Text style={styles.overviewLabel}>{t('avg')}</Text>
-          </View>
-          <View style={styles.overviewStat}>
-            <View style={[styles.overviewIcon, { backgroundColor: '#10B98115' }]}>
-              <Ionicons name="trending-up" size={20} color="#10B981" />
+
+            {/* Footer with update time */}
+            <View style={styles.ultraModernFooter}>
+              <View style={styles.updateTimestamp}>
+                <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+                <Text style={styles.ultraModernUpdateText}>
+                  {t('updated')}: {item.lastUpdated.toLocaleDateString()}
+                </Text>
+              </View>
             </View>
-            <Text style={styles.overviewNumber}>₹{highestPrice}</Text>
-            <Text style={styles.overviewLabel}>{t('highestPrice')}</Text>
           </View>
         </View>
       </View>
     );
   };
 
-  const EmptyState = () => (
-    <View style={styles.emptyState}>
-      <View style={styles.emptyIconContainer}>
-        <Ionicons name="calendar-outline" size={64} color="#D1D5DB" />
-      </View>
-      <Text style={styles.emptyTitle}>{t('noMarketsFound')}</Text>
-      <Text style={styles.emptySubtitle}>
-        {t('noDataForDateRange', { dateRange: getDateRangeLabel().toLowerCase() })}
-      </Text>
-      <TouchableOpacity style={styles.clearFiltersButton} onPress={() => updateFilter('dateRange', 'all')}>
-        <Text style={styles.clearFiltersButtonText}>{t('viewAllData')}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  if (loading && !refreshing) {
+  if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Header
-          title={t('marketCenters')}
-          subtitle={t('silkCocoonTradingHubs')}
-        />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text style={styles.loadingText}>{t('loadingMarketData')}</Text>
+      <SafeAreaView style={styles.ultraModernContainer}>
+        <View style={styles.ultraModernLoadingContainer}>
+          <View style={styles.loadingContent}>
+            <View style={styles.loadingSpinner}>
+              <View style={styles.loadingSpinnerGradient}>
+                <Image
+                  source={require('../assets/reshme_logo.png')}
+                  style={styles.loadingLogoImage}
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
+            <Text style={styles.ultraModernLoadingText}>{t('loading')}</Text>
+            <Text style={styles.ultraModernLoadingSubtext}>{t('fetchingLatestMarketPrices')}</Text>
+          </View>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header
-        title={t('marketCenters')}
-        subtitle={t('silkCocoonTradingHubs')}
-      />
-
+    <SafeAreaView style={styles.ultraModernContainer}>
+      <Header title={t('cocoonPrices')} />
+      {/* Offline Mode Banner */}
       {isOffline && (
         <View style={styles.offlineBanner}>
           <View style={styles.offlineBannerContent}>
@@ -540,581 +475,555 @@ export default function MarketScreen() {
             <View style={styles.offlineBannerText}>
               <Text style={styles.offlineBannerTitle}>{t('offlineMode')}</Text>
               <Text style={styles.offlineBannerSubtitle}>
-                {t('dataFromCache')} • {cacheTimestamp}
+                {t('dataFromCache')} • {t('lastUpdated')}: {cacheTimestamp}
               </Text>
             </View>
           </View>
         </View>
       )}
+      {/* Filter section */}
+      <View style={styles.filterHeader}>
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setIsFilterVisible(!isFilterVisible)}
+        >
+          <Ionicons
+            name={isFilterVisible ? 'chevron-up-circle' : 'chevron-down-circle'}
+            size={24}
+            color="#3B82F6"
+          />
+          <Text style={styles.toggleButtonText}>
+            {isFilterVisible ? t('hideFilters') : t('showFilters')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {isFilterVisible && (
+        <View style={styles.ultraModernFilterSection}>
+          <View style={styles.ultraModernFilterCard}>
+            <View style={styles.filterContent}>
+              <View style={styles.filterCategory}>
+              <View style={styles.filterCategoryHeader}>
+                <View style={styles.filterCategoryIcon}>
+                  <Ionicons name="options" size={14} color="#6B7280" />
+                </View>
+                <Text style={styles.ultraModernFilterTitle}>{t('filterByBreed')}</Text>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.ultraModernFilterList}
+              >
+                {breeds.map((item) => (
+                  <ModernFilterButton
+                    key={item}
+                    title={t(`breed_${item}`)}
+                    isSelected={selectedBreed === item}
+                    onPress={() => setSelectedBreed(item)}
+                    icon={item === 'all' ? 'grid' : 'leaf'}
+                  />
+                ))}
+              </ScrollView>
+            </View>
 
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
+            <View style={styles.filterCategory}>
+              <View style={styles.filterCategoryHeader}>
+                <View style={styles.filterCategoryIcon}>
+                  <Ionicons name="location" size={14} color="#6B7280" />
+                </View>
+                <Text style={styles.ultraModernFilterTitle}>{t('filterByMarket')}</Text>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.ultraModernFilterList}
+              >
+                {markets.map((item) => (
+                  <ModernFilterButton
+                    key={item}
+                    title={t(`market_${item}`)}
+                    isSelected={selectedMarket === item}
+                    onPress={() => setSelectedMarket(item)}
+                    icon={item === 'all' ? 'grid' : 'location'}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+
+              <View style={styles.filterCategory}>
+                <View style={styles.filterCategoryHeader}>
+                  <View style={styles.filterCategoryIcon}>
+                    <Ionicons name="calendar" size={14} color="#6B7280" />
+                  </View>
+                  <Text style={styles.ultraModernFilterTitle}>{t('filterByDateTitle')}</Text>
+                </View>
+                <View style={styles.dateFilterContainer}>
+                  <TouchableOpacity
+                    style={styles.dateFilterButton}
+                    onPress={showDatePickerModal}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.dateFilterContent}>
+                      <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+                      <Text style={styles.dateFilterText}>
+                        {formatDateForDisplay(selectedDate)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.resetDateButton}
+                    onPress={resetDateFilter}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="refresh" size={16} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Price list */}
+      <FlatList
+        data={filteredPrices}
+        keyExtractor={(item) => item.id}
+        renderItem={renderPriceCard}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={handleRefresh}
+            onRefresh={onRefresh}
             colors={['#3B82F6']}
             tintColor="#3B82F6"
+            progressBackgroundColor="#FFFFFF"
           />
         }
-      >
-        <OverviewCard />
+        contentContainerStyle={styles.ultraModernListContainer}
+        showsVerticalScrollIndicator={false}
+      />
 
-        {/* Date Range Filter - Always Visible */}
-        <View style={styles.dateRangeContainer}>
-          <View style={styles.dateRangeHeader}>
-            <Ionicons name="calendar" size={18} color="#3B82F6" />
-            <Text style={styles.dateRangeTitle}>{t('showingDataFor')}:</Text>
-          </View>
-          <View style={styles.dateRangeChips}>
-            {[
-              { key: 'today', label: t('today'), icon: 'today' },
-              { key: 'yesterday', label: t('yesterday'), icon: 'time' },
-              { key: 'week', label: t('last7Days'), icon: 'calendar' },
-              { key: 'all', label: t('allTime'), icon: 'infinite' }
-            ].map(range => (
-              <TouchableOpacity
-                key={range.key}
-                style={[
-                  styles.dateRangeChip,
-                  filters.dateRange === range.key && styles.dateRangeChipActive
-                ]}
-                onPress={() => updateFilter('dateRange', range.key)}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name={range.icon as any}
-                  size={16}
-                  color={filters.dateRange === range.key ? '#FFFFFF' : '#6B7280'}
-                />
-                <Text style={[
-                  styles.dateRangeChipText,
-                  filters.dateRange === range.key && styles.dateRangeChipTextActive
-                ]}>
-                  {range.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Compact Filter Section */}
-        <View style={styles.filterContainer}>
-          <TouchableOpacity
-            style={styles.filterToggleButton}
-            onPress={() => setShowFilters(!showFilters)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.filterToggleLeft}>
-              <Ionicons name="filter" size={20} color="#3B82F6" />
-              <Text style={styles.filterToggleText}>
-                {t('moreFilters')}
-              </Text>
-            </View>
-            <Ionicons
-              name={showFilters ? "chevron-up" : "chevron-down"}
-              size={20}
-              color="#3B82F6"
-            />
-          </TouchableOpacity>
-
-          {showFilters && (
-            <View style={styles.filterContent}>
-              {/* Breed Filters */}
-              <View style={styles.quickFilters}>
-                <Text style={styles.filterSectionLabel}>{t('breeds')}:</Text>
-                <View style={styles.filterChipsContainer}>
-                  {['All', 'CB', 'BV'].map(breed => (
-                    <FilterChip
-                      key={breed}
-                      label={t(`breed_${breed}` as any, breed)}
-                      isActive={filters.breed === breed}
-                      onPress={() => updateFilter('breed', breed)}
-                    />
-                  ))}
-                </View>
-              </View>
-
-              {/* Market Filters */}
-              {uniqueMarkets.length > 1 && (
-                <View style={styles.quickFilters}>
-                  <Text style={styles.filterSectionLabel}>{t('markets')}:</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={styles.filterChipsContainer}>
-                      {uniqueMarkets.map(market => (
-                        <FilterChip
-                          key={market}
-                          label={t(`market_${market}` as any, market)}
-                          isActive={filters.market === market}
-                          onPress={() => updateFilter('market', market)}
-                        />
-                      ))}
-                    </View>
-                  </ScrollView>
-                </View>
-              )}
-
-              {(filters.breed !== 'All' || filters.market !== 'All') && (
-                <TouchableOpacity
-                  style={styles.clearFiltersTextButton}
-                  onPress={clearFilters}
-                >
-                  <Text style={styles.clearFiltersText}>{t('clearAllFilters')}</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </View>
-
-        {/* Results Count */}
-        {filteredSummaries.length > 0 && (
-          <View style={styles.resultsContainer}>
-            <Text style={styles.resultsText}>
-              {filteredSummaries.length} {filteredSummaries.length === 1 ? t('market') : t('markets')} {t('found')}
-            </Text>
-          </View>
-        )}
-
-        {/* Market Data Cards or Empty State */}
-        {filteredSummaries.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <View style={styles.marketCardsContainer}>
-            {filteredSummaries.map(item => (
-              <View key={item.market}>
-                {renderMarketCard({ item })}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Bottom Spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onDateChange}
+          maximumDate={new Date()}
+          minimumDate={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)} // 7 days ago
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  ultraModernContainer: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
 
-  // Loading
-  loadingContainer: {
+  // Loading Screen
+  ultraModernLoadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-
-  // Content
-  content: {
-    flex: 1,
-  },
-
-  // Overview Card
-  overviewCard: {
+    paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  overviewTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
+  loadingContent: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  loadingSpinner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     marginBottom: 20,
-  },
-  overviewStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  overviewStat: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 8,
-  },
-  overviewIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  overviewNumber: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#111827',
-  },
-  overviewLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-
-  // Date Range Filter
-  dateRangeContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  dateRangeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  dateRangeTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  dateRangeChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  dateRangeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 20,
     backgroundColor: '#F3F4F6',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
-  dateRangeChipActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
-  },
-  dateRangeChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  dateRangeChipTextActive: {
-    color: '#FFFFFF',
-  },
-
-  // Compact Filter Section
-  filterSectionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 4,
-  },
-  filterContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+  loadingSpinnerGradient: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
     overflow: 'hidden',
   },
-  filterToggleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
+  loadingLogoImage: {
+    width: 50,
+    height: 50,
   },
-  filterToggleLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  filterToggleText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-  filterContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    gap: 12,
-  },
-  quickFilters: {
-    gap: 12,
-  },
-  filterChipsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  filterChipActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  filterChipTextActive: {
-    color: '#FFFFFF',
-  },
-  clearFiltersTextButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  clearFiltersText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#EF4444',
-  },
-
-  // Results
-  resultsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  resultsText: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-
-  // Market Cards
-  marketCardsContainer: {
-    paddingHorizontal: 20,
-    gap: 16,
-  },
-  marketCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
-    gap: 16,
-  },
-  marketCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  marketInfo: {
-    flex: 1,
-    gap: 6,
-  },
-  marketTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  marketNameText: {
+  ultraModernLoadingText: {
     fontSize: 20,
-    color: '#111827',
-    fontWeight: '700',
-  },
-  listingsText: {
-    fontSize: 13,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-
-  // Overall Prices Card
-  overallPricesCard: {
-    flexDirection: 'row',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-  },
-  priceColumn: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 6,
-  },
-  priceIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#10B98115',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  priceDivider: {
-    width: 1,
-    backgroundColor: '#E5E7EB',
-  },
-  priceCardLabel: {
-    fontSize: 11,
-    color: '#6B7280',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  maxPriceText: {
-    fontSize: 18,
-    color: '#10B981',
-    fontWeight: '800',
-  },
-  minPriceText: {
-    fontSize: 18,
-    color: '#EF4444',
-    fontWeight: '800',
-  },
-  avgPriceText: {
-    fontSize: 18,
-    color: '#3B82F6',
-    fontWeight: '800',
-  },
-
-  // Breed Prices Section
-  breedPricesSection: {
-    gap: 10,
-  },
-  breedPricesTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#374151',
-  },
-  breedPriceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 10,
-    padding: 12,
-    gap: 12,
-  },
-  breedPriceBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  breedPriceText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  breedPriceDetails: {
-    flex: 1,
-  },
-  breedPriceValue: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#111827',
-  },
-  breedPriceRange: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  breedCount: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '600',
-  },
-
-  // Lot Section
-  lotSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  lotLabel: {
-    fontSize: 13,
-    color: '#6B7280',
-    fontWeight: '600',
-  },
-  lotText: {
-    fontSize: 13,
-    color: '#111827',
-    fontWeight: '500',
-    flex: 1,
-  },
-
-  // Update Section
-  updateSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  updateText: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-
-  // Empty State
-  emptyState: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 48,
-    marginHorizontal: 20,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  emptyIconContainer: {
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 18,
     fontWeight: '700',
     color: '#111827',
     marginBottom: 8,
     textAlign: 'center',
   },
-  emptySubtitle: {
+  ultraModernLoadingSubtext: {
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 20,
+    fontWeight: '500',
   },
-  clearFiltersButton: {
+
+
+  // Filter Section
+  filterHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  toggleButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
+    marginLeft: 8,
+  },
+  ultraModernFilterSection: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  ultraModernFilterCard: {
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  filterContent: {
+    gap: 16,
+  },
+  filterCategory: {
+    gap: 12,
+  },
+  filterCategoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  filterCategoryIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  ultraModernFilterTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  ultraModernFilterList: {
+    paddingVertical: 8,
+    gap: 12,
+  },
+
+  // Filter Buttons
+  ultraModernFilter: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginRight: 8,
+  },
+  ultraModernFilterSelected: {
+  },
+  ultraModernFilterGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#3B82F6',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 10,
   },
-  clearFiltersButtonText: {
+  ultraModernFilterContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#F9FAFB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+  },
+  ultraModernFilterText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+    textTransform: 'capitalize',
+  },
+  ultraModernFilterTextSelected: {
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
+    textTransform: 'capitalize',
   },
 
-  // Offline Banner
+  // Price Cards
+  ultraModernCard: {
+    borderRadius: 16,
+    marginBottom: 16,
+    marginHorizontal: 2,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  ultraModernCardGradient: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+  },
+  ultraModernCardContent: {
+    padding: 20,
+    gap: 16,
+  },
+
+  // Card Header
+  ultraModernCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  breedSection: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    flex: 1,
+  },
+  headerRightSection: {
+    marginLeft: 12,
+  },
+  breedIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+  },
+  breedInfo: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  ultraModernBreedText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  qualityBadgeContainer: {
+    alignSelf: 'flex-start',
+  },
+  ultraModernQualityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+    backgroundColor: '#FEF3C7',
+  },
+  ultraModernQualityText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#92400E',
+  },
+  marketLotsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  ultraModernMarketBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+    backgroundColor: '#EDE9FE',
+  },
+  ultraModernMarketText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#5B21B6',
+  },
+  lotNumberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+    backgroundColor: '#FEF3C7',
+    marginTop: 8,
+  },
+  lotNumberText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400E',
+  },
+
+  // Price Table
+  priceTable: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+  },
+  priceTableTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    padding: 16,
+    backgroundColor: '#F8FAFC',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    textAlign: 'center',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  tableHeaderText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#374151',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+    alignItems: 'center',
+  },
+  tableRowHighlight: {
+    backgroundColor: '#F0FDF4',
+  },
+  tableCellType: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    textAlign: 'left',
+  },
+  tableCellPrice: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+  },
+  tableStatusCell: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  tableCellStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tableCellHighlight: {
+    color: '#166534',
+    fontWeight: '800',
+  },
+
+  // Footer
+  ultraModernFooter: {
+    alignItems: 'flex-end',
+  },
+  updateTimestamp: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+  },
+  ultraModernUpdateText: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+
+  // List Container
+  ultraModernListContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 20,
+  },
+
+  // Date Filter Styles
+  dateFilterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  dateFilterButton: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  dateFilterContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  dateFilterText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  resetDateButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+
+  // Offline Banner Styles
   offlineBanner: {
     backgroundColor: '#FEF3C7',
     borderBottomWidth: 1,
@@ -1138,12 +1047,20 @@ const styles = StyleSheet.create({
   },
   offlineBannerSubtitle: {
     fontSize: 12,
-    color: '#B45309',
     fontWeight: '500',
+    color: '#B45309',
   },
 
-  // Bottom Spacing
-  bottomSpacing: {
+  // Play Button Styles
+  playButton: {
+    width: 40,
     height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: '#EFF6FF',
+  },
+  playButtonActive: {
+    backgroundColor: '#FEE2E2',
   },
 });

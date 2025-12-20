@@ -430,5 +430,13 @@
   "allowLocation": "ಸ್ಥಳ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ",
   "locationRequired": "ಸ್ಥಳ ಅಗತ್ಯವಿದೆ",
   "locationRequiredForFeatures": "ಹವಾಮಾನ-ಆಧಾರಿತ ಆರೈಕೆ ಸಲಹೆಗಳು ಮತ್ತು ಸ್ಥಳೀಯ ಮಾರುಕಟ್ಟೆ ಮಾಹಿತಿಯನ್ನು ಒದಗಿಸಲು ಸ್ಥಳ ಪ್ರವೇಶ ಅಗತ್ಯವಿದೆ. ನೀವು ಅದನ್ನು ನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಕ್ರಿಯಗೊಳಿಸಬಹುದು.",
-  "ok": "ಸರಿ"
+  "ok": "ಸರಿ",
+  "optional": "ಐಚ್ಛಿಕ",
+  "autoTranslateHint": "ಖಾಲಿ ಬಿಟ್ಟರೆ ಸ್ವಯಂ ಅನುವಾದವಾಗುತ್ತದೆ",
+  "autoTranslateFromEnglish": "ಖಾಲಿ ಬಿಟ್ಟರೆ ಇಂಗ್ಲಿಷ್‌ನಿಂದ ಸ್ವಯಂ ಅನುವಾದವಾಗುತ್ತದೆ",
+  "autoTranslateBidirectional": "ಇಂಗ್ಲಿಷ್ ↔ ಕನ್ನಡ ನಡುವೆ ಸ್ವಯಂ ಅನುವಾದಿಸುತ್ತದೆ",
+  "translating": "ಅನುವಾದಿಸಲಾಗುತ್ತಿದೆ...",
+  "enterVideoDescription": "ವೀಡಿಯೊ ವಿವರಣೆ ನಮೂದಿಸಿ",
+  "enterImageDescription": "ಚಿತ್ರ ವಿವರಣೆ ನಮೂದಿಸಿ",
+  "enterPdfDescription": "PDF ವಿವರಣೆ ನಮೂದಿಸಿ"
 }

@@ -436,5 +436,13 @@
   "allowLocation": "Allow Location Access",
   "locationRequired": "Location Required",
   "locationRequiredForFeatures": "Location access is required to provide weather-based care suggestions and local market information. You can enable it later from settings.",
-  "ok": "OK"
+  "ok": "OK",
+  "optional": "Optional",
+  "autoTranslateHint": "Will be auto-translated if left empty",
+  "autoTranslateFromEnglish": "Will auto-translate from English if left empty",
+  "autoTranslateBidirectional": "Auto-translates between English ↔ Kannada",
+  "translating": "Translating...",
+  "enterVideoDescription": "Enter video description",
+  "enterImageDescription": "Enter image description",
+  "enterPdfDescription": "Enter PDF description"
 }
