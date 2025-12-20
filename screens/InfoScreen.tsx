@@ -13,7 +13,9 @@ import {
   Dimensions,
   Image,
   Modal,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -91,6 +93,7 @@ interface ContentItem {
 
 export default function InfoScreen() {
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [aiResponse, setAiResponse] = useState<AIResponse>({
@@ -1395,7 +1398,7 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
             onCancel={() => setSelectedImage(null)}
             backgroundColor="rgba(0, 0, 0, 0.9)"
             renderHeader={(currentIndex) => (
-              <View style={styles.imageViewerHeader}>
+              <View style={[styles.imageViewerHeader, { paddingTop: insets.top + 10 }]}>
                 <TouchableOpacity
                   style={styles.imageViewerClose}
                   onPress={() => setSelectedImage(null)}
@@ -2042,7 +2045,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    paddingTop: 50,
     paddingHorizontal: 20,
   },
   imageViewerTitle: {

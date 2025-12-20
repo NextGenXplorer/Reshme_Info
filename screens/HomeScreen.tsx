@@ -13,7 +13,10 @@ import {
   RefreshControl,
   Linking,
   ScrollView,
+  StatusBar,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { db } from '../firebase.config';
@@ -121,6 +124,7 @@ const getDirectImageUrl = (url: string): string => {
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -766,8 +770,10 @@ export default function HomeScreen() {
         transparent={false}
         visible={modalVisible}
         onRequestClose={closeModal}
+        statusBarTranslucent={true}
       >
-        <SafeAreaView style={styles.modalContainer}>
+        <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
+          <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
           {/* Modal Header */}
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
@@ -924,9 +930,9 @@ export default function HomeScreen() {
               )}
             </View>
 
-            <View style={styles.bottomSpacing} />
+            <View style={[styles.bottomSpacing, { paddingBottom: insets.bottom }]} />
           </ScrollView>
-        </SafeAreaView>
+        </View>
       </Modal>
     );
   };
