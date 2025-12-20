@@ -20,6 +20,7 @@ import { db } from '../firebase.config';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import Header from '../components/Header';
 import { callAIWithFallback } from '../utils/aiProviders';
+import { useBannerAd, BannerAd, BannerAdSize } from '../hooks/useBannerAd';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -130,6 +131,9 @@ export default function HomeScreen() {
   const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
   const [youtubeMetadata, setYoutubeMetadata] = useState<{ [key: string]: { title: string; titleKn: string; thumbnail: string } }>({});
   const [translations, setTranslations] = useState<{ [key: string]: { titleTranslated: string; descriptionTranslated: string; isTranslating: boolean; fromLang: string; toLang: string } }>({});
+
+  // Banner Ad
+  const { adUnitId, onAdLoaded, onAdFailedToLoad } = useBannerAd();
 
   const isKannada = i18n.language === 'kn';
 
@@ -982,6 +986,19 @@ export default function HomeScreen() {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 
+      {/* Banner Ad at bottom */}
+      <View style={styles.bannerAdContainer}>
+        <BannerAd
+          unitId={adUnitId}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+          }}
+          onAdLoaded={onAdLoaded}
+          onAdFailedToLoad={onAdFailedToLoad}
+        />
+      </View>
+
       {renderDetailModal()}
     </SafeAreaView>
   );
@@ -991,6 +1008,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F3F4F6',
+  },
+  bannerAdContainer: {
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 4,
   },
   loadingContainer: {
     flex: 1,

@@ -30,6 +30,7 @@ import {
   areWeatherNotificationsEnabled,
 } from '../services/weatherNotificationService';
 import LocationPermissionDisclosure from '../components/LocationPermissionDisclosure';
+import { useBannerAd, BannerAd, BannerAdSize } from '../hooks/useBannerAd';
 
 const { width } = Dimensions.get('window');
 
@@ -114,6 +115,9 @@ export default function InfoScreen() {
   const [youtubeVideoTitles, setYoutubeVideoTitles] = useState<{ [key: string]: string }>({});
   const [showLocationDisclosure, setShowLocationDisclosure] = useState(false);
   const [hasShownDisclosure, setHasShownDisclosure] = useState(false);
+
+  // Banner Ad
+  const { adUnitId, onAdLoaded, onAdFailedToLoad } = useBannerAd();
 
   // Memoized filtered content items for different media types
   const imageItems = useMemo(() => contentItems.filter(item => item.type === 'image'), [contentItems]);
@@ -1368,6 +1372,19 @@ Keep the response concise, practical, and actionable for farmers. Remember to re
         {selectedTab === 'media' && renderMediaContent()}
       </ScrollView>
 
+      {/* Banner Ad at bottom */}
+      <View style={styles.bannerAdContainer}>
+        <BannerAd
+          unitId={adUnitId}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+          }}
+          onAdLoaded={onAdLoaded}
+          onAdFailedToLoad={onAdFailedToLoad}
+        />
+      </View>
+
       {/* Location Permission Disclosure Dialog */}
       <LocationPermissionDisclosure
         visible={showLocationDisclosure}
@@ -1434,7 +1451,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 80,
+    paddingBottom: 20,
+  },
+  bannerAdContainer: {
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 4,
   },
 
   // Hero Weather Section

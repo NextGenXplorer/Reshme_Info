@@ -11,10 +11,10 @@ import * as Notifications from 'expo-notifications';
 import { db } from './firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// Ads implementation - COMMENTED OUT
-// import { useInterstitialAd } from './hooks/useInterstitialAd';
-// import { useExitAd } from './hooks/useExitAd';
-// import MobileAds from 'react-native-google-mobile-ads';
+// Ads implementation
+import { useInterstitialAd } from './hooks/useInterstitialAd';
+import { useExitAd } from './hooks/useExitAd';
+import MobileAds from 'react-native-google-mobile-ads';
 
 // Create context for notifications navigation
 const NotificationsContext = createContext<{
@@ -163,31 +163,31 @@ const AppContent = () => {
     checkFirstLaunch();
   }, []);
 
-  // Track AdMob initialization state - COMMENTED OUT
-  // const [adMobInitialized, setAdMobInitialized] = useState(false);
+  // Track AdMob initialization state
+  const [adMobInitialized, setAdMobInitialized] = useState(false);
 
-  // Initialize Google Mobile Ads - COMMENTED OUT
-  // useEffect(() => {
-  //   console.log('🚀 Starting AdMob initialization...');
-  //   MobileAds()
-  //     .initialize()
-  //     .then(adapterStatuses => {
-  //       console.log('✅ AdMob initialized successfully:', adapterStatuses);
-  //       setAdMobInitialized(true);
-  //     })
-  //     .catch(error => {
-  //       console.error('❌ AdMob initialization error:', error);
-  //       console.error('Error details:', JSON.stringify(error));
-  //       // Still set to true to allow ads to attempt loading
-  //       setAdMobInitialized(true);
-  //     });
-  // }, []);
+  // Initialize Google Mobile Ads
+  useEffect(() => {
+    console.log('🚀 Starting AdMob initialization...');
+    MobileAds()
+      .initialize()
+      .then(adapterStatuses => {
+        console.log('✅ AdMob initialized successfully:', adapterStatuses);
+        setAdMobInitialized(true);
+      })
+      .catch(error => {
+        console.error('❌ AdMob initialization error:', error);
+        console.error('Error details:', JSON.stringify(error));
+        // Still set to true to allow ads to attempt loading
+        setAdMobInitialized(true);
+      });
+  }, []);
 
-  // Interstitial ad hook for tab navigation - COMMENTED OUT
-  // const { showAd, isLoaded } = useInterstitialAd();
+  // Interstitial ad hook for tab navigation
+  const { showAd, isLoaded } = useInterstitialAd();
 
-  // Exit ad hook - shows rewarded interstitial when user presses back button - COMMENTED OUT
-  // useExitAd({ enabled: adMobInitialized });
+  // Exit ad hook - shows rewarded interstitial when user presses back button
+  useExitAd({ enabled: adMobInitialized });
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
@@ -224,28 +224,27 @@ const AppContent = () => {
     };
   }, []);
 
-  // Handle navigation state changes to show interstitial ads - COMMENTED OUT
+  // Handle navigation state changes to show interstitial ads
   const handleNavigationStateChange = (state: any) => {
     if (!state) return;
 
     const currentRoute = state.routes[state.index]?.name;
 
-    // Log navigation changes - ads disabled
+    // Show interstitial ad on tab change (30% chance)
     if (currentRoute && currentRoute !== previousRoute) {
       console.log(`📱 Tab changed: ${previousRoute} → ${currentRoute}`);
-      // Ads disabled - no ad state logging
-    }
+      console.log(`📢 Ad state - isLoaded: ${isLoaded}`);
 
-    // Interstitial ads disabled
-    // const randomValue = Math.random();
-    // if (currentRoute && currentRoute !== previousRoute && isLoaded && randomValue < 0.3) {
-    //   console.log(`🎲 Random value: ${randomValue.toFixed(2)} < 0.3 - Showing interstitial ad`);
-    //   showAd();
-    // } else if (currentRoute && currentRoute !== previousRoute && isLoaded) {
-    //   console.log(`🎲 Random value: ${randomValue.toFixed(2)} >= 0.3 - Skipping ad this time`);
-    // } else if (currentRoute && currentRoute !== previousRoute && !isLoaded) {
-    //   console.log('⚠️ Tab changed but ad not loaded yet');
-    // }
+      const randomValue = Math.random();
+      if (isLoaded && randomValue < 0.3) {
+        console.log(`🎲 Random value: ${randomValue.toFixed(2)} < 0.3 - Showing interstitial ad`);
+        showAd();
+      } else if (isLoaded) {
+        console.log(`🎲 Random value: ${randomValue.toFixed(2)} >= 0.3 - Skipping ad this time`);
+      } else {
+        console.log('⚠️ Tab changed but ad not loaded yet');
+      }
+    }
 
     setPreviousRoute(currentRoute);
   };
