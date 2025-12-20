@@ -532,12 +532,18 @@ export default function HomeScreen() {
   // Handle external link opening
   const openExternalLink = async (url: string) => {
     try {
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
-        await Linking.openURL(url);
-      }
+      // On Android, canOpenURL can be unreliable - just try to open directly
+      await Linking.openURL(url);
     } catch (error) {
       console.error('Error opening link:', error);
+      // Fallback: try with https if it's a youtube link without protocol
+      if (url && !url.startsWith('http')) {
+        try {
+          await Linking.openURL('https://' + url);
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+        }
+      }
     }
   };
 
@@ -620,11 +626,15 @@ export default function HomeScreen() {
                   style={styles.videoThumbnail}
                   resizeMode="cover"
                 />
-                <View style={styles.playButtonOverlay}>
+                <TouchableOpacity
+                  style={styles.playButtonOverlay}
+                  activeOpacity={0.8}
+                  onPress={() => openExternalLink(item.url!)}
+                >
                   <View style={styles.playButton}>
                     <Ionicons name="play" size={32} color="#FFFFFF" />
                   </View>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.youtubeBadge}>
                   <Ionicons name="logo-youtube" size={20} color="#FF0000" />
                 </View>
